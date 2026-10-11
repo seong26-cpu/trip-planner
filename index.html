@@ -876,7 +876,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   <header class="top">
     <span class="label">Trip Planner · 일정 · 예산 · 예약 · 기록</span>
     <h1 id="tripTitle">여행 올인원 플래너</h1>
-    <p class="status" id="status">저장 공간에 연결하는 중…</p>
+    <p class="status" id="status">앱을 여는 중… (JavaScript가 켜져 있어야 해요)</p>
   </header>
 
   <nav class="tabs" role="tablist" id="tabs"></nav>
@@ -945,7 +945,12 @@ const SRCS={
   mileOS:{n:"MileAsia (오사카 숙소 지역)",u:"https://mileasia.com/japan/where-to-stay-in-osaka/"},
   hcSJ:{n:"호텔스컴바인 (세인트존스)",u:"https://www.hotelscombined.co.kr/Hotel/St_Johns_Hotel.htm"},
   hcGP:{n:"호텔스컴바인 (경포대 인근 호텔)",u:"https://www.hotelscombined.co.kr/Place/Gyeongpodae.htm"},
-  hcBD:{n:"호텔스컴바인 (브라운도트 경포)",u:"https://www.hotelscombined.co.kr/Hotel/Gangneung_Brown_Dot_Gyeongpo.htm"}
+  hcBD:{n:"호텔스컴바인 (브라운도트 경포)",u:"https://www.hotelscombined.co.kr/Hotel/Gangneung_Brown_Dot_Gyeongpo.htm"},
+  kyGR:{n:"KAYAK (그레이스리 신주쿠)",u:"https://www.nz.kayak.com/Tokyo-Hotels-Hotel-Gracery-Shinjuku.794407.ksp"},
+  kyBL:{n:"KAYAK (블라썸 신주쿠)",u:"https://www.kayak.com/Tokyo-Hotels-Jr-Kyushu-Hotel-Blossom-Shinjuku.769184.ksp"},
+  kySW:{n:"KAYAK (스위소텔 난카이)",u:"https://www.kayak.com/Osaka-Hotels-Swissotel-Nankai-Osaka.22394.ksp"},
+  kyGV:{n:"KAYAK (그란비아 오사카)",u:"https://www.kayak.com/Osaka-Hotels-Hotel-Granvia-Osaka.15665.ksp"},
+  fxUSD:{n:"exchange-rates.org (USD/JPY 158.29, 10/10)",u:"https://www.exchange-rates.org/converter/usd-jpy"}
 };
 const P=(id,name,nameEn,kind,area,lat,lng,cost,note,o)=>Object.assign({pid:id,name,nameEn,kind,area,lat,lng,cost,note},o||{});
 const PACKS={
@@ -982,8 +987,8 @@ const PACKS={
    {name:"APA 호텔 게이세이 우에노 에키마에",nameEn:"APA Hotel Keisei Ueno Ekimae",area:"우에노",lat:35.7110,lng:139.7740,priceTier:"저가",price:10000,priceRange:"비즈니스호텔 범주 약 8,000~20,000엔(추정)",why:"게이세이 우에노역 도보 1분 → 나리타 스카이라이너가 편해요.",src:["jsAPA","mileSJ","shopTK"]},
    {name:"슈퍼호텔 신주쿠",nameEn:"Super Hotel Shinjuku",area:"신주쿠",priceTier:"저가",price:9000,priceRange:"8,000엔부터",why:"저렴한 비즈니스호텔로 소개.",src:["mileSJ"]},
    {name:"도미인 신주쿠",nameEn:"Dormy Inn Shinjuku",area:"신주쿠",priceTier:"중가",price:14000,priceRange:"비즈니스호텔 범주 약 8,000~20,000엔(추정)",why:"대욕장이 있는 비즈니스호텔 체인.",src:["mileSJ"]},
-   {name:"호텔 그레이스리 신주쿠",nameEn:"Hotel Gracery Shinjuku",area:"신주쿠 가부키초",lat:35.6948,lng:139.7019,priceTier:"중가",price:18000,priceRange:"중가 범주(추정)",why:"신주쿠역 도보 약 5분. 고질라 헤드 건물로 유명.",src:["trekTK","bbTK","shopTK"]},
-   {name:"JR 규슈 호텔 블라썸 신주쿠",nameEn:"JR Kyushu Hotel Blossom Shinjuku",area:"신주쿠 요요기",lat:35.6863,lng:139.6997,priceTier:"중가",price:18000,priceRange:"중가 범주(추정)",why:"신주쿠역 도보 약 3분. 가성비 좋은 4성급으로 소개.",src:["trekTK","bbTK","shopTK"]},
+   {name:"호텔 그레이스리 신주쿠",nameEn:"Hotel Gracery Shinjuku",area:"신주쿠 가부키초",lat:35.6948,lng:139.7019,priceTier:"중~고가",price:40400,priceRange:"KAYAK 최저 $91 ~ 2주 평균 $255~377 (1$=158엔 환산 약 14,400~59,700엔)",why:"신주쿠역 도보 약 5분. 고질라 헤드 건물로 유명.",src:["trekTK","bbTK","kyGR","fxUSD"]},
+   {name:"JR 규슈 호텔 블라썸 신주쿠",nameEn:"JR Kyushu Hotel Blossom Shinjuku",area:"신주쿠 요요기",lat:35.6863,lng:139.6997,priceTier:"중~고가",price:34000,priceRange:"KAYAK 최저 $128 · 현재 요금 중앙값 $215 · 2주 평균 $360 (1$=158엔 환산 약 20,300~57,000엔)",why:"신주쿠역 도보 약 3분. 가성비 좋은 4성급으로 소개.",src:["trekTK","bbTK","kyBL","fxUSD"]},
    {name:"오다큐 호텔 센추리 서던타워",nameEn:"Odakyu Hotel Century Southern Tower",area:"신주쿠 남쪽출구",priceTier:"고가",price:28000,priceRange:"상위 중가 범주 약 20,000~50,000엔(추정)",why:"신주쿠역 남쪽 출구 바로 위.",src:["mileSJ","trekTK"]},
    {name:"게이오 플라자 호텔 도쿄",nameEn:"Keio Plaza Hotel Tokyo",area:"니시신주쿠",lat:35.6903,lng:139.6955,priceTier:"고가",price:30000,priceRange:"상위 중가 범주 약 20,000~50,000엔(추정)",why:"신주쿠역 도보 약 5분. 대형 호텔.",src:["trekTK","bbTK","mileSJ"]}
   ],
@@ -1018,8 +1023,8 @@ const PACKS={
    {name:"베셀 인 난바",nameEn:"Vessel Inn Namba",area:"난바",priceTier:"중가",price:17500,priceRange:"약 13,000~22,000엔",why:"조식 포함 중가 호텔.",src:["rjOS"]},
    {name:"호텔 몬테레이 그라스미어 오사카",nameEn:"Hotel Monterey Grasmere Osaka",area:"난바(OCAT)",lat:34.6660,lng:135.4940,priceTier:"중가",price:18000,priceRange:"난바 중가 범주 10,000~30,000엔(추정)",why:"난바역 연결, 공항 리무진 OCAT 건물과 이어져 있어요.",src:["trekOS","mileOS"]},
    {name:"크로스 호텔 오사카",nameEn:"Cross Hotel Osaka",area:"난바",priceTier:"중가",price:21000,priceRange:"약 14,000~28,000엔",why:"도톤보리·아메리카무라 도보권.",src:["rjOS","trekOS","mileOS"]},
-   {name:"스위소텔 난카이 오사카",nameEn:"Swissotel Nankai Osaka",area:"난바",lat:34.6646,lng:135.5017,priceTier:"고가",price:null,priceRange:"가격 미확인",why:"난카이 난바역 바로 위(도보 1분). 라피트 이용이 편해요.",src:["klookOS","trekOS"]},
-   {name:"호텔 그란비아 오사카",nameEn:"Hotel Granvia Osaka",area:"우메다(오사카역)",lat:34.7025,lng:135.4960,priceTier:"고가",price:null,priceRange:"가격 미확인",why:"JR 오사카역 도보 1분. 교토·고베 당일치기에 편해요.",src:["klookOS"]}
+   {name:"스위소텔 난카이 오사카",nameEn:"Swissotel Nankai Osaka",area:"난바",lat:34.6646,lng:135.5017,priceTier:"고가",price:54300,priceRange:"KAYAK 최저 $155 ~ 2주 평균 $343~350 (1$=158엔 환산 약 24,500~55,400엔)",why:"난카이 난바역 바로 위(도보 1분). 라피트 이용이 편해요.",src:["klookOS","trekOS","kySW","fxUSD"]},
+   {name:"호텔 그란비아 오사카",nameEn:"Hotel Granvia Osaka",area:"우메다(오사카역)",lat:34.7025,lng:135.4960,priceTier:"중~고가",price:20100,priceRange:"KAYAK 2주 평균 평일 $127 · 주말 $239 (1$=158엔 환산 약 20,100~37,800엔)",why:"JR 오사카역 도보 1분. 교토·고베 당일치기에 편해요.",src:["klookOS","kyGV","fxUSD"]}
   ],
   guideSrc:["cityOS","expOS","explKIX","otTX","osTX"]
  },
