@@ -6,6 +6,14 @@
 <meta name="color-scheme" content="light dark">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>여행 올인원 플래너</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#D9264E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="여행플래너">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon-192.png">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap">
 <style>
@@ -1006,6 +1014,63 @@ th{text-transform:none;letter-spacing:0;font-size:.78rem;font-weight:700}
 .leaflet-tooltip.leg-tip{background:var(--route);color:#fff;border:0;box-shadow:0 1px 3px rgba(0,0,0,.3);font:600 11px/1.2 "Noto Sans KR","IBM Plex Sans KR",system-ui,sans-serif;padding:2px 6px;border-radius:10px}
 .leaflet-tooltip.leg-tip::before{display:none}
 .leaflet-popup-content a{color:var(--ink)}
+
+/* ===== v5: 모바일 최적화 + 앱(PWA) 하단 탭바 ===== */
+.t-morebtn{display:none}
+nav.tabs .t-morebtn::before{content:"";width:24px;height:24px;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Ccircle cx='5' cy='12' r='2'/%3E%3Ccircle cx='12' cy='12' r='2'/%3E%3Ccircle cx='19' cy='12' r='2'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Ccircle cx='5' cy='12' r='2'/%3E%3Ccircle cx='12' cy='12' r='2'/%3E%3Ccircle cx='19' cy='12' r='2'/%3E%3C/svg%3E") center/contain no-repeat}
+.item .body,.item .title,.lk,.note,.small{overflow-wrap:anywhere;word-break:keep-all}
+.item .body .row{flex-wrap:wrap}
+.item .body select{max-width:100%}
+@media (max-width:720px){
+  body{font-size:15px;padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+  .wrap{gap:16px}
+  header.top{padding-top:14px}
+  header.top h1{font-size:1.25rem}
+  header.top::before{width:28px;height:28px}
+  .status{font-size:.78rem}
+  nav.tabs{position:fixed;left:0;right:0;bottom:0;top:auto;z-index:1000;margin:0;padding:4px 4px calc(4px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:repeat(5,1fr);gap:0;border-top:1px solid var(--line);border-bottom:0;box-shadow:0 -2px 12px rgba(0,0,0,.06);overflow:visible;white-space:normal}
+  nav.tabs button{padding:6px 0 4px;font-size:.68rem;gap:2px;border-bottom:0;min-height:52px;justify-content:center;text-align:center;line-height:1.15}
+  nav.tabs button::before{width:22px;height:22px}
+  nav.tabs button[aria-selected="true"]{color:var(--accent);border-bottom:0}
+  nav.tabs .t-more{display:none}
+  nav.tabs .t-morebtn{display:inline-flex}
+  nav.tabs.open .t-more{display:inline-flex;position:fixed;left:auto;right:12px;width:min(220px,60vw);height:52px;min-height:52px;box-sizing:border-box;flex-direction:row;align-items:center;justify-content:flex-start;gap:12px;padding:0 16px;background:var(--surface);border:1px solid var(--line);border-bottom:0;box-shadow:var(--shadow);font-size:.92rem;border-radius:0}
+  nav.tabs.open .t-more:nth-of-type(8){border-bottom:1px solid var(--line)}
+  nav.tabs.open .t-more:nth-of-type(3){bottom:calc(76px + 3*52px + env(safe-area-inset-bottom,0px));border-radius:14px 14px 0 0}
+  nav.tabs.open .t-more:nth-of-type(6){bottom:calc(76px + 2*52px + env(safe-area-inset-bottom,0px))}
+  nav.tabs.open .t-more:nth-of-type(7){bottom:calc(76px + 52px + env(safe-area-inset-bottom,0px))}
+  nav.tabs.open .t-more:nth-of-type(8){bottom:calc(76px + env(safe-area-inset-bottom,0px));border-radius:0 0 14px 14px}
+  .toast{bottom:calc(88px + env(safe-area-inset-bottom,0px))}
+  .card{padding:16px;gap:12px;border-radius:14px}
+  .grid2{gap:16px}
+  h2{font-size:1.15rem}h3{font-size:1.02rem}
+  .item{grid-template-columns:44px minmax(0,1fr);gap:10px;padding:14px 0}
+  .item .acts{grid-column:2;justify-content:flex-start;gap:6px}
+  .item .t{font-size:.8rem}
+  .chip{font-size:.7rem;padding:2px 8px}
+  .chips{gap:6px}
+  .chips button{padding:6px 12px;font-size:.82rem}
+  .leg{grid-template-columns:0 minmax(0,1fr);gap:0}
+  .leg .line{gap:4px 6px;margin-left:0}
+  .bar{grid-template-columns:60px minmax(0,1fr) 84px;font-size:.8rem}
+  .links{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+  .lk{padding:12px}
+  .stat3>div{padding:8px 10px}
+  .stat3 b{font-size:.92rem}
+  #lmap{height:320px}
+  .lmapwrap{border-radius:14px}
+  .ticket .main{padding:18px}
+  .ticket .route{font-size:1.8rem}
+  .ticket .stub{min-width:0;padding:14px}
+  details.add>summary{padding:14px 16px;font-size:.96rem}
+  details.add>form{padding:0 16px 16px}
+  label.f{flex-basis:100%}
+  .row>.btn{flex:1 1 auto}
+  .daytabs button{min-width:84px;padding:8px 12px}
+  table{font-size:.8rem}
+  th,td{padding:6px 4px}
+}
+@media (display-mode: standalone){header.top{padding-top:calc(10px + env(safe-area-inset-top,0px))}}
 </style>
 </head>
 <body>
@@ -1030,6 +1095,7 @@ th{text-transform:none;letter-spacing:0;font-size:.78rem;font-weight:700}
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="firebase-config.js"></script>
 <script>
 /* 도시별 검증 추천 팩 — 2026-10-11 웹검색 기준. 요금은 2곳 이상 출처가 일치하면 확정, 다르거나 1곳이면 costNote에 표시. 좌표는 지도 표시용 대략 위치. */
 const SRCS={
@@ -1277,6 +1343,7 @@ const GSRC={
 "use strict";
 /* ===== 독립 실행판: Claude 기능 없음. 데이터는 이 기기 브라우저(localStorage + IndexedDB)에 저장 ===== */
 const TABS=[["home","홈"],["plan","일정·동선"],["book","항공·숙소"],["place","추천 장소·맛집"],["money","경비·정산"],["talk","번역·교통"],["mem","추억"],["check","준비물"]];
+const MORE=["book","talk","mem","check"];
 const COLS=["items","bookings","places","expenses","checklist","memories","daycfg","hotels"];
 const KEY="trip-planner-v1";
 const DEFAULT_TRIP={title:"새 여행",city:"",cityEn:"",from:"ICN",to:"",start:"",end:"",travelers:["나"],budget:0,cur:"JPY",rate:0,lang:"ja"};
@@ -1325,8 +1392,9 @@ const bookCat=k=>/항공|기차|버스|교통/.test(k||"")?"교통":k==="숙소"
 const rooms=()=>Math.max(1,Math.ceil(pax()/2));
 
 /* ---------- 저장: localStorage + IndexedDB(사진) ---------- */
-function persist(){try{const o={v:1,trip:S.trip};COLS.forEach(c=>o[c]=S[c]);localStorage.setItem(KEY,JSON.stringify(o));return true}catch(e){toast("이 기기 저장 공간이 부족해요. 백업을 내보내고 오래된 기록을 지워주세요.");return false}}
-function loadLocal(){try{const raw=localStorage.getItem(KEY);if(!raw)return false;const o=JSON.parse(raw);S.trip=o.trip||null;COLS.forEach(c=>S[c]=Array.isArray(o[c])?o[c]:[]);return true}catch(e){return false}}
+let localUpdatedAt=0;
+function persist(fromRemote){try{if(!fromRemote)localUpdatedAt=Date.now();const o={v:1,updatedAt:localUpdatedAt,trip:S.trip};COLS.forEach(c=>o[c]=S[c]);localStorage.setItem(KEY,JSON.stringify(o));if(!fromRemote)Sync.schedule();return true}catch(e){toast("이 기기 저장 공간이 부족해요. 백업을 내보내고 오래된 기록을 지워주세요.");return false}}
+function loadLocal(){try{const raw=localStorage.getItem(KEY);if(!raw)return false;const o=JSON.parse(raw);localUpdatedAt=Number(o.updatedAt)||0;S.trip=o.trip||null;COLS.forEach(c=>S[c]=Array.isArray(o[c])?o[c]:[]);return true}catch(e){return false}}
 let idb=null;
 function openIDB(){return new Promise(res=>{try{const r=indexedDB.open("trip-planner-photos",1);r.onupgradeneeded=()=>r.result.createObjectStore("p");r.onsuccess=()=>{idb=r.result;res(idb)};r.onerror=()=>res(null)}catch(e){res(null)}})}
 function idbTx(mode,fn){return new Promise(res=>{if(!idb){res(null);return}try{const tx=idb.transaction("p",mode);const st=tx.objectStore("p");const out=fn(st);tx.oncomplete=()=>res(out&&out.result!==undefined?out.result:true);tx.onerror=()=>res(null)}catch(e){res(null)}})}
@@ -1337,7 +1405,7 @@ async function loadPhotos(){if(!idb)return;await new Promise(res=>{try{const tx=
 function commit(){persist();render()}
 const SAVES_KEY="trip-planner-saves-v1";
 function saves(){try{return JSON.parse(localStorage.getItem(SAVES_KEY)||"[]")}catch(e){return[]}}
-function writeSaves(a){try{localStorage.setItem(SAVES_KEY,JSON.stringify(a));return true}catch(e){toast("이 기기 저장 공간이 가득 찼어요. 오래된 저장본을 지우거나 백업을 내보내세요.");return false}}
+function writeSaves(a,fromRemote){try{localStorage.setItem(SAVES_KEY,JSON.stringify(a));if(!fromRemote){localUpdatedAt=Date.now();persist(true);Sync.schedule()}return true}catch(e){toast("이 기기 저장 공간이 가득 찼어요. 오래된 저장본을 지우거나 백업을 내보내세요.");return false}}
 function snapshot(){const o={trip:S.trip};COLS.forEach(c=>o[c]=S[c]);return JSON.parse(JSON.stringify(o))}
 function saveTo(no){const a=saves();if(!S.trip)S.trip=Object.assign({},DEFAULT_TRIP);S.trip.saveNo=no;const snap=snapshot();const old=a.find(s=>s.no===no);
   const rec={no,name:(old&&old.name)||T().title||("여행 "+no),city:T().city,start:T().start,end:T().end,savedAt:Date.now(),counts:{items:S.items.length,places:S.places.filter(p=>!p.rec).length,expenses:S.expenses.length},data:snap};
@@ -1367,6 +1435,58 @@ async function importData(file){
   }catch(e){toast("파일을 읽지 못했어요. 이 앱에서 내보낸 .json 파일인지 확인하세요")}
 }
 
+
+/* ===== 로그인·동기화 (Firebase, 무료 Spark 요금제) =====
+   firebase-config.js 의 window.FIREBASE_CONFIG 가 있으면 켜짐. 데이터 위치: users/{uid}/data/main, 사진: users/{uid}/photos/{id} */
+const FB_VER="10.12.2";
+const Sync={user:null,ready:false,state:"off",last:0,timer:null,db:null,auth:null,err:"",
+  enabled(){return !!(window.FIREBASE_CONFIG&&window.FIREBASE_CONFIG.apiKey)},
+  label(){if(!this.enabled())return"";if(!this.ready)return"로그인 준비 중…";if(!this.user)return"로그인하면 웹·앱·다른 기기에서 같은 데이터를 써요";
+    return this.state==="saving"?"☁ 동기화 중…":this.state==="error"?"☁ 동기화 실패 — "+this.err:this.last?"☁ 동기화됨 "+new Date(this.last).toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit"}):"☁ 연결됨"},
+  async init(){if(!this.enabled())return;
+    try{for(const m of ["app","auth","firestore"])await loadScript(`https://www.gstatic.com/firebasejs/${FB_VER}/firebase-${m}-compat.js`);
+      const fb=window.firebase;fb.initializeApp(window.FIREBASE_CONFIG);this.auth=fb.auth();this.db=fb.firestore();
+      try{this.db.enablePersistence({synchronizeTabs:true}).catch(()=>{})}catch(_){}
+      this.auth.onAuthStateChanged(async u=>{this.user=u;this.ready=true;if(u)await this.pull();render()});
+    }catch(e){this.ready=true;this.state="error";this.err="로그인 도구를 불러오지 못했어요";render()}},
+  async login(){if(!this.auth)return;const p=new firebase.auth.GoogleAuthProvider();
+    try{await this.auth.signInWithPopup(p)}catch(e){if(e&&e.code==="auth/popup-blocked"){toast("팝업이 막혔어요. 브라우저에서 팝업을 허용하고 다시 눌러주세요")}else if(e&&e.code==="auth/unauthorized-domain"){toast("Firebase에 이 주소가 승인되지 않았어요(Authorized domains 확인)")}else if(e&&e.code!=="auth/popup-closed-by-user"&&e.code!=="auth/cancelled-popup-request"){toast("로그인하지 못했어요: "+(e.code||e.message))}}},
+  async logout(){if(this.auth){await this.auth.signOut();toast("로그아웃했어요. 이 기기의 데이터는 그대로 남아 있어요")}},
+  ref(){return this.db.collection("users").doc(this.user.uid)},
+  schedule(){if(!this.user)return;clearTimeout(this.timer);this.timer=setTimeout(()=>this.push(),1500)},
+  payload(){const o={updatedAt:localUpdatedAt||Date.now(),trip:S.trip||null,saves:saves()};COLS.forEach(c=>o[c]=S[c]);return JSON.parse(JSON.stringify(o))},
+  async push(){if(!this.user)return;this.state="saving";this.paint();
+    try{const data=this.payload();const size=JSON.stringify(data).length;if(size>900000){this.state="error";this.err="데이터가 너무 커요(저장 목록 일부 삭제 필요)";this.paint();return}
+      await this.ref().collection("data").doc("main").set(data);await this.pushPhotos();this.state="ok";this.last=Date.now();this.paint()}
+    catch(e){this.state="error";this.err=(e&&e.code)==="permission-denied"?"권한 오류(보안 규칙 확인)":"네트워크 확인";this.paint()}},
+  async pushPhotos(){const done=JSON.parse(localStorage.getItem("tp-photo-up")||"[]");const set=new Set(done);
+    for(const m of S.memories)for(const id of (m.photos||[])){if(set.has(id)||!PH[id])continue;if(PH[id].length>950000)continue;await this.ref().collection("photos").doc(id).set({data:PH[id],at:Date.now()});set.add(id)}
+    try{localStorage.setItem("tp-photo-up",JSON.stringify([...set]))}catch(_){}},
+  async pull(){this.state="saving";this.paint();
+    try{const snap=await this.ref().collection("data").doc("main").get();
+      if(snap.exists){const r=snap.data();const rAt=Number(r.updatedAt)||0;
+        if(rAt>localUpdatedAt){S.trip=r.trip||null;COLS.forEach(c=>S[c]=Array.isArray(r[c])?r[c]:[]);if(Array.isArray(r.saves))writeSaves(r.saves,true);localUpdatedAt=rAt;persist(true);day=null;toast("계정에 저장된 데이터를 불러왔어요")}
+        else if(rAt<localUpdatedAt){await this.push()}}
+      else if(S.trip||S.items.length||saves().length){await this.push();toast("이 기기 데이터를 계정에 올렸어요")}
+      await this.pullPhotos();this.state="ok";this.last=Date.now()}
+    catch(e){this.state="error";this.err=(e&&e.code)==="permission-denied"?"권한 오류(보안 규칙 확인)":"네트워크 확인"}
+    this.paint()},
+  async pullPhotos(){const need=[];S.memories.forEach(m=>(m.photos||[]).forEach(id=>{if(!PH[id])need.push(id)}));
+    for(const id of need){try{const d=await this.ref().collection("photos").doc(id).get();if(d.exists){PH[id]=d.data().data;await putPhoto(id,PH[id])}}catch(_){}}
+    if(need.length&&tab==="mem")render()},
+  paint(){const el=document.getElementById("syncState");if(el)el.textContent=this.label();const st=document.getElementById("acctLine");if(st)st.textContent=this.label()}
+};
+function acctCard(){if(!Sync.enabled())return `<div class="card"><h3>계정·동기화</h3><p class="small muted">로그인 기능은 아직 설정 전이에요(관리자가 Firebase 설정을 넣으면 켜져요). 지금은 이 기기에만 저장돼요.</p></div>`;
+  const u=Sync.user;return `<div class="card"><div class="row between"><h3>계정·동기화</h3>${u?`<button class="btn ghost sm" data-act="logout">로그아웃</button>`:""}</div>
+  ${u?`<div class="row"><b>${esc(u.displayName||"")}</b><span class="small muted">${esc(u.email||"")}</span></div><p class="small" id="acctLine">${esc(Sync.label())}</p><div class="row"><button class="btn sm" data-act="syncNow">지금 동기화</button></div>
+  <p class="small muted">같은 구글 계정으로 로그인하면 휴대폰 앱·PC 웹·다른 기기에서 일정·경비·저장 목록·사진 기록을 똑같이 불러와요. 마지막으로 고친 기기의 내용이 기준이 돼요.</p>`
+  :`<p class="small muted">구글 계정으로 로그인하면 웹에서 등록한 내용을 휴대폰 앱에서도 그대로 불러올 수 있어요.</p><div class="row"><button class="btn primary" data-act="login" ${Sync.ready?"":"disabled"}>${Sync.ready?"구글 계정으로 로그인":"준비 중…"}</button></div>`}</div>`}
+
+function installCard(){const standalone=matchMedia("(display-mode: standalone)").matches||navigator.standalone;if(standalone)return"";
+  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  return `<div class="card"><h3>휴대폰 앱으로 설치</h3>${window.__bip?`<p class="small muted">홈 화면에 아이콘이 생기고, 주소창 없이 앱처럼 열려요.</p><div class="row"><button class="btn primary" data-act="install">앱 설치하기</button></div>`:ios?`<p class="small">아이폰: 사파리 아래쪽 <b>공유 버튼(□↑)</b> → <b>홈 화면에 추가</b>를 누르세요.</p>`:`<p class="small">안드로이드: 크롬 오른쪽 위 <b>⋮</b> → <b>앱 설치</b>(또는 홈 화면에 추가)를 누르세요.</p>`}<p class="small muted">설치한 앱과 웹은 같은 주소를 쓰니, 로그인하면 내용이 똑같이 보여요.</p></div>`}
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();window.__bip=e;if(tab==="home")render()});
+if("serviceWorker" in navigator&&location.protocol==="https:"){navigator.serviceWorker.register("sw.js").catch(()=>{})}
 /* ---------- 엑셀(.xlsx) 내보내기 ---------- */
 function loadScript(src){return new Promise((res,rej)=>{if(document.querySelector(`script[src="${src}"]`)&&window.XLSX)return res();const s=document.createElement("script");s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s)})}
 async function exportXlsx(btn){
@@ -1482,8 +1602,9 @@ function render(){
   const openD=[...document.querySelectorAll("details.add[open]")].map(d=>d.id),closedD=[...document.querySelectorAll("details.add:not([open])")].map(d=>d.id);
   const t=T();
   $("#tripTitle").textContent=t.title||"여행 올인원 플래너";
-  $("#status").innerHTML=`<b>이 기기에 자동 저장</b> · Claude 없이 무료로 동작 · 일행과는 홈의 "백업 내보내기" 파일로 공유`;
-  $("#tabs").innerHTML=TABS.map(([k,v])=>`<button role="tab" data-tab="${k}" aria-selected="${k===tab}">${v}</button>`).join("");
+  $("#status").innerHTML=Sync.user?`<span id="syncState">${esc(Sync.label())}</span> · ${esc(Sync.user.displayName||Sync.user.email||"")}`:Sync.enabled()?`<b>이 기기에 자동 저장</b> · <button class="btn ghost sm" data-act="login" style="padding:0">로그인하고 동기화</button>`:`<b>이 기기에 자동 저장</b> · Claude 없이 무료로 동작`;
+  $("#tabs").innerHTML=TABS.map(([k,v])=>`<button role="tab" data-tab="${k}" aria-selected="${k===tab}" class="${MORE.includes(k)?"t-more":""}">${v}</button>`).join("")+`<button class="t-morebtn" data-act="more" aria-expanded="false" aria-selected="${MORE.includes(tab)}">더보기</button>`;
+  document.getElementById("tabs").classList.remove("open");
   TABS.forEach(([k])=>{$("#p-"+k).hidden=k!==tab});
   ({home:rHome,plan:rPlan,book:rBook,place:rPlace,money:rMoney,talk:rTalk,mem:rMem,check:rCheck})[tab]();
   openD.forEach(id=>{const d=document.getElementById(id);if(d)d.open=true});
@@ -1573,6 +1694,8 @@ function rHome(){
     </form>
   </details>
   ${t.recStatus?`<p class="note">${esc(t.recStatus)}</p>`:""}
+  ${acctCard()}
+  ${installCard()}
   <div class="card"><div class="row between"><h3>저장 목록</h3><span class="small muted">${t.saveNo?`지금 편집 중: <b>#${t.saveNo}</b>`:"아직 번호 없음"}</span></div>
     <div class="row">${t.saveNo?`<button class="btn primary" data-act="saveOver">#${t.saveNo}에 덮어쓰기 저장</button>`:""}<button class="btn ${t.saveNo?"":"primary"}" data-act="saveNew">새 번호로 저장</button><button class="btn ghost" data-act="newTrip">새 여행 시작</button></div>
     ${saves().length?`<div class="list">${saves().slice().sort((a,b)=>b.no-a.no).map(s=>`<div class="item"><span class="t mono">#${s.no}</span><div class="body"><span class="title">${esc(s.name)}</span><span class="small muted">${esc(s.city||"")} ${s.start?dayLabel(s.start)+"~"+dayLabel(s.end):""} · 일정 ${s.counts.items}·장소 ${s.counts.places}·지출 ${s.counts.expenses} · ${new Date(s.savedAt).toLocaleString("ko-KR",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"})} 저장</span></div><div class="acts"><button class="btn sm ${t.saveNo===s.no?"":"primary"}" data-act="loadSave" data-no="${s.no}">${t.saveNo===s.no?"다시 불러오기":"불러오기"}</button><button class="btn ghost sm" data-act="renameSave" data-no="${s.no}">이름 변경</button><button class="btn ghost sm" data-act="delSave" data-no="${s.no}">삭제</button></div></div>`).join("")}</div>`:`<div class="empty">저장한 여행이 없어요. "새 번호로 저장"을 누르면 지금까지 기록한 일정·장소·경비·사진 기록이 번호와 함께 저장돼요.</div>`}
@@ -1896,6 +2019,11 @@ document.addEventListener("click",async e=>{
   const id=b.dataset.id;
   switch(b.dataset.act){
     case "export":exportData();break;
+    case "more":{const n=document.getElementById("tabs");const o=!n.classList.contains("open");n.classList.toggle("open",o);b.setAttribute("aria-expanded",o);break}
+    case "login":await Sync.login();break;
+    case "logout":await Sync.logout();render();break;
+    case "syncNow":await Sync.pull();render();break;
+    case "install":if(window.__bip){window.__bip.prompt();window.__bip=null}break;
     case "exportX":exportXlsx(b);break;
     case "refreshPacks":await loadPackIndex(true);render();toast(packIndexErr||"팩 목록을 새로 불러왔어요");break;
     case "dlPack":{const ent=(packIndex&&packIndex.packs||[]).find(p=>p.id===id);if(!ent)break;b.disabled=true;b.textContent="내려받는 중…";try{const pk=await downloadPack(ent);await applyPackToTrip(pk)}catch(err){toast("팩을 내려받지 못했어요. 인터넷 연결을 확인하세요");render()}break}
@@ -1936,7 +2064,7 @@ document.addEventListener("input",e=>{if(e.target.id==="tf-city"){clearTimeout(w
 document.addEventListener("submit",async e=>{
   e.preventDefault();const f=e.target,d=formData(f);
   if(f.id==="tripForm"){const apply=e.submitter&&e.submitter.value==="apply";{const dd=dictFor(d.city);if(dd){if(!d.cityEn)d.cityEn=dd[1];if(!d.to)d.to=dd[2]}}const trip=Object.assign({},T(),{title:d.title,city:d.city,cityEn:d.cityEn,from:(d.from||"").toUpperCase(),to:(d.to||"").toUpperCase(),start:d.start,end:d.end,budget:Number(d.budget)||0,bud:Object.fromEntries(BCATS.map(k=>[k,Number(d["b_"+k])||0])),cur:d.cur,rate:Number(d.rate)||0,lang:d.lang,travelers:d.travelers.split(",").map(s=>s.trim()).filter(Boolean)});
-    if(apply){const ab=e.submitter;if(ab){ab.disabled=true;ab.textContent="추천 찾는 중…"}const n=await applyRecs(trip);S.trip=trip;commit();toast(n?`추천 ${n}곳·숙소 ${S.hotels.length}곳을 반영했어요`:"추천 칸을 비워뒀어요");}else{saveTrip(trip);toast("저장했어요")}return}
+    if(apply&&(!trip.title||trip.title==="새 여행")&&trip.city)trip.title=trip.city+" 여행";if(apply){const ab=e.submitter;if(ab){ab.disabled=true;ab.textContent="추천 찾는 중…"}const n=await applyRecs(trip);S.trip=trip;commit();toast(n?`추천 ${n}곳·숙소 ${S.hotels.length}곳을 반영했어요`:"추천 칸을 비워뒀어요");}else{saveTrip(trip);toast("저장했어요")}return}
   if(f.id==="itemForm"){const ll=parseLL(d.ll);const data={day:d.day,time:d.time,kind:d.kind,title:d.title,cost:Number(d.cost)||0,note:d.note,done:false};if(ll)Object.assign(data,ll);day=d.day;addDoc("items",data);toast(ll||!d.ll?"일정을 추가했어요":"좌표 형식이 달라 위치 없이 추가했어요");return}
   if(f.id==="bookForm"){addDoc("bookings",{kind:d.kind,date:d.date,title:d.title,ref:d.ref,cost:Number(d.cost)||0,note:d.note});toast("예약을 기록했어요");return}
   if(f.id==="placeForm"){const ll=parseLL(d.ll);const data={name:d.name,kind:d.kind,area:d.area,query:d.query,note:d.note,cost:Number(d.cost)||0,visited:false};if(ll)Object.assign(data,ll);addDoc("places",data);toast("저장했어요");return}
@@ -1952,7 +2080,7 @@ async function saveMemory(f){
   if(files.length&&!idb){msg.textContent="이 브라우저는 사진 저장을 지원하지 않아요(개인정보 보호 모드 등). 글만 저장할게요."}
   btn.disabled=true;const ids=[];
   try{if(idb)for(let i=0;i<files.length;i++){msg.textContent=`사진 저장 중 ${i+1}/${files.length}`;const data=await shrink(files[i]);const pid="ph"+uid();const ok=await putPhoto(pid,data);if(ok){PH[pid]=data;ids.push(pid)}}
-    addDoc("memories",{date:d.date,place:d.place,text:d.text,photos:ids});f.reset();msg.textContent="";toast("추억을 저장했어요")}
+    addDoc("memories",{date:d.date,place:d.place,text:d.text,photos:ids});f.reset();msg.textContent="";toast(Sync.user?"추억을 저장했어요 · 계정에 올리는 중":"추억을 저장했어요")}
   catch(err){msg.textContent="사진을 저장하지 못했어요. JPG·PNG인지 확인하세요.";if(ids.length||d.text)addDoc("memories",{date:d.date,place:d.place,text:d.text,photos:ids})}
   finally{btn.disabled=false}
 }
@@ -1962,7 +2090,7 @@ try{const saved=localStorage.getItem("tp-tab");if(saved&&TABS.some(([k])=>k===sa
 if(location.hash&&TABS.some(([k])=>k===location.hash.slice(1)))tab=location.hash.slice(1);
 loadLocal();
 render();
-openIDB().then(async()=>{await loadPhotos();if(tab==="mem")render()});
+openIDB().then(async()=>{await loadPhotos();if(tab==="mem")render();Sync.init()});
 })();
 
 </script>
