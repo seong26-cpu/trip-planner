@@ -1,0 +1,7 @@
+{
+  "updated": "2026-10-12",
+  "note": "앱에 내장되지 않은 추가 도시 팩 목록. 앱의 번역·교통 탭 → 도시 팩에서 내려받아 자동 적용됩니다.",
+  "packs": [
+    {"id": "danang", "file": "danang.json", "city": "다낭", "cityEn": "Da Nang", "aliases": ["danang", "da nang", "đà nẵng", "다낭"], "version": "2026-10-12", "places": 17, "hotels": 7}
+  ]
+}

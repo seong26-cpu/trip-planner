@@ -1,0 +1,72 @@
+{
+  "id": "danang",
+  "version": "2026-10-12",
+  "city": "다낭",
+  "cityEn": "Da Nang",
+  "aliases": ["danang", "da nang", "đà nẵng", "다낭"],
+  "to": "DAD",
+  "cur": "VND",
+  "lang": "vi",
+  "country": "vn",
+  "railLabel": "그랩바이크",
+  "rateHint": {"value": 0.0518, "note": "1원 ≈ 19.3동 (2026-10-10~11, Wise·Clock7) → 1동 ≈ 0.0518원"},
+  "fare": {
+    "railTable": [[3, 30000], [6, 40000], [999, 60000]],
+    "railNote": "그랩바이크 시내 3~5만동·도심 횡단 약 4만동(추정)",
+    "taxi": {"base": 15000, "baseM": 1000, "stepM": 1000, "step": 13000},
+    "taxiNote": "미터 택시 km당 약 1~1.6만동(추정, 1대)"
+  },
+  "access": {"name": "공항→미케해변 그랩카", "price": 125000, "perCar": true, "note": "그랩카 10~15만동/대, 왕복 계산"},
+  "pass": null,
+  "sources": {
+    "dnf": {"n": "Da Nang Fantasticity (2026 입장료)", "u": "https://danangfantasticity.com/en/plan-your-da-nang-journey-2026-updated-admission-prices-for-attractions-and-tourist-sites"},
+    "spBN": {"n": "Sun Paradise Land (바나힐 2026)", "u": "https://sunparadiseland.com/en/SunParadiseLandDaNang/tin-tuc/ba-na-hills-ticket-prices-2026-cable-car-fares-and-saving-tips-7745"},
+    "vvBN": {"n": "Vietnam Vacation (바나힐 케이블카)", "u": "https://vietnamvacation.com.vn/ba-na-hills-cable-car-price/"},
+    "spMM": {"n": "Sun Paradise Land (오행산 2026)", "u": "https://sunparadiseland.com/en/SunParadiseLandDaNang/tin-tuc/marble-mountains-da-nang-the-complete-2026-guide-18496"},
+    "dnfHA": {"n": "Da Nang Fantasticity (호이안 입장권)", "u": "https://danangfantasticity.com/hoi-an-ancient-town-entrance-tickets-2026"},
+    "noAP": {"n": "Nomado (아시아파크·선휠)", "u": "https://www.nomadotravel.app/en/attractions/asia-park-sun-wheel"},
+    "hdFree": {"n": "Hoi An Day Trip (다낭 무료 명소)", "u": "https://hoiandaytrip.com/free-things-to-do-in-da-nang/"},
+    "vtFood": {"n": "Vietnam Tourism (다낭 음식)", "u": "https://www.vietnamtourism.com/en/da-nang-food-scene-what-and-where-to-eat"},
+    "vtStay": {"n": "Vietnam Tourism (다낭 숙소 예산별)", "u": "https://www.vietnamtourism.com/en/where-to-stay-in-da-nang-neighborhoods-and-hotel-picks-by-budget"},
+    "vtAir": {"n": "Vietnam Tourism (공항 이동)", "u": "https://www.vietnamtourism.com/en/getting-to-da-nang-flights-trains-and-the-airport-transfer-options"},
+    "vtHA": {"n": "Vietnam Tourism (호이안 가는 법)", "u": "https://www.vietnamtourism.com/en/getting-to-hoi-an-from-da-nang-airport-and-beyond"},
+    "noGA": {"n": "Nomado (다낭 교통 총정리)", "u": "https://www.nomadotravel.app/en/guides/getting-around-da-nang"},
+    "wise": {"n": "Wise (KRW→VND 환율)", "u": "https://wise.com/us/currency-converter/krw-to-vnd-rate/history"},
+    "c7": {"n": "Clock7 (KRW→VND 환율)", "u": "https://www.clock7.com/currency/krw-to-vnd/"}
+  },
+  "places": [
+    {"pid": "d01", "name": "미케 해변", "nameEn": "My Khe Beach", "kind": "명소", "area": "미케", "lat": 16.0600, "lng": 108.2470, "cost": 0, "note": "약 3.5km 모래사장. 이른 아침·늦은 오후가 좋아요. 무료.", "src": ["hdFree"]},
+    {"pid": "d02", "name": "용다리", "nameEn": "Dragon Bridge Da Nang", "kind": "명소", "area": "한강", "lat": 16.0612, "lng": 108.2272, "cost": 0, "note": "주말 밤 용 머리에서 불·물을 뿜는 쇼. 시간은 현지 확인. 무료.", "src": ["hdFree"]},
+    {"pid": "d03", "name": "다낭 대성당 (핑크 성당)", "nameEn": "Da Nang Cathedral", "kind": "명소", "area": "하이짜우", "lat": 16.0667, "lng": 108.2232, "cost": 0, "note": "무료. 월~토 8:00~11:30, 13:30~16:30, 일요일 관람 불가.", "src": ["hdFree"]},
+    {"pid": "d04", "name": "린응사 (선짜 반도)", "nameEn": "Linh Ung Pagoda Son Tra", "kind": "명소", "area": "선짜", "lat": 16.1003, "lng": 108.2779, "cost": 0, "note": "67m 해수관음상과 바다 전망. 무료. 30~45분.", "src": ["hdFree"]},
+    {"pid": "d05", "name": "선짜 반도 (몽키 마운틴)", "nameEn": "Son Tra Peninsula", "kind": "명소", "area": "선짜", "lat": 16.1170, "lng": 108.2700, "cost": 0, "note": "원숭이(붉은다리두크) 서식지·드라이브 코스. 무료.", "src": ["hdFree"]},
+    {"pid": "d06", "name": "오행산 (마블 마운틴)", "nameEn": "Marble Mountains", "kind": "명소", "area": "응우한선", "lat": 16.0039, "lng": 108.2633, "cost": 40000, "costNote": "엘리베이터 왕복 3만동 별도", "note": "대리석 산 속 동굴·사원. 입장료에 동굴·전망대 포함.", "src": ["dnf", "spMM"]},
+    {"pid": "d07", "name": "바나힐 (썬월드)", "nameEn": "Sun World Ba Na Hills", "kind": "체험", "area": "바나산", "lat": 15.9977, "lng": 107.9880, "cost": 1000000, "costNote": "외국인 95만~100만동(출처 상이)", "note": "케이블카·골든브릿지·테마파크. 시내에서 차로 약 1시간.", "src": ["dnf", "spBN", "vvBN"]},
+    {"pid": "d08", "name": "참 조각 박물관", "nameEn": "Museum of Cham Sculpture", "kind": "명소", "area": "한강", "lat": 16.0605, "lng": 108.2237, "cost": 60000, "costNote": "1개 출처 기준", "note": "참파 왕국 조각 유물 박물관. 용다리 근처.", "src": ["dnf"]},
+    {"pid": "d09", "name": "아시아파크·선휠", "nameEn": "Sun World Asia Park Da Nang", "kind": "체험", "area": "하이짜우", "lat": 16.0390, "lng": 108.2272, "cost": 150000, "costNote": "공원 입장 무료·선휠 14~15만동·1개 출처", "note": "대관람차 선휠 야경. 15:00~22:00 운영.", "src": ["noAP"]},
+    {"pid": "d10", "name": "호이안 구시가지", "nameEn": "Hoi An Ancient Town", "kind": "명소", "area": "호이안", "lat": 15.8770, "lng": 108.3270, "cost": 120000, "costNote": "8만동(기본)·12만동(박물관 포함)", "note": "등불 거리 야경. 다낭에서 그랩카 25~40만동·약 45~60분.", "src": ["dnf", "dnfHA"]},
+    {"pid": "d11", "name": "미선 유적", "nameEn": "My Son Sanctuary", "kind": "명소", "area": "꽝남", "lat": 15.7640, "lng": 108.1240, "cost": 150000, "note": "참파 힌두 사원 유적(세계유산). 반나절 일정.", "src": ["dnf"]},
+    {"pid": "d12", "name": "한 시장", "nameEn": "Han Market", "kind": "쇼핑", "area": "한강", "lat": 16.0682, "lng": 108.2244, "cost": 0, "note": "1848년부터 이어진 시장. 5:00~18:00, 2층 푸드코트 한 그릇 약 5만동.", "src": ["hdFree", "vtFood"]},
+    {"pid": "d13", "name": "꼰 시장 푸드코트", "nameEn": "Con Market Da Nang", "kind": "맛집", "area": "하이짜우", "lat": 16.0679, "lng": 108.2147, "cost": 0, "note": "미꽝·반쎄오·분짜까 등 한 그릇 3~5만동.", "src": ["vtFood"]},
+    {"pid": "d14", "name": "미꽝 바 무아", "nameEn": "Mi Quang Ba Mua", "kind": "맛집", "area": "하이짜우", "lat": 16.0700, "lng": 108.2210, "cost": 0, "note": "다낭 대표 국수 미꽝. 약 4만동. (95 Nguyen Chi Thanh)", "src": ["vtFood"]},
+    {"pid": "d15", "name": "반쎄오 바 즈엉", "nameEn": "Banh Xeo Ba Duong", "kind": "맛집", "area": "하이짜우", "lat": 16.0590, "lng": 108.2150, "cost": 0, "note": "골목 안 반쎄오 노포. 1인 3~5만동.", "src": ["vtFood"]},
+    {"pid": "d16", "name": "분짜까 109", "nameEn": "Bun Cha Ca 109 Da Nang", "kind": "맛집", "area": "하이짜우", "lat": 16.0710, "lng": 108.2210, "cost": 0, "note": "생선어묵 국수. 약 3.5만동.", "src": ["vtFood"]},
+    {"pid": "d17", "name": "베만 해산물", "nameEn": "Be Man Seafood Da Nang", "kind": "맛집", "area": "미케", "lat": 16.0640, "lng": 108.2450, "cost": 0, "note": "해변 해산물 식당. 2인 40~80만동.", "src": ["vtFood"]}
+  ],
+  "hotels": [
+    {"name": "메모리 호스텔", "nameEn": "Memory Hostel Da Nang", "area": "한강변", "priceTier": "저가", "price": 500000, "priceRange": "개인실 약 50만동 · 도미토리 15~20만동", "why": "용다리·한 시장 도보권.", "src": ["vtStay"]},
+    {"name": "씨 미케 호텔", "nameEn": "Sea My Khe Hotel", "area": "미케", "priceTier": "저가", "price": 475000, "priceRange": "더블 40~55만동", "why": "미케 해변 근처 저예산 호텔.", "src": ["vtStay"]},
+    {"name": "살라 다낭 비치 호텔", "nameEn": "Sala Danang Beach Hotel", "area": "한강 서안", "priceTier": "중가", "price": 1000000, "priceRange": "80만~120만동", "why": "시내 중심 중가 호텔.", "src": ["vtStay"]},
+    {"name": "알라까르뜨 다낭 비치", "nameEn": "A La Carte Da Nang Beach", "area": "미케", "priceTier": "중가", "price": 1200000, "priceRange": "약 120만동부터", "why": "미케 해변 앞 중가 호텔.", "src": ["vtStay"]},
+    {"name": "그랜드브리오 시티 다낭", "nameEn": "Grandvrio City Da Nang", "area": "한강변", "priceTier": "중가", "price": 2000000, "priceRange": "150만~250만동", "why": "한강변 시내 중심.", "src": ["vtStay"]},
+    {"name": "노보텔 다낭 프리미어 한리버", "nameEn": "Novotel Danang Premier Han River", "area": "한강변", "priceTier": "고가", "price": 2500000, "priceRange": "약 250만동부터", "why": "한강 전망, 시내 중심.", "src": ["vtStay"]},
+    {"name": "풀만 다낭 비치 리조트", "nameEn": "Pullman Danang Beach Resort", "area": "미케 남쪽", "priceTier": "고가", "price": 3000000, "priceRange": "약 300만동부터", "why": "해변 리조트, 오행산 방향.", "src": ["vtStay"]}
+  ],
+  "guide": [
+    {"title": "돈·환율", "items": ["통화는 베트남 동(VND). 1원 ≈ 19.3동(2026-10-10~11 기준) → 1만동 ≈ 518원.", "홈 → 여행 기본 정보의 환율 칸에 0.0518을 넣으면 원화로 계산돼요(출발 전 다시 확인)."], "src": ["wise", "c7"]},
+    {"title": "공항에서 시내·해변으로", "items": ["다낭 공항은 미케 해변에서 약 3km, 시내에서 약 5km로 가까워요.", "그랩카: 시내 8~12만동, 미케 해변 10~15만동(1대). 그랩바이크 4~6만동.", "공항 택시(마이린·비나선): 시내 12~18만동. 미터기를 켰는지 확인하세요.", "1번 버스 8,000동, 20~30분 간격, 짐이 적을 때만."], "src": ["vtAir"]},
+    {"title": "시내 이동", "items": ["대부분 <b>그랩(Grab)</b> 앱으로 이동해요. 요금이 미리 정해져 흥정이 필요 없어요.", "그랩바이크 시내 3~5만동, 도심 횡단 약 4만동.", "미터 택시는 km당 약 1~1.6만동(앱은 1.3만동으로 추정 계산).", "시내버스 5,000~8,000동."], "src": ["noGA"]},
+    {"title": "호이안 다녀오기", "items": ["거리 약 30km. 그랩카 25~35만동(7인승 35~45만동), 약 45~60분.", "1번 버스 약 3만동, 60~90분, 호이안 버스터미널에서 내려 구시가지까지 더 가야 해요.", "구시가지 입장권 8만동(기본)·12만동(박물관 포함)."], "src": ["vtHA", "dnfHA"]},
+    {"title": "바나힐·주의사항", "items": ["바나힐 외국인 케이블카 약 95만~100만동(출처 상이). 2026년부터 최대 3일 연속 유효로 안내돼요.", "성당은 일요일 관람이 막혀요. 용다리 쇼는 주말 밤에 열리니 시간은 현지에서 확인하세요.", "교통비는 시간·수요에 따라 오르니(명절·주말) 앱 요금을 확인하세요."], "src": ["spBN", "vvBN", "hdFree"]}
+  ]
+}
