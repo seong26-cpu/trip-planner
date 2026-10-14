@@ -11,8 +11,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
-:root{--bg:#f6f7f5;--card:#fff;--ink:#1c1f1e;--sub:#6b716e;--line:#e4e7e4;--brand:#0f766e;--brand2:#e6f4f1;--warn:#b45309;--warnbg:#fef3c7;--bad:#b91c1c;--r:16px}
-@media (prefers-color-scheme:dark){:root{--bg:#111413;--card:#1a1e1d;--ink:#eef1ef;--sub:#9aa29e;--line:#2a302e;--brand:#2dd4bf;--brand2:#13302c;--warn:#fbbf24;--warnbg:#3a2e10;--bad:#f87171}}
+:root{--bg:#f6f7f5;--card:#fff;--ink:#1c1f1e;--sub:#6b716e;--line:#e4e7e4;--brand:#0f766e;--brand2:#e6f4f1;--warn:#b45309;--warnbg:#fef3c7;--bad:#b91c1c;--r:16px;--onbrand:#fff}
+@media (prefers-color-scheme:dark){:root{--bg:#111413;--card:#1a1e1d;--ink:#eef1ef;--sub:#9aa29e;--line:#2a302e;--brand:#2dd4bf;--brand2:#13302c;--warn:#fbbf24;--warnbg:#3a2e10;--bad:#f87171;--onbrand:#04201c}}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Pretendard,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-size:15px;line-height:1.5}
 header{position:sticky;top:0;z-index:5;background:var(--bg);padding:calc(10px + env(safe-area-inset-top)) 16px 8px;display:flex;align-items:center;gap:8px}
@@ -35,8 +35,7 @@ nav.tabs button.on{color:var(--brand);font-weight:700}
 .item .t{font-weight:600;word-break:break-all}
 .item .d{color:var(--sub);font-size:13px;white-space:pre-wrap;word-break:break-all}
 button,.btn{font:inherit;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:9px 14px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:4px;justify-content:center}
-button.p,.btn.p{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:600}
-@media (prefers-color-scheme:dark){button.p,.btn.p{color:#04201c}}
+button.p,.btn.p{background:var(--brand);border-color:var(--brand);color:var(--onbrand);font-weight:600}
 button.s{padding:5px 10px;font-size:13px;border-radius:10px}
 button.x{border:0;background:none;color:var(--sub);padding:4px 6px}
 input,textarea,select{font:inherit;width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink)}
@@ -48,7 +47,7 @@ label{font-size:13px;color:var(--sub);display:block;margin:8px 0 4px}
 .tag{display:inline-block;font-size:11px;padding:1px 7px;border-radius:99px;background:var(--brand2);color:var(--brand);margin-right:4px}
 .tag.w{background:var(--warnbg);color:var(--warn)}
 .big{font-size:28px;font-weight:800}
-.fab{position:fixed;right:18px;bottom:calc(78px + env(safe-area-inset-bottom));width:54px;height:54px;border-radius:50%;background:var(--brand);color:#fff;font-size:28px;border:0;box-shadow:0 6px 18px rgba(0,0,0,.18);z-index:8}
+.fab{position:fixed;right:18px;bottom:calc(78px + env(safe-area-inset-bottom));width:54px;height:54px;border-radius:50%;background:var(--brand);color:var(--onbrand);font-size:28px;border:0;box-shadow:0 6px 18px rgba(0,0,0,.18);z-index:8}
 dialog{border:0;border-radius:20px;padding:0;width:min(560px,94vw);background:var(--card);color:var(--ink);max-height:90vh}
 dialog::backdrop{background:rgba(0,0,0,.4)}
 dialog form{padding:18px}
@@ -65,6 +64,49 @@ code{background:var(--brand2);padding:1px 5px;border-radius:6px;font-size:13px}
 .hide{display:none!important}
 .sec{display:none}.sec.on{display:block}
 .empty{color:var(--sub);text-align:center;padding:14px;font-size:14px}
+:root[data-topic=fit]{--bg:#0b1020;--card:#151c33;--ink:#f3f6ff;--sub:#aab4d4;--line:#2a3560;--brand:#538DFF;--brand2:#1c2a55;--onbrand:#0b1020;--warn:#fbbf24;--warnbg:#3a2e10;--bad:#f87171}
+:root[data-topic=cook]{--bg:#fffaf4;--card:#fff;--ink:#2b1d14;--sub:#7a6555;--line:#f0dcc8;--brand:#c2410c;--brand2:#ffe9d6;--onbrand:#fff;--warn:#b45309;--warnbg:#fef3c7;--bad:#b91c1c}
+:root[data-topic=food]{--bg:#fbf7f5;--card:#fff;--ink:#2a1616;--sub:#6b4f4a;--line:#ecdcd6;--brand:#b91c1c;--brand2:#fde8e8;--onbrand:#fff;--warn:#b45309;--warnbg:#fef3c7;--bad:#b91c1c}
+:root[data-topic=memo]{--bg:#fffdf5;--card:#fff;--ink:#26210f;--sub:#6b6241;--line:#eadf9c;--brand:#854d0e;--brand2:#fde68a;--onbrand:#fff;--warn:#b45309;--warnbg:#fef3c7;--bad:#b91c1c}
+nav.tabs button svg{width:24px;height:24px}
+.topics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.tcard{padding:0;overflow:hidden;display:block;text-align:left;border-radius:var(--r)}
+.tcard img{width:100%;height:96px;object-fit:cover;display:block}
+.tcard div{padding:10px 12px}.tcard b{display:block;font-size:16px}.tcard span{font-size:12px;color:var(--sub)}
+.banner{display:block;width:100%;height:150px;object-fit:cover;border-radius:18px;margin:10px 0 6px}
+.big2{font-size:24px;margin:8px 0 6px;letter-spacing:-.4px}
+.hero h2{font-size:26px;line-height:1.3;margin:6px 0 0;letter-spacing:-.4px}
+.hero img{display:block;width:100%;height:170px;object-fit:cover;border-radius:18px;margin-top:12px}
+.stats3{display:grid;grid-template-columns:repeat(3,1fr);text-align:center}
+.stats3 b{display:block;font-size:22px;color:var(--brand)}.stats3 span{font-size:12px;color:var(--sub)}
+.rail{display:flex;gap:10px;overflow-x:auto;padding:2px 0 8px}
+.rcard{flex:0 0 190px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.rcard img{display:block;width:100%;height:110px;object-fit:cover}.rcard .rb{padding:10px 12px 12px}
+.th{width:64px;height:64px;border-radius:12px;object-fit:cover;flex:0 0 auto}
+.rk{width:24px;font-size:20px;font-weight:800;color:var(--brand);text-align:center}
+.cats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:8px 0}
+.cats a{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;color:var(--ink);text-decoration:none}
+.cats i{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:800;font-size:18px}
+.themes{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin:8px 0 12px;border-radius:12px;overflow:hidden}
+.tile{min-height:78px;background:var(--card);border:0;border-radius:0;display:flex;flex-direction:column;gap:6px;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--ink);text-decoration:none;padding:6px}
+.tile svg{width:26px;height:26px}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0}
+.pcard{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;cursor:pointer}
+.pcard img{display:block;width:100%;height:110px;object-fit:cover}.pcard .pb{padding:10px 12px 12px}
+.pcard .t{font-weight:700;word-break:break-all}.pcard .d{font-size:12px;color:var(--sub);white-space:pre-line}
+.pcard .st{margin-top:4px;color:var(--brand);font-size:13px;letter-spacing:1px}.pcard .st span{color:var(--sub);letter-spacing:0;font-size:12px}
+.seg{display:flex;background:var(--brand2);border-radius:99px;padding:3px}
+.seg span{padding:6px 12px;border-radius:99px;font-size:12px;cursor:pointer;color:var(--sub)}
+.seg span.on{background:var(--card);color:var(--ink);font-weight:700}
+.sq{width:36px;height:36px;border-radius:10px;flex:0 0 auto}
+.dhead img{display:block;width:100%;height:180px;object-fit:cover}.dhead h3{margin:12px 18px 0;font-size:20px}
+.drow{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid var(--line);font-size:14px;justify-content:space-between}
+.drow span{color:var(--sub);flex:0 0 72px}.drow b{flex:1;font-weight:600}
+.rmres{margin:12px 0;padding:12px;border-radius:12px;background:var(--bg);display:flex;justify-content:space-between;align-items:baseline}
+.rmres b{font-size:22px;color:var(--brand)}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.cell{background:var(--bg);border-radius:12px;padding:10px 6px;text-align:center}
+.cell span,.cell small{display:block;font-size:12px;color:var(--sub)}.cell b{font-size:18px;color:var(--brand)}
 </style>
 </head>
 <body>
@@ -75,7 +117,8 @@ code{background:var(--brand2);padding:1px 5px;border-radius:6px;font-size:13px}
 
 <script>
 /* ===================== 기본 ===================== */
-const TABS=[['home','🏠','홈'],['plan','📅','일정'],['cook','🍳','요리'],['fit','💪','헬스'],['more','☰','더보기']];
+const TABS=[['home','M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z','홈'],['plan','M4 6h16v14H4zM4 10h16M8 3v4M16 3v4','일정'],['cook','M3 11h18a9 7 0 0 1-18 0zM8 7c0-2 2-2 2-4M13 7c0-2 2-2 2-4','요리'],['fit','M6 7v10M3 9v6M18 7v10M21 9v6M6 12h12','운동'],['more','M4 6h16M4 12h16M4 18h16','더보기']];
+const svgI=d=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
 const SHEETS={메모:['제목','내용','태그','고정'],일정:['종류','제목','날짜','시작','종료','장소','상대','메모','캘린더ID'],맛집:['이름','지역','메뉴','평점','가격대','방문','메모'],장소:['이름','주소','종류'],식재료:['이름','수량','보관','유통기한'],레시피:['이름','재료','조리법','칼로리','시간','출처'],운동:['날짜','종류','부위','세트시간','칼로리','메모'],식단:['날짜','끼니','음식','칼로리','메모']};
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -192,8 +235,10 @@ function form(sheet,row={},opt={}){
 /* ===================== 화면 ===================== */
 const V={};
 function render(){
-  $('#tabs').innerHTML=TABS.map(([k,i,l])=>`<button data-t="${k}" class="${k===tab?'on':''}"><span class="i">${i}</span>${l}</button>`).join('');
-  $('#title').textContent={home:'오늘',plan:'일정 · 약속',cook:'요리',fit:'헬스',more:'더보기'}[tab];
+  $('#tabs').innerHTML=TABS.map(([k,i,l])=>`<button data-t="${k}" class="${k===tab?'on':''}">${svgI(i)}${l}</button>`).join('');
+  $('#title').textContent={home:'오늘',plan:'일정 · 약속',cook:'요리',fit:'운동',more:'더보기'}[tab];
+  const tp=tab==='fit'?'fit':tab==='cook'?'cook':tab==='more'?({맛집:'food',메모:'memo'}[sub.more||'메모']||''):'';
+  if(tp)document.documentElement.dataset.topic=tp;else document.documentElement.removeAttribute('data-topic');
   $('#app').innerHTML=V[tab]();
   document.querySelectorAll('[data-act]').forEach(b=>b.onclick=e=>{e.stopPropagation();ACT[b.dataset.act](b.dataset)});
   document.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>{const[s,id]=b.dataset.ed.split('|');form(s,DB[s].find(x=>x.id===id))});
@@ -226,7 +271,8 @@ V.home=()=>{
   ${exp.length?`<div class="card"><h2>⚠️ 유통기한 임박 재료</h2>${exp.map(x=>`<div class="item" data-ed="식재료|${x.id}"><div class="b"><div class="t">${esc(x.이름)}</div></div><span class="tag w">${x.유통기한<t?'지남':x.유통기한}</span></div>`).join('')}<button class="s" data-act="go" data-t="cook" style="margin-top:6px">이 재료로 요리 추천 →</button></div>`:''}
   <div class="card"><h2>빠른 메모</h2><div class="row"><input id="qm" style="flex:1;width:auto" placeholder="떠오른 생각을 적어두세요"><button class="p" data-act="qm">저장</button></div>
    ${pins.map(x=>`<div class="item" data-ed="메모|${x.id}"><div class="b"><div class="t">📌 ${esc(x.제목)}</div><div class="d">${esc((x.내용||'').slice(0,80))}</div></div></div>`).join('')}</div>
-  <div class="grid2"><button data-act="go" data-t="more" data-s="교통">🚇 길찾기</button><button data-act="go" data-t="more" data-s="맛집">🍜 오늘 뭐 먹지</button></div>`;
+  <div class="topics">${[['운동','루틴 · 1RM · 기록','img/hero-gym.svg','fit',''],['요리','레시피 · 사진 · 냉장고','img/food-banner.svg','cook',''],['맛집','테마 · 랜덤 · 내 목록','img/rest-hero.svg','more','맛집'],['메모','노트 · 검색 · 고정','img/memo-hero.svg','more','메모']].map(([n,sb,im,t,sv])=>`<button class="tcard" data-act="go" data-t="${t}" ${sv?`data-s="${sv}"`:''}><img src="${im}" alt=""><div><b>${n}</b><span>${sb}</span></div></button>`).join('')}</div>
+  <div class="grid2"><button data-act="go" data-t="more" data-s="교통">🚇 길찾기</button><button data-act="go" data-t="plan">📅 일정 · 약속</button></div>`;
 };
 ACT.go=d=>{tab=d.t;if(d.s)sub.more=d.s;location.hash=tab;render();scrollTo(0,0)};
 ACT.qm=()=>{const v=$('#qm').value.trim();if(!v)return;put('메모',{제목:v.slice(0,30),내용:v,태그:'빠른메모',고정:false});toast('메모 저장');render()};
@@ -247,10 +293,24 @@ V.plan=()=>{
 };
 
 /* ---- 요리 ---- */
+const FOOD=['img/food-jeyuk.svg','img/food-stew.svg','img/food-rice.svg','img/food-egg.svg'];
+const REST=['img/rest-grill.svg','img/rest-noodle.svg','img/rest-sushi.svg'];
+const q10=q=>'https://www.10000recipe.com/recipe/list.html?q='+encodeURIComponent(q);
+function cookHome(){
+  const cats=[['밑반찬','#ffe9d6','#9a3412'],['메인반찬','#fee2e2','#991b1b'],['국/탕','#fef3c7','#854d0e'],['찌개','#ffedd5','#9a3412'],['면/만두','#fef9c3','#713f12'],['밥/죽','#ecfccb','#3f6212'],['간식','#fce7f3','#9d174d'],['디저트','#e0e7ff','#3730a3']];
+  const best=[['제육볶음','메인반찬'],['두부찌개','찌개'],['김치볶음밥','밥/죽'],['계란말이','밑반찬']];
+  return `<div class="row" style="flex-wrap:nowrap"><input id="rq" placeholder="요리 이름이나 재료를 검색해요" style="flex:1"><button class="p" data-act="rsearch">검색</button></div>
+  <div class="chips" style="margin-top:8px">${best.map(b=>`<a class="chip" target="_blank" rel="noopener" href="${q10(b[0])}"># ${b[0]}</a>`).join('')}</div>
+  <div class="card" style="padding:0;overflow:hidden"><img class="banner" style="border-radius:0;margin:0" src="img/food-banner.svg" alt=""><div style="padding:12px 14px"><span class="tag">오늘의 추천</span><div style="font-weight:700;margin-top:4px">인기 요리 모아보기</div></div></div>
+  <h3 style="margin:16px 0 4px">레시피 분류</h3><div class="cats">${cats.map(c=>`<a target="_blank" rel="noopener" href="${q10(c[0])}"><i style="background:${c[1]};color:${c[2]}">${c[0].charAt(0)}</i>${c[0]}</a>`).join('')}</div>
+  <h3 style="margin:16px 0 4px">베스트 레시피 <span class="muted" style="font-weight:400">샘플 · 누르면 검색</span></h3>
+  <div class="card">${best.map((b,i)=>`<a class="item" target="_blank" rel="noopener" href="${q10(b[0])}" style="text-decoration:none;color:inherit;align-items:center"><div class="rk">${i+1}</div><img class="th" src="${FOOD[i]}" alt=""><div class="b"><div class="t">${b[0]}</div><span class="tag">${b[1]}</span></div></a>`).join('')}</div>`;
+}
 V.cook=()=>{
-  const m=sub.cook||'사진으로 찾기';
-  let h=chips('cook',['사진으로 찾기','내 냉장고','레시피']);
-  if(m==='사진으로 찾기'){
+  const m=sub.cook||'추천';
+  let h=chips('cook',['추천','사진으로 찾기','내 냉장고','레시피']);
+  if(m==='추천'){h+=cookHome()}
+  else if(m==='사진으로 찾기'){
     const r=LS.get('lastScan',null);
     h+=`<div class="card"><h2>📷 재료 사진 → 요리 추천</h2>
     <p class="muted">냉장고 안이나 재료를 찍으면 AI가 재료를 알아보고, 만들 수 있는 요리를 알려줘요.</p>
@@ -266,7 +326,7 @@ V.cook=()=>{
   }else{
     const L=DB.레시피.slice().reverse();
     h+=`<div class="card"><h2>저장한 레시피<span class="sp"></span><button class="s" data-act="add" data-s="레시피">＋</button></h2>
-    ${L.length?L.map(x=>`<div class="item" data-ed="레시피|${x.id}"><div class="b"><div class="t">${esc(x.이름)}</div><div class="d">${esc([x.시간&&x.시간+'분',x.칼로리&&x.칼로리+' kcal(추정)',x.출처].filter(Boolean).join(' · '))}</div></div></div>`).join(''):'<div class="empty">아직 레시피가 없어요</div>'}</div>`;
+    ${L.length?L.map((x,i)=>`<div class="item" data-ed="레시피|${x.id}"><img class="th" src="${FOOD[i%4]}" alt=""><div class="b"><div class="t">${esc(x.이름)}</div><div class="d">${esc([x.시간&&x.시간+'분',x.칼로리&&x.칼로리+' kcal(추정)',x.출처].filter(Boolean).join(' · '))}</div></div></div>`).join(''):'<div class="empty">아직 레시피가 없어요</div>'}</div>`;
   }
   return h;
 };
@@ -301,10 +361,24 @@ const PLANS={
  '상하체 분할 주4회':{days:[{day:'월',title:'상체',items:['푸시업 4×10','로우 4×10','숄더프레스 3×10','플랭크 3×30초']},{day:'화',title:'하체',items:['스쿼트 4×12','런지 3×10','힙 브릿지 3×15','카프레이즈 3×15']},{day:'목',title:'상체',items:['인클라인 푸시업 4×10','풀다운/밴드 로우 4×10','사이드 레터럴 3×12','크런치 3×15']},{day:'금',title:'하체+유산소',items:['고블릿 스쿼트 4×10','스텝업 3×10','걷기/자전거 20분']}]}
 };
 const LOWCAL=['닭가슴살 샐러드','두부 구이·두부 부침','계란찜 / 삶은 계란','채소 듬뿍 된장국','버섯·양배추 볶음','곤약밥 / 잡곡밥 반 공기','생선구이(고등어·연어)','오이·방울토마토 간식','그릭요거트(무가당)','쌈채소 + 수육(기름 적은 부위)'];
+function heroFit(){
+  const t=today();const wk=DB.운동.filter(x=>x.날짜>=addDays(t,-6)&&x.날짜<=t).length;
+  const kc=DB.식단.filter(x=>x.날짜===t).reduce((a,x)=>a+num(x.칼로리),0);
+  return `<div class="hero"><h2>운동 루틴,<br>기록으로 쌓이는 변화</h2><img src="img/hero-gym.svg" alt=""></div><div class="card stats3"><div><b>${wk}</b><span>최근 7일 운동(건)</span></div><div><b>${DB.운동.length}</b><span>전체 기록(건)</span></div><div><b>${kc.toLocaleString()}</b><span>오늘 섭취(kcal)</span></div></div>`;
+}
+function rmBind(){
+  const w=$('#rmW'),r=$('#rmR');if(!w||!r)return;
+  const calc=()=>{const W=parseFloat(w.value),R=parseFloat(r.value);
+    if(!(W>0&&R>0)){$('#rmOut').innerHTML='예상 1RM <b>— kg</b>';$('#rmSets').innerHTML='';return}
+    const rm=R===1?W:W*(1+R/30);const f=x=>Math.round(x*2)/2;
+    $('#rmOut').innerHTML='예상 1RM <b>'+f(rm)+' kg</b>';
+    $('#rmSets').innerHTML=[['쉬움',.6],['보통',.75],['어려움',.85]].map(([n,p])=>`<div class="cell"><span>${n}</span><b>${f(rm*p)} kg</b><small>${Math.round(p*100)}%</small></div>`).join('')};
+  w.oninput=calc;r.oninput=calc;
+}
 V.fit=()=>{
   const m=sub.fit||'오늘',t=today();
-  let h=chips('fit',['오늘','운동 계획','식단','기록']);
-  if(m==='오늘'){
+  let h=chips('fit',['오늘','운동 계획','식단','기록','1RM']);
+  if(m==='오늘'){h+=heroFit();
     const plan=LS.get('plan',null);const tp=plan&&plan.days?plan.days.find(d=>d.day==='일월화수목금토'[new Date().getDay()]):null;
     const meals=DB.식단.filter(x=>x.날짜===t),kc=meals.reduce((a,x)=>a+num(x.칼로리),0);
     const wk=[...Array(7)].map((_,i)=>addDays(t,i-6)).map(d=>({d,k:DB.식단.filter(x=>x.날짜===d).reduce((a,x)=>a+num(x.칼로리),0)}));const mx=Math.max(1,...wk.map(x=>x.k),num(CFG.kcal));
@@ -316,7 +390,7 @@ V.fit=()=>{
      <div class="bars">${wk.map(x=>`<div class="${x.d===t?'on':''}" style="height:${Math.round(x.k/mx*100)}%"><span>${dname(x.d).split(' ')[0]}</span></div>`).join('')}</div><div style="height:20px"></div></div>`;
   }else if(m==='운동 계획'){
     const plan=LS.get('plan',null);
-    h+=`<div class="card"><h2>기본 계획 고르기</h2>${Object.keys(PLANS).map(k=>`<button style="width:100%;margin:4px 0;justify-content:space-between" data-act="setPlan" data-k="${k}">${k} ${plan&&plan.name===k?'✅':''}</button>`).join('')}<p class="muted">일반적인 입문 예시예요. 통증·질환이 있으면 전문가와 상의하세요.</p></div>
+    h+=`<h3 style="margin:6px 0">기본 계획</h3><div class="rail">${Object.keys(PLANS).map((k,i)=>`<div class="rcard"><img src="${['img/gym-barbell.svg','img/gym-dumbbell.svg','img/gym-kettle.svg'][i%3]}" alt=""><div class="rb"><div class="t" style="font-weight:700">${k}</div><div class="muted">${PLANS[k].days.map(d=>d.day).join(' · ')}</div><button class="s ${plan&&plan.name===k?'p':''}" data-act="setPlan" data-k="${k}" style="margin-top:8px">${plan&&plan.name===k?'적용 중':'선택'}</button></div></div>`).join('')}</div><div class="card"><p class="muted">일반적인 입문 예시예요. 통증·질환이 있으면 전문가와 상의하세요.</p></div>
     <div class="card"><h2>🤖 AI 맞춤 계획</h2><div class="grid2"><div><label>목표</label><select id="pg"><option>체중 감량</option><option>근력 향상</option><option>체력·건강 유지</option></select></div><div><label>주 몇 회</label><select id="pd"><option>3</option><option>2</option><option>4</option><option>5</option></select></div></div>
      <div class="grid2"><div><label>1회 시간(분)</label><input id="pm" value="40"></div><div><label>장소</label><select id="pl"><option>집(맨몸)</option><option>헬스장</option><option>야외</option></select></div></div>
      <button class="p" style="width:100%;margin-top:10px" data-act="aiPlan">계획 만들기</button><div id="planOut"></div></div>
@@ -324,13 +398,15 @@ V.fit=()=>{
   }else if(m==='식단'){
     h+=`<div class="card"><h2>🥗 저칼로리 메뉴 아이디어</h2>${LOWCAL.map(x=>`<span class="chip" style="display:inline-block;margin:3px">${x}</span>`).join('')}<p class="muted">일반적으로 칼로리가 낮은 편인 메뉴 예시예요 (양·조리법에 따라 달라짐).</p></div>
     <div class="card"><h2>🤖 내 재료로 저칼로리 식단 추천</h2><p class="muted">내 냉장고 재료를 활용해 하루 식단을 짜 드려요.</p><button class="p" style="width:100%" data-act="aiMeal">추천 받기</button><div id="mealPlan"></div></div>`;
+  }else if(m==='1RM'){
+    h+=`<div class="card"><h2>1RM 계산기</h2><div class="grid2"><div><label>무게 (kg)</label><input id="rmW" inputmode="decimal" placeholder="예: 80"></div><div><label>횟수 (회)</label><input id="rmR" inputmode="numeric" placeholder="예: 5"></div></div><div class="rmres" id="rmOut">예상 1RM <b>— kg</b></div><div class="grid3" id="rmSets"></div><p class="muted">Epley 공식: 무게 × (1 + 횟수 ÷ 30). 세트 추천(60·75·85%)은 일반적인 예시 비율이며 개인차가 있어요.</p></div>`;
   }else{
     const W=DB.운동.slice().sort((a,b)=>b.날짜.localeCompare(a.날짜)).slice(0,60);
     h+=`<div class="card"><h2>운동 기록<span class="sp"></span><button class="s" data-act="add" data-s="운동">＋</button></h2>${W.length?W.map(x=>`<div class="item" data-ed="운동|${x.id}"><div class="muted" style="width:62px">${dname(x.날짜).split(' ')[0]}</div><div class="b"><div class="t">${esc(x.종류)} <span class="tag">${esc(x.부위)}</span></div><div class="d">${esc(x.세트시간||'')}</div></div></div>`).join(''):'<div class="empty">기록이 없어요</div>'}</div>`;
   }
   return h;
 };
-AFTER.fit=()=>{const i=$('#mealIn');if(i)i.onchange=async e=>{const f=e.target.files[0];if(!f)return;const out=$('#mealOut');
+AFTER.fit=()=>{rmBind();const i=$('#mealIn');if(i)i.onchange=async e=>{const f=e.target.files[0];if(!f)return;const out=$('#mealOut');
   try{const im=await imgToB64(f);out.innerHTML=`<img class="thumb" src="${im.url}"><p class="muted">🔍 추정 중…</p>`;
    const r=await ai(`이 음식 사진을 보고 음식 이름과 1인분 기준 대략적 칼로리를 추정해. 여러 음식이면 각각. 반드시 JSON으로만: {"foods":[{"name":"음식명","kcal":300,"note":"추정 근거 한 줄"}],"total":300,"tip":"더 가볍게 먹는 팁 한 줄"}`,im.b64);
    const fs=r.foods||[];out.innerHTML=`<img class="thumb" src="${im.url}"><div class="item"><div class="b"><div class="t">${fs.map(x=>esc(x.name)+' 약 '+esc(x.kcal)+'kcal').join(', ')}</div><div class="d">합계 약 ${esc(r.total)} kcal (추정)\n💡 ${esc(r.tip||'')}</div></div></div><div class="row"><select id="mk" style="flex:1"><option>아침</option><option selected>점심</option><option>저녁</option><option>간식</option></select><button class="p" id="mSave">식단에 저장</button></div>`;
@@ -353,13 +429,25 @@ ACT.aiMeal=async()=>{const out=$('#mealPlan');out.innerHTML='<p class="muted">�
 V.more=()=>{
   const m=sub.more||'메모';let h=chips('more',['메모','맛집','교통','설정']);
   if(m==='메모'){
-    const q=(sub.mq||'').toLowerCase();const L=DB.메모.filter(x=>!q||(x.제목+x.내용+x.태그).toLowerCase().includes(q)).sort((a,b)=>String(b.수정||'').localeCompare(String(a.수정||'')));
-    h+=`<input id="mq" placeholder="🔍 메모 검색" value="${esc(sub.mq||'')}"><div class="card">${L.length?L.map(x=>`<div class="item" data-ed="메모|${x.id}"><div class="b"><div class="t">${x.고정===true||x.고정==='TRUE'?'📌 ':''}${esc(x.제목)}</div><div class="d">${esc((x.내용||'').slice(0,120))}</div>${x.태그?String(x.태그).split(',').map(t=>`<span class="tag">${esc(t.trim())}</span>`).join(''):''}</div></div>`).join(''):'<div class="empty">메모가 없어요</div>'}</div><button class="fab" data-act="add" data-s="메모">＋</button>`;
+    const q=(sub.mq||'').toLowerCase();const ms=sub.ms||'최근 수정순';
+    const L=DB.메모.filter(x=>!q||(x.제목+x.내용+x.태그).toLowerCase().includes(q)).sort(ms==='제목순'?((a,b)=>String(a.제목).localeCompare(String(b.제목),'ko')):((a,b)=>String(b.수정||'').localeCompare(String(a.수정||''))));
+    const COL=['#fde68a','#bfdbfe','#fbcfe8','#bbf7d0'];
+    h+=`<img class="banner" src="img/memo-hero.svg" alt=""><h2 class="big2">온라인 메모장</h2><input id="mq" placeholder="🔍 메모 검색" value="${esc(sub.mq||'')}">
+    <div class="row" style="justify-content:space-between;margin-top:14px"><b>저장된 노트 <span class="muted">${L.length}</span></b><div class="seg">${['제목순','최근 수정순'].map(x=>`<span class="${ms===x?'on':''}" data-act="msort" data-v="${x}">${x}</span>`).join('')}</div></div>
+    <div class="card">${L.length?L.map((x,i)=>`<div class="item" data-ed="메모|${x.id}"><div class="sq" style="background:${COL[i%4]}"></div><div class="b"><div class="t">${x.고정===true||x.고정==='TRUE'?'📌 ':''}${esc(x.제목)}</div><div class="d">${esc((x.내용||'').slice(0,120))}</div>${x.태그?String(x.태그).split(',').map(t=>`<span class="tag">${esc(t.trim())}</span>`).join(''):''}</div></div>`).join(''):'<div class="empty">메모가 없어요</div>'}</div><button class="fab" data-act="add" data-s="메모">＋</button>`;
   }else if(m==='맛집'){
-    const f=sub.mf||'전체';let L=DB.맛집.slice();if(f!=='전체')L=L.filter(x=>x.방문===f);L.sort((a,b)=>String(b.평점||'').length-String(a.평점||'').length);
-    h+=`<div class="card"><h2>🎲 오늘 뭐 먹지?</h2><button class="p" data-act="pick" style="width:100%">내 맛집 목록에서 랜덤 추천</button><div id="pickOut"></div></div>
+    const q=(sub.fq||'').toLowerCase();const f=sub.mf||'전체';let L=DB.맛집.slice();
+    if(f!=='전체')L=L.filter(x=>x.방문===f);
+    if(q)L=L.filter(x=>[x.이름,x.지역,x.메뉴,x.메모].join(' ').toLowerCase().includes(q));
+    L.sort((a,b)=>String(b.평점||'').length-String(a.평점||'').length);
+    const stars=v=>{const n=String(v||'').length;return '★'.repeat(n)+'☆'.repeat(5-n)};
+    const THEMES=[['가족모임','M8 6a2 2 0 1 0 0-.01M16 6a2 2 0 1 0 0-.01M5 21v-6a3 3 0 0 1 6 0v6M13 21v-6a3 3 0 0 1 6 0v6'],['데이트','M12 20s-7-4.5-7-10a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 5.5-7 10-7 10z'],['친구 모임','M8 8a3 3 0 1 0 0-.01M16 8a3 3 0 1 0 0-.01M3 20c0-3 2-5 5-5s5 2 5 5M11 20c0-3 2-5 5-5s5 2 5 5'],['비오는 날','M3 12a9 8 0 0 1 18 0zM12 12v7a2 2 0 0 1-4 0'],['드라이브','M4 18l3-9h10l3 9zM4 18v2h4v-2M16 18v2h4v-2'],['치맥','M6 8h9v11H6zM15 10h3a2 2 0 0 1 0 5h-3M8 5c0-1 2-1 2-2M12 5c0-1 2-1 2-2'],['디저트','M12 4a5 5 0 1 1 0 10 5 5 0 0 1 0-10zM12 14v7'],['건강식','M5 19c0-9 5-14 15-14 0 10-5 15-14 15zM5 19l8-8'],['TV맛집','M4 8h16v11H4zM9 4l3 4 3-4'],['돼지고기','M5 12a7 6 0 0 1 14 0v2a7 6 0 0 1-14 0zM10 13h4'],['소고기','M4 8l3 2h10l3-2M7 10v6a5 4 0 0 0 10 0v-6M10 15h4'],['닭요리','M14 4a3 3 0 0 1 3 3v2l3 1-3 1v3a6 6 0 0 1-12 0c0-4 3-6 5-6V6a3 3 0 0 1 4-2z'],['해산물','M3 12c4-6 12-6 16 0-4 6-12 6-16 0zM19 12l3-3v6zM8 11h.01'],['뷔페','M3 17h18M5 17a7 7 0 0 1 14 0M12 8V6'],['가성비','M4 7h15v12H4zM4 7l12-3v3M15 13h4'],['무한리필','M7 9a3 3 0 1 0 0 6c4 0 6-6 10-6a3 3 0 1 1 0 6c-4 0-6-6-10-6z']];
+    h+=`<input id="fq" placeholder="🔍 맛집 이름, 지역, 메뉴" value="${esc(sub.fq||'')}">
+    <img class="banner" src="img/rest-hero.svg" alt=""><h2 class="big2">오늘 뭐 먹지?</h2><p class="muted" style="margin:0">테마를 누르면 지도에서 검색해요.</p>
+    <div class="themes">${THEMES.map(([n,d])=>n==='TV맛집'?`<button class="tile" data-act="tv">${svgI(d)}<span>${n}</span></button>`:`<a class="tile" target="_blank" rel="noopener" href="https://map.naver.com/p/search/${encodeURIComponent(n+' 맛집')}">${svgI(d)}<span>${n}</span></a>`).join('')}</div>
+    <div class="card"><h2>🎲 내 목록에서 랜덤 추천</h2><button class="p" data-act="pick" style="width:100%">추천 받기</button><div id="pickOut"></div></div>
     <div class="chips">${['전체','가보고싶음','가봄'].map(x=>`<span class="chip ${f===x?'on':''}" data-act="chip" data-k="mf" data-v="${x}">${x}</span>`).join('')}</div>
-    <div class="card">${L.length?L.map(x=>`<div class="item"><div class="b" data-ed="맛집|${x.id}"><div class="t">${esc(x.이름)} <span class="muted">${esc(x.평점||'')}</span></div><div class="d">${esc([x.지역,x.메뉴,x.가격대].filter(Boolean).join(' · '))}</div></div><a class="btn s" target="_blank" href="https://map.naver.com/p/search/${encodeURIComponent((x.지역||'')+' '+x.이름)}">지도</a></div>`).join(''):'<div class="empty">맛집을 추가해 보세요</div>'}</div><button class="fab" data-act="add" data-s="맛집">＋</button>`;
+    <div class="pgrid">${L.length?L.map(x=>{const im=REST[[...String(x.이름)].reduce((a,c)=>a+c.charCodeAt(0),0)%3];return `<div class="pcard" data-act="detail" data-id="${x.id}"><img src="${im}" alt=""><div class="pb"><div class="t">${esc(x.이름)}</div><div class="d">📍 ${esc(x.지역||'-')}${x.메뉴?'\n'+esc(x.메뉴):''}</div><div class="st">${stars(x.평점)} <span>${esc(x.가격대||'')}</span></div></div></div>`}).join(''):'<div class="card empty" style="grid-column:1/-1">맛집을 추가해 보세요</div>'}</div><button class="fab" data-act="add" data-s="맛집">＋</button>`;
   }else if(m==='교통'){
     const P=DB.장소;const opts=P.map(x=>`<option value="${esc(x.주소||x.이름)}">${esc(x.이름)}</option>`).join('');
     h+=`<div class="card"><h2>🚇 길찾기</h2><label>출발</label><input id="from" list="pl" placeholder="장소명 또는 주소 (비우면 현재 위치)"><label>도착</label><input id="to" list="pl" placeholder="장소명 또는 주소"><datalist id="pl">${opts}</datalist>
@@ -385,7 +473,8 @@ V.more=()=>{
   }
   return h;
 };
-AFTER.more=()=>{const q=$('#mq');if(q){q.oninput=()=>{sub.mq=q.value;const p=q.selectionStart;render();const n=$('#mq');n.focus();n.setSelectionRange(p,p)}}
+AFTER.more=()=>{const fq=$('#fq');if(fq){fq.oninput=()=>{sub.fq=fq.value;const p=fq.selectionStart;render();const n=$('#fq');n.focus();n.setSelectionRange(p,p)}}
+  const q=$('#mq');if(q){q.oninput=()=>{sub.mq=q.value;const p=q.selectionStart;render();const n=$('#mq');n.focus();n.setSelectionRange(p,p)}}
   const im=$('#impIn');if(im)im.onchange=async e=>{try{const d=JSON.parse(await e.target.files[0].text());if(!confirm('가져온 데이터를 추가할까요? (같은 id는 덮어씀)'))return;for(const k in SHEETS)(d[k]||[]).forEach(r=>put(k,r));toast('가져오기 완료');render()}catch(er){toast('파일을 읽지 못했어요')}}};
 ACT.pick=()=>{const L=DB.맛집;if(!L.length)return toast('먼저 맛집을 추가해 주세요');const x=L[Math.floor(Math.random()*L.length)];$('#pickOut').innerHTML=`<div class="item"><div class="b"><div class="t">🍽 ${esc(x.이름)}</div><div class="d">${esc([x.지역,x.메뉴].filter(Boolean).join(' · '))}</div></div><a class="btn s" target="_blank" href="https://map.naver.com/p/search/${encodeURIComponent((x.지역||'')+' '+x.이름)}">지도</a></div>`};
 ACT.swap=()=>{const a=$('#from').value;$('#from').value=$('#to').value;$('#to').value=a};
@@ -404,6 +493,19 @@ ACT.connect=async()=>{const u=$('#surl').value.trim();if(!/^https:\/\/script\.go
 ACT.copyCode=async()=>{try{const t=await (await fetch('Code.gs',{cache:'no-store'})).text();await navigator.clipboard.writeText(t);toast('서버 코드를 복사했어요. Apps Script에 붙여넣으세요!')}catch(e){window.open('Code.gs','_blank')}};
 ACT.saveKcal=()=>{CFG.kcal=$('#kc').value.trim();LS.set('cfg',CFG);toast('저장했어요')};
 ACT.exp=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(DB,null,1)],{type:'application/json'}));a.download='나의하루_백업_'+today()+'.json';a.click()};
+
+ACT.msort=d=>{sub.ms=d.v;render()};
+ACT.rsearch=()=>{const q=$('#rq').value.trim();if(!q)return toast('검색어를 입력해 주세요');window.open(q10(q),'_blank')};
+ACT.detail=d=>{const x=DB.맛집.find(r=>r.id===d.id);if(!x)return;const dl=$('#dlg');
+  const rows=[['업체명',x.이름],['지역',x.지역],['추천 메뉴',x.메뉴],['평점',x.평점],['가격대',x.가격대],['방문',x.방문],['메모',x.메모]].filter(r=>r[1]);
+  dl.innerHTML=`<div class="dhead"><img src="img/rest-store.svg" alt=""><h3>${esc(x.이름)}</h3></div><div style="padding:6px 18px 4px">${rows.map(([k,v])=>`<div class="drow"><span>${k}</span><b style="white-space:pre-wrap">${esc(v)}</b></div>`).join('')}</div><div class="row" style="padding:12px 18px 18px"><a class="btn" target="_blank" rel="noopener" href="https://map.naver.com/p/search/${encodeURIComponent((x.지역||'')+' '+x.이름)}">지도</a><span style="flex:1"></span><button id="dClose">닫기</button><button class="p" id="dEdit">수정</button></div>`;
+  dl.showModal();
+  $('#dClose').onclick=()=>{dl.returnValue='';dl.close()};
+  $('#dEdit').onclick=()=>{dl.returnValue='';dl.close();setTimeout(()=>form('맛집',x),0)};
+};
+ACT.tv=()=>{const dl=$('#dlg');const S=['테이스티로드','식신로드','수요미식회','생생정보통','VJ특공대','생활의달인','맛있는TV','올리브쇼'];
+  dl.innerHTML=`<div style="padding:18px"><h3>TV맛집</h3><p class="muted" style="margin:0 0 6px">TV에 나온 맛집을 방송 프로그램별로 지도에서 검색해요.</p>${S.map(n=>`<a class="drow" target="_blank" rel="noopener" href="https://map.naver.com/p/search/${encodeURIComponent(n+' 맛집')}" style="text-decoration:none;color:var(--ink)"><span style="color:var(--ink)">${n}</span><b style="flex:0">›</b></a>`).join('')}<div class="row" style="margin-top:12px"><span style="flex:1"></span><button class="p" id="tvClose">닫기</button></div></div>`;
+  dl.showModal();$('#tvClose').onclick=()=>{dl.returnValue='';dl.close()}};
 
 /* ===================== 시작 ===================== */
 if(!TABS.some(x=>x[0]===tab))tab='home';
