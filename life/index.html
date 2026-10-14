@@ -134,7 +134,16 @@ function del(sheet,id){
 }
 async function ai(prompt,image,mime){
   if(!CFG.url)throw new Error('AI 기능은 서버 연결 후 사용할 수 있어요 (더보기 → 설정).');
-  return api('ai',{prompt,image,mime},90000);
+  const waits=[4000,10000,20000];
+  for(let i=0;;i++){
+    try{return await api('ai',{prompt,image,mime},120000)}
+    catch(e){
+      const busy=/\((500|503)|high demand|overloaded|UNAVAILABLE/i.test(e.message);
+      if(!busy||i>=waits.length)throw new Error(busy?'지금 구글 AI 서버가 붐벼요(일시적). 1~2분 뒤 다시 눌러 주세요.':e.message);
+      toast(`AI 서버가 붐벼서 ${waits[i]/1000}초 뒤 자동 재시도할게요 (${i+1}/${waits.length})`,waits[i]);
+      await new Promise(r=>setTimeout(r,waits[i]));
+    }
+  }
 }
 function imgToB64(file,max=1024){return new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const s=Math.min(1,max/Math.max(im.width,im.height));const c=document.createElement('canvas');c.width=im.width*s;c.height=im.height*s;c.getContext('2d').drawImage(im,0,0,c.width,c.height);const u=c.toDataURL('image/jpeg',.82);ok({b64:u.split(',')[1],url:u})};im.onerror=no;im.src=r.result};r.onerror=no;r.readAsDataURL(file)})}
 

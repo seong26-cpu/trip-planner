@@ -187,11 +187,14 @@ function ai_(prompt, imageB64, mime) {
       txt = txt.replace(/^\s*```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '');
       try { return JSON.parse(txt); } catch (x) { return { raw: txt }; }
     }
-    last = code === 429 ? '오늘 무료 AI 사용 한도를 다 썼습니다(' + m + '). 잠시 후(또는 내일) 다시 시도하세요.'
+    // 서버 혼잡(503)·일시 오류(500): 같은 모델로 잠깐 쉬고 1번 더 시도
+    if ((code === 503 || code === 500) && !tried[m + '#r']) { tried[m + '#r'] = 1; Utilities.sleep(3000); i--; delete tried[m]; continue; }
+    last = code === 429 ?'오늘 무료 AI 사용 한도를 다 썼습니다(' + m + '). 잠시 후(또는 내일) 다시 시도하세요.'
                         : 'AI 오류(' + code + ', ' + m + '): ' + (body.error && body.error.message || '');
     // 모델이 없어졌으면(404) 사용 가능한 Flash 모델을 자동으로 찾아 뒤에 추가
-    if ((code === 404 || code === 429) && !discovered) { discovered = true; models = models.concat(findFlashModels_(key)); }
-    if (code !== 404 && code !== 429) break;
+    var move = code === 404 || code === 429 || code === 503 || code === 500;
+    if (move && !discovered) { discovered = true; models = models.concat(findFlashModels_(key)); }
+    if (!move) break;
   }
   throw new Error(last || 'AI 모델을 찾지 못했습니다. 설정 탭 B3의 모델 이름을 확인하세요.');
 }
