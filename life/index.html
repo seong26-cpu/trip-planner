@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>나의 하루</title>
+<meta name="theme-color" content="#0f766e">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{--bg:#f6f7f5;--card:#fff;--ink:#1c1f1e;--sub:#6b716e;--line:#e4e7e4;--brand:#0f766e;--brand2:#e6f4f1;--warn:#b45309;--warnbg:#fef3c7;--bad:#b91c1c;--r:16px}
+@media (prefers-color-scheme:dark){:root{--bg:#111413;--card:#1a1e1d;--ink:#eef1ef;--sub:#9aa29e;--line:#2a302e;--brand:#2dd4bf;--brand2:#13302c;--warn:#fbbf24;--warnbg:#3a2e10;--bad:#f87171}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Pretendard,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-size:15px;line-height:1.5}
+header{position:sticky;top:0;z-index:5;background:var(--bg);padding:calc(10px + env(safe-area-inset-top)) 16px 8px;display:flex;align-items:center;gap:8px}
+header h1{font-size:20px;margin:0;flex:1}
+#sync{font-size:12px;color:var(--sub);border:1px solid var(--line);border-radius:99px;padding:3px 10px;background:var(--card);cursor:pointer}
+main{padding:4px 16px calc(90px + env(safe-area-inset-bottom));max-width:720px;margin:0 auto}
+nav.tabs{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:9}
+nav.tabs button{flex:1;border:0;background:none;color:var(--sub);padding:8px 0 10px;font:inherit;font-size:11px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer}
+nav.tabs button .i{font-size:21px;line-height:1}
+nav.tabs button.on{color:var(--brand);font-weight:700}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin:10px 0}
+.card h2{font-size:16px;margin:0 0 8px;display:flex;align-items:center;gap:6px}
+.card h2 .sp{flex:1}
+.muted{color:var(--sub);font-size:13px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.item{padding:10px 0;border-top:1px solid var(--line);display:flex;gap:10px;align-items:flex-start}
+.item:first-of-type{border-top:0}
+.item .b{flex:1;min-width:0}
+.item .t{font-weight:600;word-break:break-all}
+.item .d{color:var(--sub);font-size:13px;white-space:pre-wrap;word-break:break-all}
+button,.btn{font:inherit;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:9px 14px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:4px;justify-content:center}
+button.p,.btn.p{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:600}
+@media (prefers-color-scheme:dark){button.p,.btn.p{color:#04201c}}
+button.s{padding:5px 10px;font-size:13px;border-radius:10px}
+button.x{border:0;background:none;color:var(--sub);padding:4px 6px}
+input,textarea,select{font:inherit;width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink)}
+textarea{min-height:90px;resize:vertical}
+label{font-size:13px;color:var(--sub);display:block;margin:8px 0 4px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:2px 0 6px;scrollbar-width:none}
+.chip{white-space:nowrap;border-radius:99px;padding:6px 12px;font-size:13px;border:1px solid var(--line);background:var(--card);cursor:pointer}
+.chip.on{background:var(--brand2);border-color:var(--brand);color:var(--brand);font-weight:600}
+.tag{display:inline-block;font-size:11px;padding:1px 7px;border-radius:99px;background:var(--brand2);color:var(--brand);margin-right:4px}
+.tag.w{background:var(--warnbg);color:var(--warn)}
+.big{font-size:28px;font-weight:800}
+.fab{position:fixed;right:18px;bottom:calc(78px + env(safe-area-inset-bottom));width:54px;height:54px;border-radius:50%;background:var(--brand);color:#fff;font-size:28px;border:0;box-shadow:0 6px 18px rgba(0,0,0,.18);z-index:8}
+dialog{border:0;border-radius:20px;padding:0;width:min(560px,94vw);background:var(--card);color:var(--ink);max-height:90vh}
+dialog::backdrop{background:rgba(0,0,0,.4)}
+dialog form{padding:18px}
+dialog h3{margin:0 0 6px}
+.bars{display:flex;align-items:flex-end;gap:6px;height:90px;margin-top:6px}
+.bars div{flex:1;background:var(--brand2);border-radius:6px 6px 0 0;position:relative;min-height:2px}
+.bars div.on{background:var(--brand)}
+.bars span{position:absolute;bottom:-18px;left:0;right:0;text-align:center;font-size:11px;color:var(--sub)}
+.notice{background:var(--warnbg);color:var(--warn);border-radius:12px;padding:10px 12px;font-size:13px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(90px + env(safe-area-inset-bottom));background:#1c1f1e;color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;z-index:99;max-width:90vw}
+.steps li{margin:6px 0}
+code{background:var(--brand2);padding:1px 5px;border-radius:6px;font-size:13px}
+.thumb{width:100%;max-height:260px;object-fit:cover;border-radius:12px;margin-top:8px}
+.hide{display:none!important}
+.sec{display:none}.sec.on{display:block}
+.empty{color:var(--sub);text-align:center;padding:14px;font-size:14px}
+</style>
+</head>
+<body>
+<header><h1 id="title">오늘</h1><span id="sync" title="동기화">로컬 모드</span></header>
+<main id="app"></main>
+<nav class="tabs" id="tabs"></nav>
+<dialog id="dlg"></dialog>
+
+<script>
+/* ===================== 기본 ===================== */
+const TABS=[['home','🏠','홈'],['plan','📅','일정'],['cook','🍳','요리'],['fit','💪','헬스'],['more','☰','더보기']];
+const SHEETS={메모:['제목','내용','태그','고정'],일정:['종류','제목','날짜','시작','종료','장소','상대','메모','캘린더ID'],맛집:['이름','지역','메뉴','평점','가격대','방문','메모'],장소:['이름','주소','종류'],식재료:['이름','수량','보관','유통기한'],레시피:['이름','재료','조리법','칼로리','시간','출처'],운동:['날짜','종류','부위','세트시간','칼로리','메모'],식단:['날짜','끼니','음식','칼로리','메모']};
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const addDays=(s,n)=>{const d=new Date(s+'T00:00');d.setDate(d.getDate()+n);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const dname=s=>{const d=new Date(s+'T00:00');return (d.getMonth()+1)+'/'+d.getDate()+' ('+'일월화수목금토'[d.getDay()]+')'};
+const uid=()=>Math.random().toString(36).slice(2,10);
+const num=v=>{const n=parseFloat(String(v).replace(/[^0-9.]/g,''));return isNaN(n)?0:n};
+function toast(m,ms=2400){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),ms)}
+
+const LS={get(k,d){try{const v=localStorage.getItem('life.'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('life.'+k,JSON.stringify(v))}catch(e){}}};
+let DB=LS.get('db',{});for(const k in SHEETS)DB[k]=DB[k]||[];
+let Q=LS.get('queue',[]);
+let CFG=LS.get('cfg',{url:'',kcal:'',hasAI:false,sheetUrl:''});
+let CAL=LS.get('cal',[]);
+let tab=location.hash.slice(1)||'home', sub={};
+const saveLocal=()=>{LS.set('db',DB);LS.set('queue',Q)};
+
+/* ===================== 서버 통신 ===================== */
+async function api(action,body={},timeout=60000){
+  if(!CFG.url)throw new Error('서버 미연결');
+  const ctl=new AbortController();const tm=setTimeout(()=>ctl.abort(),timeout);
+  try{
+    const r=await fetch(CFG.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action,...body}),signal:ctl.signal});
+    const j=await r.json();if(!j.ok)throw new Error(j.error||'서버 오류');return j.data===undefined?j:j.data;
+  }finally{clearTimeout(tm)}
+}
+function setSync(t){$('#sync').textContent=t}
+let syncing=false;
+async function sync(full=true){
+  if(!CFG.url){setSync('로컬 모드');return}
+  if(syncing)return;syncing=true;setSync('동기화 중…');
+  try{
+    if(Q.length){
+      const ops=Q.slice(0,40);const res=await api('batch',{ops});
+      res.forEach((r,i)=>{if(r.ok&&ops[i].action==='upsert'){const L=DB[ops[i].sheet];const k=L.findIndex(x=>x.id===r.data.id);if(k>=0)L[k]=Object.assign(L[k],r.data)}});
+      Q=Q.slice(ops.length);saveLocal();
+      if(Q.length){syncing=false;return sync(full)}
+    }
+    if(full){
+      const d=await api('listAll');for(const k in SHEETS)DB[k]=d[k]||[];saveLocal();
+      try{CAL=await api('calList',{from:addDays(today(),-7),to:addDays(today(),45)});LS.set('cal',CAL)}catch(e){}
+    }
+    setSync('✓ 동기화 '+new Date().toTimeString().slice(0,5));render();
+  }catch(e){setSync(Q.length?'⏳ 대기 '+Q.length+'건':'오프라인');console.warn(e)}
+  syncing=false;
+}
+function put(sheet,row){
+  row=Object.assign({},row);if(!row.id)row.id=uid();
+  const now=new Date().toISOString().slice(0,16).replace('T',' ');if(!row['생성'])row['생성']=now;row['수정']=now;
+  const L=DB[sheet];const k=L.findIndex(x=>x.id===row.id);if(k>=0)L[k]=Object.assign(L[k],row);else L.push(row);
+  Q=Q.filter(o=>!(o.action==='upsert'&&o.sheet===sheet&&o.row.id===row.id));Q.push({action:'upsert',sheet,row});saveLocal();sync(false);return row;
+}
+function del(sheet,id){
+  DB[sheet]=DB[sheet].filter(x=>x.id!==id);Q=Q.filter(o=>!(o.sheet===sheet&&o.row&&o.row.id===id));Q.push({action:'remove',sheet,id});saveLocal();sync(false);
+}
+async function ai(prompt,image,mime){
+  if(!CFG.url)throw new Error('AI 기능은 서버 연결 후 사용할 수 있어요 (더보기 → 설정).');
+  return api('ai',{prompt,image,mime},90000);
+}
+function imgToB64(file,max=1024){return new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const s=Math.min(1,max/Math.max(im.width,im.height));const c=document.createElement('canvas');c.width=im.width*s;c.height=im.height*s;c.getContext('2d').drawImage(im,0,0,c.width,c.height);const u=c.toDataURL('image/jpeg',.82);ok({b64:u.split(',')[1],url:u})};im.onerror=no;im.src=r.result};r.onerror=no;r.readAsDataURL(file)})}
+
+/* ===================== 공통 폼 ===================== */
+const FIELD={
+  메모:{제목:{},내용:{t:'area'},태그:{ph:'예: 업무, 주식'},고정:{t:'check',l:'홈에 고정'}},
+  일정:{종류:{t:'sel',o:['일정','약속']},제목:{},날짜:{t:'date'},시작:{t:'time'},종료:{t:'time'},장소:{},상대:{ph:'약속 상대'},메모:{t:'area'}},
+  맛집:{이름:{},지역:{ph:'예: 인천 송도'},메뉴:{ph:'추천 메뉴'},평점:{t:'sel',o:['','★','★★','★★★','★★★★','★★★★★']},가격대:{t:'sel',o:['','~1만','1~2만','2~4만','4만~']},방문:{t:'sel',o:['가보고싶음','가봄']},메모:{t:'area'}},
+  장소:{이름:{ph:'예: 집, 회사'},주소:{ph:'도로명 주소 또는 장소명'},종류:{t:'sel',o:['자주','집','회사']}},
+  식재료:{이름:{},수량:{},보관:{t:'sel',o:['냉장','냉동','실온']},유통기한:{t:'date'}},
+  레시피:{이름:{},재료:{t:'area'},조리법:{t:'area'},칼로리:{ph:'1인분 kcal (추정)'},시간:{ph:'분'},출처:{t:'sel',o:['직접','AI 추천']}},
+  운동:{날짜:{t:'date'},종류:{ph:'예: 스쿼트, 걷기'},부위:{t:'sel',o:['전신','하체','가슴','등','어깨','팔','복근','유산소','스트레칭']},세트시간:{ph:'예: 3세트×12회 / 30분'},칼로리:{ph:'소모 kcal (선택)'},메모:{}},
+  식단:{날짜:{t:'date'},끼니:{t:'sel',o:['아침','점심','저녁','간식']},음식:{},칼로리:{ph:'kcal'},메모:{}}
+};
+function form(sheet,row={},opt={}){
+  const f=FIELD[sheet];const d=$('#dlg');
+  let h=`<form method="dialog"><h3>${esc(opt.title||(row.id?sheet+' 수정':sheet+' 추가'))}</h3>`;
+  for(const k in f){const c=f[k],v=row[k]??c.def??'';
+    if(c.t==='check'){h+=`<label style="display:flex;gap:8px;align-items:center;color:var(--ink)"><input type="checkbox" name="${k}" style="width:auto" ${v===true||v==='TRUE'||v==='true'?'checked':''}> ${c.l}</label>`;continue}
+    h+=`<label>${k}</label>`;
+    if(c.t==='area')h+=`<textarea name="${k}">${esc(v)}</textarea>`;
+    else if(c.t==='sel')h+=`<select name="${k}">${c.o.map(o=>`<option ${o===String(v)?'selected':''}>${o}</option>`).join('')}</select>`;
+    else h+=`<input name="${k}" type="${c.t||'text'}" value="${esc(v)}" placeholder="${esc(c.ph||'')}">`;
+  }
+  if(sheet==='일정')h+=`<label style="display:flex;gap:8px;align-items:center;color:var(--ink)"><input type="checkbox" name="_cal" style="width:auto" ${CFG.url&&(!row.id||row['캘린더ID'])?'checked':''} ${CFG.url?'':'disabled'}> 구글 캘린더에도 등록 ${CFG.url?'':'(서버 연결 후 가능)'}</label>`;
+  h+=`<div class="row" style="margin-top:14px">${row.id?'<button value="del" class="x" style="color:var(--bad)">삭제</button>':''}<span style="flex:1"></span><button value="cancel">취소</button><button value="ok" class="p">저장</button></div></form>`;
+  d.innerHTML=h;d.showModal();
+  if(!row.id&&f.날짜&&!row.날짜)d.querySelector('[name=날짜]').value=today();
+  d.onclose=async()=>{
+    const fm=d.querySelector('form');if(!fm)return;
+    if(d.returnValue==='del'){if(!confirm('삭제할까요?'))return;
+      if(sheet==='일정'&&row['캘린더ID']&&CFG.url)api('calDelete',{eventId:row['캘린더ID']}).catch(()=>{});
+      del(sheet,row.id);toast('삭제했어요');render();return}
+    if(d.returnValue!=='ok')return;
+    const o=Object.assign({},row);for(const k in f){const el=fm.elements[k];o[k]=f[k].t==='check'?el.checked:el.value.trim()}
+    const first=Object.keys(f).find(k=>!f[k].t||f[k].t==='text');
+    if(first&&!o[first]&&sheet!=='운동'){toast(first+'을(를) 입력해 주세요');return}
+    if(sheet==='일정'&&fm.elements._cal.checked){
+      try{toast('캘린더 등록 중…');o['캘린더ID']=await api('calSave',{ev:{eventId:o['캘린더ID'],title:(o.종류==='약속'?'[약속] ':'')+o.제목+(o.상대?' - '+o.상대:''),date:o.날짜,start:o.시작,end:o.종료,location:o.장소,description:o.메모}});toast('구글 캘린더에 등록했어요')}
+      catch(e){toast('캘린더 등록 실패: '+e.message+' (앱에는 저장됨)',4000)}
+    }
+    put(sheet,o);opt.after&&opt.after(o);render();
+  };
+}
+
+/* ===================== 화면 ===================== */
+const V={};
+function render(){
+  $('#tabs').innerHTML=TABS.map(([k,i,l])=>`<button data-t="${k}" class="${k===tab?'on':''}"><span class="i">${i}</span>${l}</button>`).join('');
+  $('#title').textContent={home:'오늘',plan:'일정 · 약속',cook:'요리',fit:'헬스',more:'더보기'}[tab];
+  $('#app').innerHTML=V[tab]();
+  document.querySelectorAll('[data-act]').forEach(b=>b.onclick=e=>{e.stopPropagation();ACT[b.dataset.act](b.dataset)});
+  document.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>{const[s,id]=b.dataset.ed.split('|');form(s,DB[s].find(x=>x.id===id))});
+  AFTER[tab]&&AFTER[tab]();
+}
+$('#tabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;tab=b.dataset.t;location.hash=tab;scrollTo(0,0);render()};
+$('#sync').onclick=()=>sync(true);
+const ACT={},AFTER={};
+const chips=(key,list)=>`<div class="chips">${list.map(x=>`<span class="chip ${ (sub[key]||list[0])===x?'on':''}" data-act="chip" data-k="${key}" data-v="${x}">${x}</span>`).join('')}</div>`;
+ACT.chip=d=>{sub[d.k]=d.v;render()};
+ACT.add=d=>form(d.s,d.pre?JSON.parse(d.pre):{});
+
+/* ---- 홈 ---- */
+V.home=()=>{
+  const t=today();
+  const ev=[...DB.일정.filter(x=>x.날짜===t).map(x=>({t:x.제목,s:x.시작,k:x.종류,id:x.id,cid:x['캘린더ID']})),
+    ...CAL.filter(x=>x.date===t&&!DB.일정.some(y=>y['캘린더ID']===x.eventId)).map(x=>({t:x.title,s:x.start,k:'캘린더'}))].sort((a,b)=>(a.s||'').localeCompare(b.s||''));
+  const kc=DB.식단.filter(x=>x.날짜===t).reduce((a,x)=>a+num(x.칼로리),0);
+  const burn=DB.운동.filter(x=>x.날짜===t).reduce((a,x)=>a+num(x.칼로리),0);
+  const exp=DB.식재료.filter(x=>x.유통기한&&x.유통기한<=addDays(t,3)).sort((a,b)=>a.유통기한.localeCompare(b.유통기한));
+  const pins=DB.메모.filter(x=>x.고정===true||x.고정==='TRUE'||x.고정==='true');
+  const plan=LS.get('plan',null);const todayPlan=plan&&plan.days?plan.days.find(d=>d.day==='일월화수목금토'[new Date().getDay()]):null;
+  return `${CFG.url?'':`<div class="notice">지금은 <b>로컬 모드</b>예요. 이 기기에만 저장됩니다. 구글 시트·캘린더·AI를 쓰려면 <a href="#" data-act="go" data-t="more">더보기 → 설정</a>에서 한 번만 연결하세요.</div>`}
+  <div class="card"><h2>${dname(t)} 일정<span class="sp"></span><button class="s" data-act="add" data-s="일정">＋</button></h2>
+   ${ev.length?ev.map(x=>`<div class="item" ${x.id?`data-ed="일정|${x.id}"`:''}><div class="muted" style="width:46px">${x.s||'종일'}</div><div class="b"><div class="t">${esc(x.t)}</div></div><span class="tag ${x.k==='약속'?'w':''}">${x.k}</span></div>`).join(''):'<div class="empty">오늘 일정이 없어요</div>'}</div>
+  <div class="grid2">
+   <div class="card" data-act="go" data-t="fit"><div class="muted">오늘 섭취</div><div class="big">${kc.toLocaleString()}<small style="font-size:14px"> kcal</small></div><div class="muted">${CFG.kcal?'목표 '+CFG.kcal+' kcal':'목표 미설정'}</div></div>
+   <div class="card" data-act="go" data-t="fit"><div class="muted">오늘 운동</div><div class="big">${DB.운동.filter(x=>x.날짜===t).length}<small style="font-size:14px"> 건</small></div><div class="muted">${burn?'소모 '+burn+' kcal':todayPlan?esc(todayPlan.title):'기록 없음'}</div></div>
+  </div>
+  ${exp.length?`<div class="card"><h2>⚠️ 유통기한 임박 재료</h2>${exp.map(x=>`<div class="item" data-ed="식재료|${x.id}"><div class="b"><div class="t">${esc(x.이름)}</div></div><span class="tag w">${x.유통기한<t?'지남':x.유통기한}</span></div>`).join('')}<button class="s" data-act="go" data-t="cook" style="margin-top:6px">이 재료로 요리 추천 →</button></div>`:''}
+  <div class="card"><h2>빠른 메모</h2><div class="row"><input id="qm" style="flex:1;width:auto" placeholder="떠오른 생각을 적어두세요"><button class="p" data-act="qm">저장</button></div>
+   ${pins.map(x=>`<div class="item" data-ed="메모|${x.id}"><div class="b"><div class="t">📌 ${esc(x.제목)}</div><div class="d">${esc((x.내용||'').slice(0,80))}</div></div></div>`).join('')}</div>
+  <div class="grid2"><button data-act="go" data-t="more" data-s="교통">🚇 길찾기</button><button data-act="go" data-t="more" data-s="맛집">🍜 오늘 뭐 먹지</button></div>`;
+};
+ACT.go=d=>{tab=d.t;if(d.s)sub.more=d.s;location.hash=tab;render();scrollTo(0,0)};
+ACT.qm=()=>{const v=$('#qm').value.trim();if(!v)return;put('메모',{제목:v.slice(0,30),내용:v,태그:'빠른메모',고정:false});toast('메모 저장');render()};
+
+/* ---- 일정 ---- */
+V.plan=()=>{
+  const t=today(),mode=sub.plan||'다가오는';
+  let mine=DB.일정.slice();
+  if(mode==='약속')mine=mine.filter(x=>x.종류==='약속');
+  const cal=mode==='약속'?[]:CAL.filter(x=>!DB.일정.some(y=>y['캘린더ID']===x.eventId)).map(x=>({제목:x.title,날짜:x.date,시작:x.start,장소:x.location,종류:'캘린더',_cal:1}));
+  let all=[...mine,...cal];
+  all=mode==='지난'?all.filter(x=>x.날짜<t).sort((a,b)=>b.날짜.localeCompare(a.날짜)):all.filter(x=>x.날짜>=t).sort((a,b)=>(a.날짜+(a.시작||'')).localeCompare(b.날짜+(b.시작||'')));
+  const g={};all.forEach(x=>(g[x.날짜]=g[x.날짜]||[]).push(x));
+  return `${chips('plan',['다가오는','약속','지난'])}
+  ${Object.keys(g).length?Object.keys(g).slice(0,60).map(dt=>`<div class="card"><h2>${dname(dt)}${dt===t?' <span class="tag">오늘</span>':''}</h2>${g[dt].map(x=>`<div class="item" ${x._cal?'':`data-ed="일정|${x.id}"`}><div class="muted" style="width:46px">${x.시작||'종일'}</div><div class="b"><div class="t">${esc(x.제목)}</div><div class="d">${esc([x.장소,x.상대&&'with '+x.상대].filter(Boolean).join(' · '))}</div></div><span class="tag ${x.종류==='약속'?'w':''}">${x.종류}${x['캘린더ID']?' ☁︎':''}</span></div>`).join('')}</div>`).join(''):'<div class="card empty">일정이 없어요. ＋ 버튼으로 추가하세요.</div>'}
+  <p class="muted">☁︎ = 구글 캘린더에도 등록됨 · '캘린더' 표시는 구글 캘린더에서 가져온 일정</p>
+  <button class="fab" data-act="add" data-s="일정">＋</button>`;
+};
+
+/* ---- 요리 ---- */
+V.cook=()=>{
+  const m=sub.cook||'사진으로 찾기';
+  let h=chips('cook',['사진으로 찾기','내 냉장고','레시피']);
+  if(m==='사진으로 찾기'){
+    const r=LS.get('lastScan',null);
+    h+=`<div class="card"><h2>📷 재료 사진 → 요리 추천</h2>
+    <p class="muted">냉장고 안이나 재료를 찍으면 AI가 재료를 알아보고, 만들 수 있는 요리를 알려줘요.</p>
+    <div class="grid2"><label class="btn p" style="margin:0">📷 촬영<input type="file" accept="image/*" capture="environment" id="camIn" class="hide"></label><label class="btn" style="margin:0">🖼 앨범<input type="file" accept="image/*" id="galIn" class="hide"></label></div>
+    <label>원하는 조건 (선택)</label><input id="cookCond" placeholder="예: 저칼로리, 15분 이내, 1인분" value="${esc(LS.get('cookCond',''))}">
+    <div id="scanOut">${r?scanHtml(r):''}</div></div>
+    <p class="muted">※ AI 인식은 틀릴 수 있어요. 칼로리는 '추정치'입니다. 알레르기 재료는 직접 확인하세요.</p>`;
+  }else if(m==='내 냉장고'){
+    const L=DB.식재료.slice().sort((a,b)=>(a.유통기한||'9').localeCompare(b.유통기한||'9'));
+    h+=`<div class="card"><h2>내 식재료 <span class="sp"></span><button class="s" data-act="add" data-s="식재료">＋</button></h2>
+    ${L.length?L.map(x=>`<div class="item" data-ed="식재료|${x.id}"><div class="b"><div class="t">${esc(x.이름)} <span class="muted">${esc(x.수량||'')}</span></div><div class="d">${esc(x.보관||'')}${x.유통기한?' · ~'+x.유통기한:''}</div></div>${x.유통기한&&x.유통기한<=addDays(today(),3)?'<span class="tag w">임박</span>':''}</div>`).join(''):'<div class="empty">등록된 재료가 없어요. 사진 인식 결과에서 바로 저장할 수도 있어요.</div>'}
+    ${L.length?`<button class="p" data-act="fridgeAI" style="width:100%;margin-top:10px">🤖 이 재료로 만들 요리 추천</button>`:''}</div><div id="scanOut"></div>`;
+  }else{
+    const L=DB.레시피.slice().reverse();
+    h+=`<div class="card"><h2>저장한 레시피<span class="sp"></span><button class="s" data-act="add" data-s="레시피">＋</button></h2>
+    ${L.length?L.map(x=>`<div class="item" data-ed="레시피|${x.id}"><div class="b"><div class="t">${esc(x.이름)}</div><div class="d">${esc([x.시간&&x.시간+'분',x.칼로리&&x.칼로리+' kcal(추정)',x.출처].filter(Boolean).join(' · '))}</div></div></div>`).join(''):'<div class="empty">아직 레시피가 없어요</div>'}</div>`;
+  }
+  return h;
+};
+const RECIPE_JSON=`{"ingredients":[{"name":"재료명(한국어)","amount":"보이는 양 추정","confidence":"high|mid|low"}],"dishes":[{"name":"요리명","why":"추천 이유 한 줄","use":["사용 재료"],"missing":["추가로 필요한 재료"],"steps":["1단계","2단계"],"minutes":15,"kcal":350,"lowcal":true}]}`;
+AFTER.cook=()=>{
+  const go=async f=>{if(!f)return;const out=$('#scanOut');const cond=$('#cookCond').value.trim();LS.set('cookCond',cond);
+    try{const im=await imgToB64(f);out.innerHTML=`<img class="thumb" src="${im.url}"><p class="muted">🔍 AI가 사진을 보고 있어요… (10~30초)</p>`;
+      const r=await ai(`너는 요리 도우미야. 이 사진에 보이는 식재료를 찾아내고, 그 재료로 만들 수 있는 한국 가정식 요리 3~5개를 추천해. 사진에서 확실하지 않은 재료는 confidence를 low로 표시해. 조건: ${cond||'없음'}. kcal는 1인분 대략 추정치. 반드시 다음 JSON 형식으로만 답해: ${RECIPE_JSON}`,im.b64,'image/jpeg');
+      r._img=im.url;LS.set('lastScan',r);out.innerHTML=`<img class="thumb" src="${im.url}">`+scanHtml(r);bindScan();
+    }catch(e){out.innerHTML=`<div class="notice">${esc(e.message)}</div>`}};
+  const c=$('#camIn'),g=$('#galIn');if(c)c.onchange=e=>go(e.target.files[0]);if(g)g.onchange=e=>go(e.target.files[0]);bindScan();
+};
+function scanHtml(r){
+  const I=r.ingredients||[],D=r.dishes||[];
+  if(r.raw)return `<div class="notice">AI 응답을 해석하지 못했어요. 다시 시도해 주세요.</div>`;
+  return `<h3 style="margin:14px 0 6px">찾은 재료 ${I.length}개</h3><div>${I.map(x=>`<span class="tag ${x.confidence==='low'?'w':''}">${esc(x.name)}${x.confidence==='low'?'?':''}</span>`).join(' ')}</div>
+  ${I.length?`<button class="s" data-act="saveIng" style="margin-top:8px">＋ 내 냉장고에 저장</button>`:''}
+  <h3 style="margin:14px 0 6px">추천 요리</h3>${D.map((d,i)=>`<div class="item"><div class="b"><div class="t">${esc(d.name)} ${d.lowcal?'<span class="tag">저칼로리</span>':''}</div><div class="d">${esc(d.why||'')}\n⏱ ${esc(d.minutes||'?')}분 · 약 ${esc(d.kcal||'?')} kcal(추정)${d.missing&&d.missing.length?'\n필요: '+esc(d.missing.join(', ')):''}</div><details><summary class="muted">만드는 법</summary><ol>${(d.steps||[]).map(s=>`<li>${esc(s)}</li>`).join('')}</ol></details></div><button class="s" data-act="saveRec" data-i="${i}">저장</button></div>`).join('')}`;
+}
+function bindScan(){document.querySelectorAll('#scanOut [data-act]').forEach(b=>b.onclick=()=>ACT[b.dataset.act](b.dataset))}
+ACT.saveIng=()=>{const r=LS.get('lastScan',{});let n=0;(r.ingredients||[]).forEach(x=>{if(!DB.식재료.some(y=>y.이름===x.name)){put('식재료',{이름:x.name,수량:x.amount||'',보관:'냉장',유통기한:''});n++}});toast(n+'개 재료를 저장했어요')};
+ACT.saveRec=d=>{const r=LS.get('lastScan',{});const x=(r.dishes||[])[+d.i];if(!x)return;put('레시피',{이름:x.name,재료:[...(x.use||[]),...(x.missing||[])].join(', '),조리법:(x.steps||[]).map((s,i)=>(i+1)+'. '+s).join('\n'),칼로리:String(x.kcal||''),시간:String(x.minutes||''),출처:'AI 추천'});toast('레시피 저장')};
+ACT.fridgeAI=async()=>{const out=$('#scanOut');out.innerHTML='<div class="card muted">🤖 추천을 만들고 있어요…</div>';
+  try{const list=DB.식재료.map(x=>x.이름+(x.유통기한?'(유통기한 '+x.유통기한+')':'')).join(', ');
+    const r=await ai(`너는 요리 도우미야. 보유 재료: ${list}. 유통기한이 가까운 재료를 우선 쓰는 한국 가정식 3~5개를 추천해. ingredients에는 보유 재료를 그대로 넣어. kcal는 1인분 대략 추정치. 반드시 다음 JSON 형식으로만 답해: ${RECIPE_JSON}`);
+    LS.set('lastScan',r);out.innerHTML='<div class="card">'+scanHtml(r)+'</div>';bindScan()}catch(e){out.innerHTML=`<div class="notice">${esc(e.message)}</div>`}};
+
+/* ---- 헬스 ---- */
+const PLANS={
+ '초보 전신 주3회':{days:[{day:'월',title:'전신 A',items:['스쿼트 3×10','푸시업(무릎 가능) 3×8','덤벨/물병 로우 3×10','플랭크 3×20초']},{day:'수',title:'전신 B',items:['런지 3×8(각 다리)','벽 푸시업/인클라인 3×10','힙 브릿지 3×12','데드버그 3×10']},{day:'금',title:'전신 A + 걷기',items:['스쿼트 3×10','푸시업 3×8','로우 3×10','빠르게 걷기 20분']}]},
+ '걷기·유산소 주5회':{days:['월','화','수','목','금'].map(d=>({day:d,title:'빠르게 걷기',items:['가볍게 몸풀기 5분','빠르게 걷기 30분','스트레칭 5분']}))},
+ '상하체 분할 주4회':{days:[{day:'월',title:'상체',items:['푸시업 4×10','로우 4×10','숄더프레스 3×10','플랭크 3×30초']},{day:'화',title:'하체',items:['스쿼트 4×12','런지 3×10','힙 브릿지 3×15','카프레이즈 3×15']},{day:'목',title:'상체',items:['인클라인 푸시업 4×10','풀다운/밴드 로우 4×10','사이드 레터럴 3×12','크런치 3×15']},{day:'금',title:'하체+유산소',items:['고블릿 스쿼트 4×10','스텝업 3×10','걷기/자전거 20분']}]}
+};
+const LOWCAL=['닭가슴살 샐러드','두부 구이·두부 부침','계란찜 / 삶은 계란','채소 듬뿍 된장국','버섯·양배추 볶음','곤약밥 / 잡곡밥 반 공기','생선구이(고등어·연어)','오이·방울토마토 간식','그릭요거트(무가당)','쌈채소 + 수육(기름 적은 부위)'];
+V.fit=()=>{
+  const m=sub.fit||'오늘',t=today();
+  let h=chips('fit',['오늘','운동 계획','식단','기록']);
+  if(m==='오늘'){
+    const plan=LS.get('plan',null);const tp=plan&&plan.days?plan.days.find(d=>d.day==='일월화수목금토'[new Date().getDay()]):null;
+    const meals=DB.식단.filter(x=>x.날짜===t),kc=meals.reduce((a,x)=>a+num(x.칼로리),0);
+    const wk=[...Array(7)].map((_,i)=>addDays(t,i-6)).map(d=>({d,k:DB.식단.filter(x=>x.날짜===d).reduce((a,x)=>a+num(x.칼로리),0)}));const mx=Math.max(1,...wk.map(x=>x.k),num(CFG.kcal));
+    h+=`<div class="card"><h2>🏋️ 오늘의 운동</h2>${tp?`<div class="t"><b>${esc(tp.title)}</b> <span class="muted">(${esc(plan.name)})</span></div><ul>${tp.items.map(i=>`<li>${esc(i)}</li>`).join('')}</ul><button class="p s" data-act="doneWo" data-t="${esc(tp.title)}" data-i="${esc(tp.items.join(', '))}">완료 기록</button>`:plan?'<div class="muted">오늘은 쉬는 날 😌 가벼운 스트레칭 추천</div>':'<div class="muted">운동 계획이 없어요 → \'운동 계획\' 탭에서 선택</div>'}</div>
+    <div class="card"><h2>🍽 오늘 식단 <span class="sp"></span><button class="s" data-act="add" data-s="식단">＋</button></h2>
+     <div class="big">${kc.toLocaleString()} <small style="font-size:14px">kcal ${CFG.kcal?'/ 목표 '+CFG.kcal:''}</small></div>
+     ${meals.map(x=>`<div class="item" data-ed="식단|${x.id}"><span class="tag">${esc(x.끼니)}</span><div class="b"><div class="t">${esc(x.음식)}</div></div><div class="muted">${esc(x.칼로리)}</div></div>`).join('')}
+     <label class="btn" style="margin-top:10px;width:100%">📷 음식 사진으로 칼로리 추정<input type="file" accept="image/*" capture="environment" id="mealIn" class="hide"></label><div id="mealOut"></div>
+     <div class="bars">${wk.map(x=>`<div class="${x.d===t?'on':''}" style="height:${Math.round(x.k/mx*100)}%"><span>${dname(x.d).split(' ')[0]}</span></div>`).join('')}</div><div style="height:20px"></div></div>`;
+  }else if(m==='운동 계획'){
+    const plan=LS.get('plan',null);
+    h+=`<div class="card"><h2>기본 계획 고르기</h2>${Object.keys(PLANS).map(k=>`<button style="width:100%;margin:4px 0;justify-content:space-between" data-act="setPlan" data-k="${k}">${k} ${plan&&plan.name===k?'✅':''}</button>`).join('')}<p class="muted">일반적인 입문 예시예요. 통증·질환이 있으면 전문가와 상의하세요.</p></div>
+    <div class="card"><h2>🤖 AI 맞춤 계획</h2><div class="grid2"><div><label>목표</label><select id="pg"><option>체중 감량</option><option>근력 향상</option><option>체력·건강 유지</option></select></div><div><label>주 몇 회</label><select id="pd"><option>3</option><option>2</option><option>4</option><option>5</option></select></div></div>
+     <div class="grid2"><div><label>1회 시간(분)</label><input id="pm" value="40"></div><div><label>장소</label><select id="pl"><option>집(맨몸)</option><option>헬스장</option><option>야외</option></select></div></div>
+     <button class="p" style="width:100%;margin-top:10px" data-act="aiPlan">계획 만들기</button><div id="planOut"></div></div>
+    ${plan?`<div class="card"><h2>현재: ${esc(plan.name)}</h2>${plan.days.map(d=>`<div class="item"><span class="tag">${d.day}</span><div class="b"><div class="t">${esc(d.title)}</div><div class="d">${esc(d.items.join(' / '))}</div></div></div>`).join('')}</div>`:''}`;
+  }else if(m==='식단'){
+    h+=`<div class="card"><h2>🥗 저칼로리 메뉴 아이디어</h2>${LOWCAL.map(x=>`<span class="chip" style="display:inline-block;margin:3px">${x}</span>`).join('')}<p class="muted">일반적으로 칼로리가 낮은 편인 메뉴 예시예요 (양·조리법에 따라 달라짐).</p></div>
+    <div class="card"><h2>🤖 내 재료로 저칼로리 식단 추천</h2><p class="muted">내 냉장고 재료를 활용해 하루 식단을 짜 드려요.</p><button class="p" style="width:100%" data-act="aiMeal">추천 받기</button><div id="mealPlan"></div></div>`;
+  }else{
+    const W=DB.운동.slice().sort((a,b)=>b.날짜.localeCompare(a.날짜)).slice(0,60);
+    h+=`<div class="card"><h2>운동 기록<span class="sp"></span><button class="s" data-act="add" data-s="운동">＋</button></h2>${W.length?W.map(x=>`<div class="item" data-ed="운동|${x.id}"><div class="muted" style="width:62px">${dname(x.날짜).split(' ')[0]}</div><div class="b"><div class="t">${esc(x.종류)} <span class="tag">${esc(x.부위)}</span></div><div class="d">${esc(x.세트시간||'')}</div></div></div>`).join(''):'<div class="empty">기록이 없어요</div>'}</div>`;
+  }
+  return h;
+};
+AFTER.fit=()=>{const i=$('#mealIn');if(i)i.onchange=async e=>{const f=e.target.files[0];if(!f)return;const out=$('#mealOut');
+  try{const im=await imgToB64(f);out.innerHTML=`<img class="thumb" src="${im.url}"><p class="muted">🔍 추정 중…</p>`;
+   const r=await ai(`이 음식 사진을 보고 음식 이름과 1인분 기준 대략적 칼로리를 추정해. 여러 음식이면 각각. 반드시 JSON으로만: {"foods":[{"name":"음식명","kcal":300,"note":"추정 근거 한 줄"}],"total":300,"tip":"더 가볍게 먹는 팁 한 줄"}`,im.b64);
+   const fs=r.foods||[];out.innerHTML=`<img class="thumb" src="${im.url}"><div class="item"><div class="b"><div class="t">${fs.map(x=>esc(x.name)+' 약 '+esc(x.kcal)+'kcal').join(', ')}</div><div class="d">합계 약 ${esc(r.total)} kcal (추정)\n💡 ${esc(r.tip||'')}</div></div></div><div class="row"><select id="mk" style="flex:1"><option>아침</option><option selected>점심</option><option>저녁</option><option>간식</option></select><button class="p" id="mSave">식단에 저장</button></div>`;
+   $('#mSave').onclick=()=>{put('식단',{날짜:today(),끼니:$('#mk').value,음식:fs.map(x=>x.name).join(', '),칼로리:String(r.total||''),메모:'사진 AI 추정'});toast('저장했어요');render()};
+  }catch(er){out.innerHTML=`<div class="notice">${esc(er.message)}</div>`}}};
+ACT.setPlan=d=>{LS.set('plan',{name:d.k,days:PLANS[d.k].days});toast('계획 설정: '+d.k);render()};
+ACT.doneWo=d=>{put('운동',{날짜:today(),종류:d.t,부위:'전신',세트시간:d.i,칼로리:'',메모:'계획 완료'});toast('수고했어요! 💪');render()};
+ACT.aiPlan=async()=>{const out=$('#planOut');out.innerHTML='<p class="muted">🤖 계획을 만들고 있어요…</p>';
+  try{const r=await ai(`초보~중급 직장인을 위한 주간 운동 계획을 만들어. 목표: ${$('#pg').value}, 주 ${$('#pd').value}회, 1회 ${$('#pm').value}분, 장소: ${$('#pl').value}. 안전한 일반 운동만. 반드시 JSON으로만: {"name":"계획 이름","days":[{"day":"월|화|수|목|금|토|일 중 하나","title":"제목","items":["운동 세트×횟수"]}],"tip":"주의사항 한 줄"}`);
+    if(!r.days)throw new Error('계획을 만들지 못했어요. 다시 시도해 주세요.');
+    LS.set('plan',{name:r.name||'AI 맞춤',days:r.days});toast('AI 계획을 적용했어요');render();if(r.tip)setTimeout(()=>toast('💡 '+r.tip,5000),300)}catch(e){out.innerHTML=`<div class="notice">${esc(e.message)}</div>`}};
+ACT.aiMeal=async()=>{const out=$('#mealPlan');out.innerHTML='<p class="muted">🤖 식단을 짜고 있어요…</p>';
+  try{const list=DB.식재료.map(x=>x.이름).join(', ')||'(등록 재료 없음 — 구하기 쉬운 재료로)';
+    const r=await ai(`보유 재료: ${list}. 이 재료를 최대한 활용한 하루 저칼로리 한국 가정식 식단(아침·점심·저녁·간식)을 추천해. 칼로리는 대략 추정치. 반드시 JSON으로만: {"meals":[{"time":"아침","menu":"메뉴","kcal":350,"how":"간단 조리법 한 줄"}],"total":1400,"note":"한 줄 조언"}`);
+    out.innerHTML=(r.meals||[]).map(x=>`<div class="item"><span class="tag">${esc(x.time)}</span><div class="b"><div class="t">${esc(x.menu)} <span class="muted">약 ${esc(x.kcal)}kcal</span></div><div class="d">${esc(x.how||'')}</div></div><button class="s" data-m='${esc(JSON.stringify({날짜:today(),끼니:x.time,음식:x.menu,칼로리:String(x.kcal||''),메모:'AI 추천(추정)'}))}'>기록</button></div>`).join('')+`<p class="muted">합계 약 ${esc(r.total)} kcal (추정) · ${esc(r.note||'')}</p>`;
+    out.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{put('식단',JSON.parse(b.dataset.m));toast('식단에 기록했어요')});
+  }catch(e){out.innerHTML=`<div class="notice">${esc(e.message)}</div>`}};
+
+/* ---- 더보기 (메모·맛집·교통·설정) ---- */
+V.more=()=>{
+  const m=sub.more||'메모';let h=chips('more',['메모','맛집','교통','설정']);
+  if(m==='메모'){
+    const q=(sub.mq||'').toLowerCase();const L=DB.메모.filter(x=>!q||(x.제목+x.내용+x.태그).toLowerCase().includes(q)).sort((a,b)=>String(b.수정||'').localeCompare(String(a.수정||'')));
+    h+=`<input id="mq" placeholder="🔍 메모 검색" value="${esc(sub.mq||'')}"><div class="card">${L.length?L.map(x=>`<div class="item" data-ed="메모|${x.id}"><div class="b"><div class="t">${x.고정===true||x.고정==='TRUE'?'📌 ':''}${esc(x.제목)}</div><div class="d">${esc((x.내용||'').slice(0,120))}</div>${x.태그?String(x.태그).split(',').map(t=>`<span class="tag">${esc(t.trim())}</span>`).join(''):''}</div></div>`).join(''):'<div class="empty">메모가 없어요</div>'}</div><button class="fab" data-act="add" data-s="메모">＋</button>`;
+  }else if(m==='맛집'){
+    const f=sub.mf||'전체';let L=DB.맛집.slice();if(f!=='전체')L=L.filter(x=>x.방문===f);L.sort((a,b)=>String(b.평점||'').length-String(a.평점||'').length);
+    h+=`<div class="card"><h2>🎲 오늘 뭐 먹지?</h2><button class="p" data-act="pick" style="width:100%">내 맛집 목록에서 랜덤 추천</button><div id="pickOut"></div></div>
+    <div class="chips">${['전체','가보고싶음','가봄'].map(x=>`<span class="chip ${f===x?'on':''}" data-act="chip" data-k="mf" data-v="${x}">${x}</span>`).join('')}</div>
+    <div class="card">${L.length?L.map(x=>`<div class="item"><div class="b" data-ed="맛집|${x.id}"><div class="t">${esc(x.이름)} <span class="muted">${esc(x.평점||'')}</span></div><div class="d">${esc([x.지역,x.메뉴,x.가격대].filter(Boolean).join(' · '))}</div></div><a class="btn s" target="_blank" href="https://map.naver.com/p/search/${encodeURIComponent((x.지역||'')+' '+x.이름)}">지도</a></div>`).join(''):'<div class="empty">맛집을 추가해 보세요</div>'}</div><button class="fab" data-act="add" data-s="맛집">＋</button>`;
+  }else if(m==='교통'){
+    const P=DB.장소;const opts=P.map(x=>`<option value="${esc(x.주소||x.이름)}">${esc(x.이름)}</option>`).join('');
+    h+=`<div class="card"><h2>🚇 길찾기</h2><label>출발</label><input id="from" list="pl" placeholder="장소명 또는 주소 (비우면 현재 위치)"><label>도착</label><input id="to" list="pl" placeholder="장소명 또는 주소"><datalist id="pl">${opts}</datalist>
+     <div class="grid2" style="margin-top:12px"><button class="p" data-act="route" data-m="kakao">카카오맵</button><button class="p" data-act="route" data-m="google">구글 대중교통</button><button data-act="route" data-m="naver">네이버 지도</button><button data-act="swap">⇅ 출발/도착 바꾸기</button></div></div>
+    <div class="card"><h2>⭐ 자주 가는 곳<span class="sp"></span><button class="s" data-act="add" data-s="장소">＋</button></h2>${P.length?P.map(x=>`<div class="item"><div class="b" data-ed="장소|${x.id}"><div class="t">${esc(x.이름)} <span class="tag">${esc(x.종류||'')}</span></div><div class="d">${esc(x.주소||'')}</div></div><button class="s" data-act="toHere" data-a="${esc(x.주소||x.이름)}">여기로</button></div>`).join(''):'<div class="empty">집·회사 등을 등록하면 한 번에 길찾기 돼요</div>'}</div>`;
+  }else{
+    h+=`<div class="card"><h2>⚙️ 서버 연결 (구글 시트·캘린더·AI)</h2>
+     <p class="muted">${CFG.url?'✅ 연결됨':'❌ 미연결 — 아래 안내대로 한 번만 설정하세요'} ${CFG.url?(CFG.hasAI?'· AI 사용 가능':'· AI 키 없음(시트 설정 탭 B2)'):''}</p>
+     <label>Apps Script 웹 앱 URL</label><input id="surl" value="${esc(CFG.url)}" placeholder="https://script.google.com/macros/s/…/exec">
+     <div class="row" style="margin-top:8px"><button class="p" data-act="connect">연결 테스트 & 저장</button>${CFG.sheetUrl?`<a class="btn" target="_blank" href="${esc(CFG.sheetUrl)}">시트 열기</a>`:''}</div>
+     <details style="margin-top:10px"><summary><b>처음 설정 방법 (약 5분, 한 번만)</b></summary><ol class="steps">
+      <li>구글 드라이브에서 <b>「나만의 생활 대시보드 DB」</b> 시트를 엽니다 (이미 만들어 두었어요).</li>
+      <li>메뉴 <b>확장 프로그램 → Apps Script</b> 클릭.</li>
+      <li>편집기의 내용을 모두 지우고, 아래 <b>[서버 코드 복사]</b> 버튼으로 복사한 코드를 붙여넣고 💾 저장.</li>
+      <li>오른쪽 위 <b>배포 → 새 배포</b> → 톱니바퀴에서 <b>웹 앱</b> 선택 → 실행 사용자: <b>나</b>, 액세스: <b>모든 사용자</b> → 배포.</li>
+      <li>권한 창이 뜨면 계정 선택 → <b>고급 → (안전하지 않음)으로 이동 → 허용</b>.</li>
+      <li>나온 <b>웹 앱 URL</b>을 복사해서 위 칸에 붙여넣고 [연결 테스트 & 저장].</li>
+      <li>(AI 사용 시) <a target="_blank" href="https://aistudio.google.com/apikey">Google AI Studio</a>에서 API 키 발급 → 시트 <b>설정</b> 탭 <b>B2</b> 칸에 붙여넣기.</li></ol>
+      <button data-act="copyCode">📋 서버 코드 복사</button></details></div>
+    <div class="card"><h2>🎯 하루 목표 칼로리</h2><div class="row"><input id="kc" type="number" value="${esc(CFG.kcal)}" placeholder="예: 직접 정한 목표" style="flex:1"><button data-act="saveKcal">저장</button></div></div>
+    <div class="card"><h2>💾 백업</h2><div class="row"><button data-act="exp">내보내기(JSON)</button><label class="btn" style="margin:0">가져오기<input type="file" id="impIn" accept=".json" class="hide"></label></div><p class="muted">서버 연결 시 모든 데이터는 구글 시트에도 저장돼요. 대기 중 ${Q.length}건.</p></div>
+    <p class="muted" style="text-align:center">나의 하루 v1.0 · 무료 도구만 사용 (GitHub Pages · Google Apps Script · Gemini 무료 등급)</p>`;
+  }
+  return h;
+};
+AFTER.more=()=>{const q=$('#mq');if(q){q.oninput=()=>{sub.mq=q.value;const p=q.selectionStart;render();const n=$('#mq');n.focus();n.setSelectionRange(p,p)}}
+  const im=$('#impIn');if(im)im.onchange=async e=>{try{const d=JSON.parse(await e.target.files[0].text());if(!confirm('가져온 데이터를 추가할까요? (같은 id는 덮어씀)'))return;for(const k in SHEETS)(d[k]||[]).forEach(r=>put(k,r));toast('가져오기 완료');render()}catch(er){toast('파일을 읽지 못했어요')}}};
+ACT.pick=()=>{const L=DB.맛집;if(!L.length)return toast('먼저 맛집을 추가해 주세요');const x=L[Math.floor(Math.random()*L.length)];$('#pickOut').innerHTML=`<div class="item"><div class="b"><div class="t">🍽 ${esc(x.이름)}</div><div class="d">${esc([x.지역,x.메뉴].filter(Boolean).join(' · '))}</div></div><a class="btn s" target="_blank" href="https://map.naver.com/p/search/${encodeURIComponent((x.지역||'')+' '+x.이름)}">지도</a></div>`};
+ACT.swap=()=>{const a=$('#from').value;$('#from').value=$('#to').value;$('#to').value=a};
+ACT.toHere=d=>{$('#to').value=d.a;$('#to').scrollIntoView({behavior:'smooth',block:'center'})};
+ACT.route=d=>{const f=$('#from').value.trim(),t=$('#to').value.trim();if(!t)return toast('도착지를 입력해 주세요');let u;
+  if(d.m==='google')u='https://www.google.com/maps/dir/?api=1&travelmode=transit&destination='+encodeURIComponent(t)+(f?'&origin='+encodeURIComponent(f):'');
+  else if(d.m==='kakao')u='https://map.kakao.com/?'+(f?'sName='+encodeURIComponent(f)+'&':'')+'eName='+encodeURIComponent(t);
+  else u='https://map.naver.com/p/search/'+encodeURIComponent(t);
+  window.open(u,'_blank')};
+ACT.connect=async()=>{const u=$('#surl').value.trim();if(!/^https:\/\/script\.google(usercontent)?\.com\//.test(u))return toast('script.google.com 으로 시작하는 웹 앱 URL을 넣어 주세요',3500);
+  const old=CFG.url;CFG.url=u;toast('연결 확인 중…');
+  try{const r=await api('ping',{},30000);CFG.hasAI=!!r.hasAI;CFG.sheetUrl=r.sheetUrl||'';LS.set('cfg',CFG);toast('✅ 연결 성공! 데이터를 동기화합니다');
+    const local=Object.keys(SHEETS).some(k=>DB[k].length);if(local&&!Q.length&&confirm('이 기기에 있던 기존 데이터를 시트로 올릴까요?'))for(const k in SHEETS)DB[k].forEach(r=>Q.push({action:'upsert',sheet:k,row:r}));
+    saveLocal();await sync(true);render()}
+  catch(e){CFG.url=old;toast('연결 실패: '+e.message+' — 배포 설정(액세스: 모든 사용자)을 확인하세요',5000)}};
+ACT.copyCode=async()=>{try{const t=await (await fetch('Code.gs',{cache:'no-store'})).text();await navigator.clipboard.writeText(t);toast('서버 코드를 복사했어요. Apps Script에 붙여넣으세요!')}catch(e){window.open('Code.gs','_blank')}};
+ACT.saveKcal=()=>{CFG.kcal=$('#kc').value.trim();LS.set('cfg',CFG);toast('저장했어요')};
+ACT.exp=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(DB,null,1)],{type:'application/json'}));a.download='나의하루_백업_'+today()+'.json';a.click()};
+
+/* ===================== 시작 ===================== */
+if(!TABS.some(x=>x[0]===tab))tab='home';
+render();sync(true);
+addEventListener('online',()=>sync(false));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)sync(true)});
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
