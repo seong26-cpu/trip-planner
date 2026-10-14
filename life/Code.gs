@@ -163,25 +163,58 @@ function calList_(from, to) {
 function ai_(prompt, imageB64, mime) {
   var key = setting_('GEMINI_API_KEY');
   if (!key) throw new Error('설정 탭 B2에 Gemini API 키가 없습니다.');
-  var model = setting_('GEMINI_MODEL') || 'gemini-2.5-flash';
+  // 설정 탭 B3: 모델 이름 (쉼표로 여러 개 가능 → 앞에서부터 시도)
+  var models = (setting_('GEMINI_MODEL') || 'gemini-3.8-flash').split(',')
+    .map(function (s) { return s.trim(); }).filter(String);
   var parts = [{ text: prompt }];
   if (imageB64) parts.push({ inline_data: { mime_type: mime || 'image/jpeg', data: imageB64 } });
-  var res = UrlFetchApp.fetch(
-    'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(model) + ':generateContent',
-    {
-      method: 'post', contentType: 'application/json', muteHttpExceptions: true,
-      headers: { 'x-goog-api-key': key },
-      payload: JSON.stringify({
-        contents: [{ parts: parts }],
-        generationConfig: { responseMimeType: 'application/json', temperature: 0.4 }
+  var payload = JSON.stringify({
+    contents: [{ parts: parts }],
+    generationConfig: { responseMimeType: 'application/json', temperature: 0.4 }
+  });
+  var tried = {}, last = '', discovered = false;
+  for (var i = 0; i < models.length && i < 6; i++) {
+    var m = models[i]; if (tried[m]) continue; tried[m] = 1;
+    var res = UrlFetchApp.fetch(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(m) + ':generateContent',
+      { method: 'post', contentType: 'application/json', muteHttpExceptions: true,
+        headers: { 'x-goog-api-key': key }, payload: payload });
+    var code = res.getResponseCode(), body = {};
+    try { body = JSON.parse(res.getContentText() || '{}'); } catch (x) {}
+    if (code === 200) {
+      var txt = (((body.candidates || [])[0] || {}).content || {}).parts;
+      txt = txt ? txt.filter(function (p) { return !p.thought; }).map(function (p) { return p.text || ''; }).join('') : '';
+      txt = txt.replace(/^\s*```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '');
+      try { return JSON.parse(txt); } catch (x) { return { raw: txt }; }
+    }
+    last = code === 429 ? '오늘 무료 AI 사용 한도를 다 썼습니다(' + m + '). 잠시 후(또는 내일) 다시 시도하세요.'
+                        : 'AI 오류(' + code + ', ' + m + '): ' + (body.error && body.error.message || '');
+    // 모델이 없어졌으면(404) 사용 가능한 Flash 모델을 자동으로 찾아 뒤에 추가
+    if ((code === 404 || code === 429) && !discovered) { discovered = true; models = models.concat(findFlashModels_(key)); }
+    if (code !== 404 && code !== 429) break;
+  }
+  throw new Error(last || 'AI 모델을 찾지 못했습니다. 설정 탭 B3의 모델 이름을 확인하세요.');
+}
+
+/** 이 API 키로 실제 사용 가능한 Flash 계열 모델 목록 (최신 이름순) */
+function findFlashModels_(key) {
+  try {
+    var r = UrlFetchApp.fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=200',
+      { muteHttpExceptions: true, headers: { 'x-goog-api-key': key } });
+    if (r.getResponseCode() !== 200) return [];
+    return (JSON.parse(r.getContentText()).models || [])
+      .filter(function (x) {
+        return /flash/i.test(x.name) && !/image|tts|live|audio|embed|preview|exp/i.test(x.name) &&
+          (x.supportedGenerationMethods || []).indexOf('generateContent') >= 0;
       })
-    });
-  var code = res.getResponseCode(), body = JSON.parse(res.getContentText() || '{}');
-  if (code === 429) throw new Error('오늘 무료 AI 사용 한도를 다 썼습니다. 잠시 후(또는 내일) 다시 시도하세요.');
-  if (code !== 200) throw new Error('AI 오류(' + code + '): ' + (body.error && body.error.message || ''));
-  var txt = (((body.candidates || [])[0] || {}).content || {}).parts;
-  txt = txt ? txt.map(function (p) { return p.text || ''; }).join('') : '';
-  try { return JSON.parse(txt); } catch (x) { return { raw: txt }; }
+      .map(function (x) { return x.name.replace(/^models\//, ''); })
+      .sort().reverse();
+  } catch (x) { return []; }
+}
+
+/** 편집기에서 실행해 보면 [실행 로그]에 내 키로 쓸 수 있는 모델 목록이 나옵니다 (선택) */
+function listMyModels() {
+  Logger.log(findFlashModels_(setting_('GEMINI_API_KEY')).join('\n'));
 }
 
 /** 편집기에서 한 번 실행해서 권한 승인용 (선택) */
