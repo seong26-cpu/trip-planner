@@ -1,2 +1,24 @@
-{"name":"나의 하루 — 생활 대시보드","short_name":"나의 하루","start_url":"./","scope":"./","display":"standalone","background_color":"#f6f7f5","theme_color":"#0f766e","lang":"ko",
-"icons":[{"src":"icon-192.png","sizes":"192x192","type":"image/png"},{"src":"icon-512.png","sizes":"512x512","type":"image/png"},{"src":"icon.svg","sizes":"any","type":"image/svg+xml"}]}
+{
+  "id": "./",
+  "name": "나의 하루 — 생활 대시보드",
+  "short_name": "나의 하루",
+  "description": "일정·약속·요리·운동·식단·맛집·메모·길찾기를 한 곳에서",
+  "lang": "ko",
+  "start_url": "./#home",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f6f7f5",
+  "theme_color": "#0f766e",
+  "categories": ["lifestyle", "productivity", "health"],
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png"},
+    {"src": "maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ],
+  "shortcuts": [
+    {"name": "일정 · 약속", "url": "./#plan", "icons": [{"src": "icon-192.png", "sizes": "192x192"}]},
+    {"name": "요리 (사진으로 찾기)", "url": "./#cook", "icons": [{"src": "icon-192.png", "sizes": "192x192"}]},
+    {"name": "운동", "url": "./#fit", "icons": [{"src": "icon-192.png", "sizes": "192x192"}]}
+  ]
+}

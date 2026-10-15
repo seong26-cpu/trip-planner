@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#0f766e">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
@@ -107,10 +107,13 @@ nav.tabs button svg{width:24px;height:24px}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .cell{background:var(--bg);border-radius:12px;padding:10px 6px;text-align:center}
 .cell span,.cell small{display:block;font-size:12px;color:var(--sub)}.cell b{font-size:18px;color:var(--brand)}
+.pill{font-size:12px;color:var(--sub);border:1px solid var(--line);border-radius:99px;padding:3px 10px;background:var(--card);cursor:pointer;white-space:nowrap}#acct:empty{display:none}#acct.go{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:700}
+.hero{background:linear-gradient(135deg,var(--brand2),var(--card));border:1px solid var(--line);border-radius:var(--r);padding:16px;margin:10px 0}.hero b{font-size:16px}.hero p{margin:6px 0 12px;color:var(--sub);font-size:13px}
+.gbtn{width:100%;background:#fff;color:#1f1f1f;border:1px solid #dadce0;font-weight:600;gap:10px}.gbtn svg{width:18px;height:18px}
 </style>
 </head>
 <body>
-<header><h1 id="title">오늘</h1><span id="sync" title="동기화">로컬 모드</span></header>
+<header><h1 id="title">오늘</h1><span id="acct" class="pill" title="Google 계정"></span><span id="sync" class="pill" title="동기화">로컬 모드</span></header>
 <main id="app"></main>
 <nav class="tabs" id="tabs"></nav>
 <dialog id="dlg"></dialog>
@@ -135,7 +138,88 @@ let Q=LS.get('queue',[]);
 let CFG=LS.get('cfg',{url:'',kcal:'',hasAI:false,sheetUrl:''});
 let CAL=LS.get('cal',[]);
 let tab=location.hash.slice(1)||'home', sub={};
-const saveLocal=()=>{LS.set('db',DB);LS.set('queue',Q)};
+let DEL=LS.get('del',{});
+const saveLocal=()=>{LS.set('db',DB);LS.set('queue',Q);LS.set('del',DEL);CLOUD.dirty()};
+
+/* ===================== Google 로그인 · 클라우드 (여행 플래너와 같은 Firebase) =====================
+   - users/{내uid}/life/state 문서에 설정(서버 주소·목표 칼로리·운동 계획)과 데이터를 저장
+   - 보안 규칙: 로그인한 본인만 읽기/쓰기 (firestore.rules)
+   - 서버 주소를 한 기기에서만 넣으면, 다른 기기는 로그인만 하면 자동으로 받아옴 */
+const FB_VER='10.12.2';
+function loadScript(src){return new Promise((ok,no)=>{if(document.querySelector(`script[src="${src}"]`))return ok();const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
+const CLOUD={auth:null,db:null,user:null,ready:false,failed:false,t:null,busy:false,
+  async init(){
+    try{
+      await loadScript('../firebase-config.js');
+      if(!window.FIREBASE_CONFIG||!window.FIREBASE_CONFIG.apiKey)throw new Error('no config');
+      for(const m of ['app','auth','firestore'])await loadScript(`https://www.gstatic.com/firebasejs/${FB_VER}/firebase-${m}-compat.js`);
+      const fb=window.firebase;if(!fb.apps.length)fb.initializeApp(window.FIREBASE_CONFIG);
+      this.auth=fb.auth();this.db=fb.firestore();
+      try{await this.auth.setPersistence(fb.auth.Auth.Persistence.LOCAL)}catch(e){}
+      try{await this.auth.getRedirectResult()}catch(e){}
+      this.auth.onAuthStateChanged(async u=>{this.user=u;this.ready=true;paintAcct();if(u){await this.pull();}render()});
+    }catch(e){this.failed=true;this.ready=true;paintAcct();console.warn('cloud',e)}
+  },
+  async login(){
+    if(!this.auth){toast(this.failed?'로그인 기능을 불러오지 못했어요. 인터넷 연결을 확인해 주세요':'잠시 후 다시 눌러 주세요');return}
+    const p=new firebase.auth.GoogleAuthProvider();p.setCustomParameters({prompt:'select_account'});
+    try{await this.auth.signInWithPopup(p)}
+    catch(e){const c=e&&e.code||'';
+      if(c==='auth/popup-blocked'||c==='auth/operation-not-supported-in-this-environment'){try{await this.auth.signInWithRedirect(p)}catch(x){toast('로그인하지 못했어요: '+(x.code||x.message))}}
+      else if(c==='auth/unauthorized-domain')toast('Firebase에 이 주소가 승인되지 않았어요');
+      else if(c!=='auth/popup-closed-by-user'&&c!=='auth/cancelled-popup-request')toast('로그인하지 못했어요: '+(c||e.message))}
+  },
+  async logout(){if(this.auth&&confirm('로그아웃할까요? (이 기기 데이터는 그대로 남아요)')){await this.auth.signOut();render()}},
+  ref(){return this.db.collection('users').doc(this.user.uid).collection('life').doc('state')},
+  cfgOut(){return {url:CFG.url||'',kcal:CFG.kcal||'',hasAI:!!CFG.hasAI,sheetUrl:CFG.sheetUrl||'',plan:LS.get('plan',null),at:CFG.at||0}},
+  async pull(){
+    if(!this.user)return;this.busy=true;setSync('☁︎ 불러오는 중…');
+    try{
+      const snap=await this.ref().get();const r=snap.exists?snap.data():{};
+      const rc=r.cfg||{};
+      if(rc.url&&(!CFG.url||(rc.at||0)>(CFG.at||0))){
+        const changed=rc.url!==CFG.url;
+        Object.assign(CFG,{url:rc.url,kcal:rc.kcal||CFG.kcal,hasAI:!!rc.hasAI,sheetUrl:rc.sheetUrl||CFG.sheetUrl,at:rc.at||Date.now()});
+        if(rc.plan)LS.set('plan',rc.plan);LS.set('cfg',CFG);
+        if(changed)toast('✅ 내 계정에 저장된 서버 연결을 불러왔어요 (시트·캘린더·AI 사용 가능)',3500);
+        if(changed){const have=new Set(Q.map(o=>o.sheet+'|'+(o.row&&o.row.id)));for(const k in SHEETS)DB[k].forEach(r=>{if(!have.has(k+'|'+r.id))Q.push({action:'upsert',sheet:k,row:r})});LS.set('queue',Q)}
+      }else{
+        if(!rc.kcal&&CFG.kcal||!rc.plan&&LS.get('plan',null)||CFG.url&&!rc.url||(CFG.at||0)>(rc.at||0))await this.saveCfg(true);
+        if(rc.kcal&&!CFG.kcal){CFG.kcal=rc.kcal;LS.set('cfg',CFG)}
+        if(rc.plan&&!LS.get('plan',null))LS.set('plan',rc.plan);
+      }
+      if(!CFG.url&&r.data){mergeData(JSON.parse(r.data),r.del?JSON.parse(r.del):{});LS.set('db',DB);LS.set('del',DEL)}
+      this.busy=false;
+      if(CFG.url)await sync(true);else{await this.pushData(true);setSync('☁︎ 동기화 '+new Date().toTimeString().slice(0,5))}
+    }catch(e){this.busy=false;setSync('☁︎ 오프라인');console.warn(e)}
+  },
+  async saveCfg(now){if(!this.user)return;try{await this.ref().set({cfg:this.cfgOut()},{merge:true})}catch(e){console.warn(e)}},
+  dirty(){if(!this.user||CFG.url||this.busy)return;clearTimeout(this.t);this.t=setTimeout(()=>this.pushData(),1500)},
+  async pushData(){if(!this.user||CFG.url)return;try{await this.ref().set({data:JSON.stringify(DB),del:JSON.stringify(DEL),at:Date.now()},{merge:true});setSync('☁︎ 동기화 '+new Date().toTimeString().slice(0,5))}catch(e){setSync('☁︎ 대기 중')}}
+};
+function mergeData(R,RD){
+  for(const k in RD){DEL[k]=DEL[k]||{};for(const id in RD[k])DEL[k][id]=Math.max(DEL[k][id]||0,RD[k][id])}
+  for(const k in SHEETS){
+    const m={};for(const x of DB[k])m[x.id]=x;
+    for(const x of (R[k]||[])){const c=m[x.id];if(!c||(x._t||0)>(c._t||0))m[x.id]=x}
+    const D=DEL[k]||{};DB[k]=Object.values(m).filter(x=>!(D[x.id]&&D[x.id]>=(x._t||0)));
+  }
+}
+function setCfg(patch){Object.assign(CFG,patch,{at:Date.now()});LS.set('cfg',CFG);CLOUD.saveCfg()}
+function paintAcct(){const a=$('#acct');if(!a)return;
+  if(CLOUD.user){a.className='pill';a.textContent='👤 '+(CLOUD.user.displayName||CLOUD.user.email||'로그인됨').split(' ')[0];a.onclick=()=>{tab='more';sub.more='설정';location.hash=tab;render()}}
+  else if(CLOUD.ready&&!CLOUD.failed){a.className='pill go';a.textContent='Google 로그인';a.onclick=()=>CLOUD.login()}
+  else a.textContent='';}
+const GICON='<svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.6 5.4 2.7 13.3l7.9 6.1C12.5 13.6 17.8 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.6c0-1.6-.1-3.1-.4-4.6H24v9h12.4c-.5 2.9-2.2 5.3-4.6 6.9l7.4 5.7c4.3-4 6.9-9.9 6.9-17z"/><path fill="#FBBC05" d="M10.6 28.6A14.6 14.6 0 0 1 9.5 24c0-1.6.3-3.2.8-4.6l-7.9-6.1A24 24 0 0 0 0 24c0 3.9.9 7.5 2.6 10.7l8-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.4-5.7c-2.1 1.4-4.8 2.3-8.5 2.3-6.2 0-11.5-4.2-13.4-9.9l-8 6.1C6.6 42.6 14.6 48 24 48z"/></svg>';
+function loginCard(){
+  if(CLOUD.user||CLOUD.failed)return '';
+  return `<div class="hero"><b>☁︎ Google 로그인 한 번이면 끝</b><p>폰·PC 어디서든 같은 데이터가 보여요. 구글 시트·캘린더·AI 연결도 내 계정에서 자동으로 불러와요.</p><button class="gbtn" data-act="login">${GICON} Google 계정으로 로그인</button></div>`;
+}
+function installCard(){
+  const st=matchMedia('(display-mode: standalone)').matches||navigator.standalone;if(st)return '';
+  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  return `<div class="card"><h2>📲 휴대폰 앱으로 설치</h2>${window.__bip?`<p class="muted" style="margin:0 0 10px">홈 화면에 아이콘이 생기고, 주소창 없이 앱처럼 열려요.</p><button class="p" data-act="install" style="width:100%">앱 설치하기</button>`:ios?`<p class="muted" style="margin:0">아이폰: 사파리 아래쪽 <b>공유 버튼(□↑)</b> → <b>홈 화면에 추가</b></p>`:`<p class="muted" style="margin:0">안드로이드: 크롬 오른쪽 위 <b>⋮</b> → <b>앱 설치</b>(또는 홈 화면에 추가)</p>`}</div>`;
+}
 
 /* ===================== 서버 통신 ===================== */
 async function api(action,body={},timeout=60000){
@@ -149,7 +233,7 @@ async function api(action,body={},timeout=60000){
 function setSync(t){$('#sync').textContent=t}
 let syncing=false;
 async function sync(full=true){
-  if(!CFG.url){setSync('로컬 모드');return}
+  if(!CFG.url){if(CLOUD.user)CLOUD.dirty();else setSync(CLOUD.ready?'로컬 모드':'…');return}
   if(syncing)return;syncing=true;setSync('동기화 중…');
   try{
     if(Q.length){
@@ -168,12 +252,12 @@ async function sync(full=true){
 }
 function put(sheet,row){
   row=Object.assign({},row);if(!row.id)row.id=uid();
-  const now=new Date().toISOString().slice(0,16).replace('T',' ');if(!row['생성'])row['생성']=now;row['수정']=now;
+  const now=new Date().toISOString().slice(0,16).replace('T',' ');if(!row['생성'])row['생성']=now;row['수정']=now;row._t=Date.now();
   const L=DB[sheet];const k=L.findIndex(x=>x.id===row.id);if(k>=0)L[k]=Object.assign(L[k],row);else L.push(row);
   Q=Q.filter(o=>!(o.action==='upsert'&&o.sheet===sheet&&o.row.id===row.id));Q.push({action:'upsert',sheet,row});saveLocal();sync(false);return row;
 }
 function del(sheet,id){
-  DB[sheet]=DB[sheet].filter(x=>x.id!==id);Q=Q.filter(o=>!(o.sheet===sheet&&o.row&&o.row.id===id));Q.push({action:'remove',sheet,id});saveLocal();sync(false);
+  DB[sheet]=DB[sheet].filter(x=>x.id!==id);(DEL[sheet]=DEL[sheet]||{})[id]=Date.now();Q=Q.filter(o=>!(o.sheet===sheet&&o.row&&o.row.id===id));Q.push({action:'remove',sheet,id});saveLocal();sync(false);
 }
 async function ai(prompt,image,mime){
   if(!CFG.url)throw new Error('AI 기능은 서버 연결 후 사용할 수 있어요 (더보기 → 설정).');
@@ -239,6 +323,7 @@ function render(){
   $('#title').textContent={home:'오늘',plan:'일정 · 약속',cook:'요리',fit:'운동',more:'더보기'}[tab];
   const tp=tab==='fit'?'fit':tab==='cook'?'cook':tab==='more'?({맛집:'food',메모:'memo'}[sub.more||'메모']||''):'';
   if(tp)document.documentElement.dataset.topic=tp;else document.documentElement.removeAttribute('data-topic');
+  paintAcct();
   $('#app').innerHTML=V[tab]();
   document.querySelectorAll('[data-act]').forEach(b=>b.onclick=e=>{e.stopPropagation();ACT[b.dataset.act](b.dataset)});
   document.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>{const[s,id]=b.dataset.ed.split('|');form(s,DB[s].find(x=>x.id===id))});
@@ -261,7 +346,7 @@ V.home=()=>{
   const exp=DB.식재료.filter(x=>x.유통기한&&x.유통기한<=addDays(t,3)).sort((a,b)=>a.유통기한.localeCompare(b.유통기한));
   const pins=DB.메모.filter(x=>x.고정===true||x.고정==='TRUE'||x.고정==='true');
   const plan=LS.get('plan',null);const todayPlan=plan&&plan.days?plan.days.find(d=>d.day==='일월화수목금토'[new Date().getDay()]):null;
-  return `${CFG.url?'':`<div class="notice">지금은 <b>로컬 모드</b>예요. 이 기기에만 저장됩니다. 구글 시트·캘린더·AI를 쓰려면 <a href="#" data-act="go" data-t="more">더보기 → 설정</a>에서 한 번만 연결하세요.</div>`}
+  return `${loginCard()}${CLOUD.user&&!CFG.url?`<div class="notice">☁︎ 로그인 완료 — 기기 간 동기화 중이에요. 구글 시트·캘린더·AI는 <b>예전에 서버를 연결했던 기기(PC 등)에서 이 앱을 한 번 열고 로그인</b>하면 자동으로 여기에도 연결돼요.</div>`:''}
   <div class="card"><h2>${dname(t)} 일정<span class="sp"></span><button class="s" data-act="add" data-s="일정">＋</button></h2>
    ${ev.length?ev.map(x=>`<div class="item" ${x.id?`data-ed="일정|${x.id}"`:''}><div class="muted" style="width:46px">${x.s||'종일'}</div><div class="b"><div class="t">${esc(x.t)}</div></div><span class="tag ${x.k==='약속'?'w':''}">${x.k}</span></div>`).join(''):'<div class="empty">오늘 일정이 없어요</div>'}</div>
   <div class="grid2">
@@ -272,7 +357,7 @@ V.home=()=>{
   <div class="card"><h2>빠른 메모</h2><div class="row"><input id="qm" style="flex:1;width:auto" placeholder="떠오른 생각을 적어두세요"><button class="p" data-act="qm">저장</button></div>
    ${pins.map(x=>`<div class="item" data-ed="메모|${x.id}"><div class="b"><div class="t">📌 ${esc(x.제목)}</div><div class="d">${esc((x.내용||'').slice(0,80))}</div></div></div>`).join('')}</div>
   <div class="topics">${[['운동','루틴 · 1RM · 기록','img/hero-gym.svg','fit',''],['요리','레시피 · 사진 · 냉장고','img/food-banner.svg','cook',''],['맛집','테마 · 랜덤 · 내 목록','img/rest-hero.svg','more','맛집'],['메모','노트 · 검색 · 고정','img/memo-hero.svg','more','메모']].map(([n,sb,im,t,sv])=>`<button class="tcard" data-act="go" data-t="${t}" ${sv?`data-s="${sv}"`:''}><img src="${im}" alt=""><div><b>${n}</b><span>${sb}</span></div></button>`).join('')}</div>
-  <div class="grid2"><button data-act="go" data-t="more" data-s="교통">🚇 길찾기</button><button data-act="go" data-t="plan">📅 일정 · 약속</button></div>`;
+  <div class="grid2"><button data-act="go" data-t="more" data-s="교통">🚇 길찾기</button><button data-act="go" data-t="plan">📅 일정 · 약속</button></div>${installCard()}`;
 };
 ACT.go=d=>{tab=d.t;if(d.s)sub.more=d.s;location.hash=tab;render();scrollTo(0,0)};
 ACT.qm=()=>{const v=$('#qm').value.trim();if(!v)return;put('메모',{제목:v.slice(0,30),내용:v,태그:'빠른메모',고정:false});toast('메모 저장');render()};
@@ -412,12 +497,12 @@ AFTER.fit=()=>{rmBind();const i=$('#mealIn');if(i)i.onchange=async e=>{const f=e
    const fs=r.foods||[];out.innerHTML=`<img class="thumb" src="${im.url}"><div class="item"><div class="b"><div class="t">${fs.map(x=>esc(x.name)+' 약 '+esc(x.kcal)+'kcal').join(', ')}</div><div class="d">합계 약 ${esc(r.total)} kcal (추정)\n💡 ${esc(r.tip||'')}</div></div></div><div class="row"><select id="mk" style="flex:1"><option>아침</option><option selected>점심</option><option>저녁</option><option>간식</option></select><button class="p" id="mSave">식단에 저장</button></div>`;
    $('#mSave').onclick=()=>{put('식단',{날짜:today(),끼니:$('#mk').value,음식:fs.map(x=>x.name).join(', '),칼로리:String(r.total||''),메모:'사진 AI 추정'});toast('저장했어요');render()};
   }catch(er){out.innerHTML=`<div class="notice">${esc(er.message)}</div>`}}};
-ACT.setPlan=d=>{LS.set('plan',{name:d.k,days:PLANS[d.k].days});toast('계획 설정: '+d.k);render()};
+ACT.setPlan=d=>{LS.set('plan',{name:d.k,days:PLANS[d.k].days});setCfg({});toast('계획 설정: '+d.k);render()};
 ACT.doneWo=d=>{put('운동',{날짜:today(),종류:d.t,부위:'전신',세트시간:d.i,칼로리:'',메모:'계획 완료'});toast('수고했어요! 💪');render()};
 ACT.aiPlan=async()=>{const out=$('#planOut');out.innerHTML='<p class="muted">🤖 계획을 만들고 있어요…</p>';
   try{const r=await ai(`초보~중급 직장인을 위한 주간 운동 계획을 만들어. 목표: ${$('#pg').value}, 주 ${$('#pd').value}회, 1회 ${$('#pm').value}분, 장소: ${$('#pl').value}. 안전한 일반 운동만. 반드시 JSON으로만: {"name":"계획 이름","days":[{"day":"월|화|수|목|금|토|일 중 하나","title":"제목","items":["운동 세트×횟수"]}],"tip":"주의사항 한 줄"}`);
     if(!r.days)throw new Error('계획을 만들지 못했어요. 다시 시도해 주세요.');
-    LS.set('plan',{name:r.name||'AI 맞춤',days:r.days});toast('AI 계획을 적용했어요');render();if(r.tip)setTimeout(()=>toast('💡 '+r.tip,5000),300)}catch(e){out.innerHTML=`<div class="notice">${esc(e.message)}</div>`}};
+    LS.set('plan',{name:r.name||'AI 맞춤',days:r.days});setCfg({});toast('AI 계획을 적용했어요');render();if(r.tip)setTimeout(()=>toast('💡 '+r.tip,5000),300)}catch(e){out.innerHTML=`<div class="notice">${esc(e.message)}</div>`}};
 ACT.aiMeal=async()=>{const out=$('#mealPlan');out.innerHTML='<p class="muted">🤖 식단을 짜고 있어요…</p>';
   try{const list=DB.식재료.map(x=>x.이름).join(', ')||'(등록 재료 없음 — 구하기 쉬운 재료로)';
     const r=await ai(`보유 재료: ${list}. 이 재료를 최대한 활용한 하루 저칼로리 한국 가정식 식단(아침·점심·저녁·간식)을 추천해. 칼로리는 대략 추정치. 반드시 JSON으로만: {"meals":[{"time":"아침","menu":"메뉴","kcal":350,"how":"간단 조리법 한 줄"}],"total":1400,"note":"한 줄 조언"}`);
@@ -454,8 +539,10 @@ V.more=()=>{
      <div class="grid2" style="margin-top:12px"><button class="p" data-act="route" data-m="kakao">카카오맵</button><button class="p" data-act="route" data-m="google">구글 대중교통</button><button data-act="route" data-m="naver">네이버 지도</button><button data-act="swap">⇅ 출발/도착 바꾸기</button></div></div>
     <div class="card"><h2>⭐ 자주 가는 곳<span class="sp"></span><button class="s" data-act="add" data-s="장소">＋</button></h2>${P.length?P.map(x=>`<div class="item"><div class="b" data-ed="장소|${x.id}"><div class="t">${esc(x.이름)} <span class="tag">${esc(x.종류||'')}</span></div><div class="d">${esc(x.주소||'')}</div></div><button class="s" data-act="toHere" data-a="${esc(x.주소||x.이름)}">여기로</button></div>`).join(''):'<div class="empty">집·회사 등을 등록하면 한 번에 길찾기 돼요</div>'}</div>`;
   }else{
-    h+=`<div class="card"><h2>⚙️ 서버 연결 (구글 시트·캘린더·AI)</h2>
-     <p class="muted">${CFG.url?'✅ 연결됨':'❌ 미연결 — 아래 안내대로 한 번만 설정하세요'} ${CFG.url?(CFG.hasAI?'· AI 사용 가능':'· AI 키 없음(시트 설정 탭 B2)'):''}</p>
+    h+=`${CLOUD.user?`<div class="card"><h2>👤 내 계정</h2><p class="muted" style="margin:0 0 10px">${esc(CLOUD.user.email||'')} — 설정과 데이터가 이 계정에 저장돼 모든 기기에서 같이 보여요.</p><div class="row"><button data-act="cloudPull">☁︎ 지금 동기화</button><button class="x" data-act="logout">로그아웃</button></div></div>`:loginCard()}
+    ${installCard()}
+    <div class="card"><h2>⚙️ 서버 연결 (구글 시트·캘린더·AI)</h2>
+     <p class="muted">${CFG.url?'✅ 연결됨'+(CLOUD.user?' · 내 계정에 저장됨(다른 기기 자동 연결)':''):(CLOUD.user?'❌ 미연결 — 예전에 연결했던 기기에서 로그인하면 자동으로 채워져요. 그런 기기가 없으면 아래 안내대로 한 번만 설정하세요':'❌ 미연결 — 먼저 Google 로그인을 해 보세요')} ${CFG.url?(CFG.hasAI?'· AI 사용 가능':'· AI 키 없음(시트 설정 탭 B2)'):''}</p>
      <label>Apps Script 웹 앱 URL</label><input id="surl" value="${esc(CFG.url)}" placeholder="https://script.google.com/macros/s/…/exec">
      <div class="row" style="margin-top:8px"><button class="p" data-act="connect">연결 테스트 & 저장</button>${CFG.sheetUrl?`<a class="btn" target="_blank" href="${esc(CFG.sheetUrl)}">시트 열기</a>`:''}</div>
      <details style="margin-top:10px"><summary><b>처음 설정 방법 (약 5분, 한 번만)</b></summary><ol class="steps">
@@ -469,7 +556,7 @@ V.more=()=>{
       <button data-act="copyCode">📋 서버 코드 복사</button></details></div>
     <div class="card"><h2>🎯 하루 목표 칼로리</h2><div class="row"><input id="kc" type="number" value="${esc(CFG.kcal)}" placeholder="예: 직접 정한 목표" style="flex:1"><button data-act="saveKcal">저장</button></div></div>
     <div class="card"><h2>💾 백업</h2><div class="row"><button data-act="exp">내보내기(JSON)</button><label class="btn" style="margin:0">가져오기<input type="file" id="impIn" accept=".json" class="hide"></label></div><p class="muted">서버 연결 시 모든 데이터는 구글 시트에도 저장돼요. 대기 중 ${Q.length}건.</p></div>
-    <p class="muted" style="text-align:center">나의 하루 v1.0 · 무료 도구만 사용 (GitHub Pages · Google Apps Script · Gemini 무료 등급)</p>`;
+    <p class="muted" style="text-align:center">나의 하루 v1.1 · 무료 도구만 사용 (GitHub Pages · Google Apps Script · Gemini 무료 등급)</p>`;
   }
   return h;
 };
@@ -486,12 +573,14 @@ ACT.route=d=>{const f=$('#from').value.trim(),t=$('#to').value.trim();if(!t)retu
   window.open(u,'_blank')};
 ACT.connect=async()=>{const u=$('#surl').value.trim();if(!/^https:\/\/script\.google(usercontent)?\.com\//.test(u))return toast('script.google.com 으로 시작하는 웹 앱 URL을 넣어 주세요',3500);
   const old=CFG.url;CFG.url=u;toast('연결 확인 중…');
-  try{const r=await api('ping',{},30000);CFG.hasAI=!!r.hasAI;CFG.sheetUrl=r.sheetUrl||'';LS.set('cfg',CFG);toast('✅ 연결 성공! 데이터를 동기화합니다');
+  try{const r=await api('ping',{},30000);setCfg({hasAI:!!r.hasAI,sheetUrl:r.sheetUrl||''});toast('✅ 연결 성공! 데이터를 동기화합니다');
     const local=Object.keys(SHEETS).some(k=>DB[k].length);if(local&&!Q.length&&confirm('이 기기에 있던 기존 데이터를 시트로 올릴까요?'))for(const k in SHEETS)DB[k].forEach(r=>Q.push({action:'upsert',sheet:k,row:r}));
     saveLocal();await sync(true);render()}
   catch(e){CFG.url=old;toast('연결 실패: '+e.message+' — 배포 설정(액세스: 모든 사용자)을 확인하세요',5000)}};
 ACT.copyCode=async()=>{try{const t=await (await fetch('Code.gs',{cache:'no-store'})).text();await navigator.clipboard.writeText(t);toast('서버 코드를 복사했어요. Apps Script에 붙여넣으세요!')}catch(e){window.open('Code.gs','_blank')}};
-ACT.saveKcal=()=>{CFG.kcal=$('#kc').value.trim();LS.set('cfg',CFG);toast('저장했어요')};
+ACT.saveKcal=()=>{setCfg({kcal:$('#kc').value.trim()});toast('저장했어요')};
+ACT.login=()=>CLOUD.login();ACT.logout=()=>CLOUD.logout();ACT.cloudPull=()=>CLOUD.pull();
+ACT.install=async()=>{if(!window.__bip)return;window.__bip.prompt();try{await window.__bip.userChoice}catch(e){}window.__bip=null;render()};
 ACT.exp=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(DB,null,1)],{type:'application/json'}));a.download='나의하루_백업_'+today()+'.json';a.click()};
 
 ACT.msort=d=>{sub.ms=d.v;render()};
@@ -509,9 +598,11 @@ ACT.tv=()=>{const dl=$('#dlg');const S=['테이스티로드','식신로드','수
 
 /* ===================== 시작 ===================== */
 if(!TABS.some(x=>x[0]===tab))tab='home';
-render();sync(true);
+render();sync(true);CLOUD.init();
 addEventListener('online',()=>sync(false));
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)sync(true)});
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();window.__bip=e;if(tab==='home'||tab==='more')render()});
+addEventListener('appinstalled',()=>{window.__bip=null;toast('앱이 설치됐어요! 홈 화면에서 열어 보세요');render()});
+let lastVis=0;document.addEventListener('visibilitychange',()=>{if(document.hidden)return;if(CFG.url)sync(true);else if(CLOUD.user&&Date.now()-lastVis>30000){lastVis=Date.now();CLOUD.pull()}});
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
