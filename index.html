@@ -1081,6 +1081,21 @@ fieldset.apt legend{font-size:.82rem;font-weight:600;color:var(--fg);padding:0;m
 .seg span{display:flex;align-items:center;justify-content:center;gap:6px;min-height:42px;padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--fg);font-size:.9rem;cursor:pointer}
 .seg input:checked+span{background:var(--ink);color:var(--ink-fg);border-color:var(--ink)}
 .seg input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
+
+/* ===== v6: 더보기 화면·수정·첨부 ===== */
+nav.tabs .t-morebtn{display:inline-flex}
+.att{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:4px}
+.att img{width:56px;height:56px;object-fit:cover;border-radius:8px;border:1px solid var(--line);cursor:zoom-in;background:var(--surface-2)}
+.att .btn.sm{padding:4px 8px}
+.edit-note{background:var(--accent-soft);color:var(--fg);border-radius:10px;padding:8px 12px;font-size:.88rem;margin:0}
+details.add.editing{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+.more-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.more-grid button{font:inherit;display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--fg);cursor:pointer;text-align:left;min-height:64px}
+.more-grid button b{font-size:1rem}
+.more-grid button span{font-size:.8rem;color:var(--muted)}
+.info-cat{margin:6px 0 2px;font-size:.95rem}
+.lk .url{font-size:.72rem;color:var(--muted);word-break:break-all;overflow-wrap:anywhere}
+@media (max-width:720px){#p-more .links{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -1102,6 +1117,7 @@ fieldset.apt legend{font-size:.82rem;font-weight:600;color:var(--fg);padding:0;m
   <section class="panel" id="p-talk" role="tabpanel" hidden></section>
   <section class="panel" id="p-mem" role="tabpanel" hidden></section>
   <section class="panel" id="p-check" role="tabpanel" hidden></section>
+  <section class="panel" id="p-more" role="tabpanel" hidden></section>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
@@ -1109,6 +1125,7 @@ fieldset.apt legend{font-size:.82rem;font-weight:600;color:var(--fg);padding:0;m
 <script>
 /* 도시별 검증 추천 팩 — 2026-10-11 웹검색 기준. 요금은 2곳 이상 출처가 일치하면 확정, 다르거나 1곳이면 costNote에 표시. 좌표는 지도 표시용 대략 위치. */
 const SRCS={
+  tmS:{n:"도쿄메트로 (Tokyo Subway Ticket 공식)",u:"https://www.tokyometro.jp/kr/ticket/value/travel/index.html"},
   avg:{n:"Art Visit Guide (스카이트리)",u:"https://www.artvisitguide.com/tokyo-skytree-tickets-how-to-book-best-time-to-visit-2026/"},
   mileTL:{n:"MileAsia (팀랩)",u:"https://mileasia.com/japan/teamlab-planets/"},
   veltraTL:{n:"VELTRA (팀랩)",u:"https://veltra.com/en/asia/japan/tokyo/a/189150"},
@@ -1182,7 +1199,7 @@ const PACKS={
  tokyo:{id:"tokyo",city:"도쿄",cityEn:"Tokyo",to:"TYO",cur:"JPY",lang:"ja",country:"jp",railLabel:"지하철·전철",
   fare:{railTable:[[6,200],[11,230],[999,280]],railNote:"도쿄메트로 180엔부터·환승 시 증가(추정)",taxi:{base:500,baseM:1000,stepM:232,step:100},taxiNote:"도쿄 23구 2026.4 개정 요금표"},
   access:{name:"나리타→우에노 스카이라이너",price:2580,note:"편도 2,470~2,580엔(출처 상이), 왕복 계산"},
-  pass:{name:"Tokyo Subway Ticket 24시간",price:800,note:"도쿄메트로+도에이 전용, JR 제외, 여권 필요"},
+  pass:{name:"Tokyo Subway Ticket 24시간",price:1000,note:"도쿄메트로+도에이 전 노선, JR 제외 · 24시간 1,000엔(도쿄메트로 공식, 2026-10-15 확인)"},
   places:[
    P("t01","센소지","Senso-ji","명소","아사쿠사",35.7148,139.7967,0,"도쿄에서 가장 오래된 사찰. 가미나리몬→나카미세 거리 순서로 걸어요."),
    P("t02","도쿄 스카이트리 (덴보 데크)","Tokyo Skytree","전망대","오시아게",35.7101,139.8107,2600,"350m 전망대. 온라인 예매가 현장보다 싸요.",{costNote:"1,800~2,600엔 날짜별 변동",src:["avg"]}),
@@ -1375,7 +1392,8 @@ function days(){const t=T();const a=parseD(t.start),b=parseD(t.end);if(!a||!b||b
 function dayLabel(s){const d=parseD(s);if(!d)return"-";return (d.getMonth()+1)+"/"+d.getDate()+"("+WD[d.getDay()]+")"}
 function nights(){return Math.max(0,days().length-1)}
 function toKRW(amount,cur){const t=T();if(cur==="KRW")return Number(amount)||0;return (Number(amount)||0)*(Number(t.rate)||0)}
-function toast(msg){const el=document.createElement("div");el.className="toast";el.textContent=msg;document.body.appendChild(el);setTimeout(()=>el.remove(),2600)}
+let EDIT=null,PENDING_ATT=null,EDITED=0;
+function toast(msg){if(EDITED&&Date.now()-EDITED<1500&&!/수정했어요/.test(msg)){EDITED=0;return}const el=document.createElement("div");el.className="toast";el.textContent=msg;document.body.appendChild(el);setTimeout(()=>el.remove(),2600)}
 function travelers(){const t=T().travelers;return Array.isArray(t)&&t.length?t:["나"]}
 const pax=()=>travelers().length;
 function formData(form){const o={};new FormData(form).forEach((v,k)=>{o[k]=typeof v==="string"?v.trim():v});return o}
@@ -1421,7 +1439,43 @@ function saveTo(no){const a=saves();if(!S.trip)S.trip=Object.assign({},DEFAULT_T
   const rec={no,name:(old&&old.name)||T().title||("여행 "+no),city:T().city,start:T().start,end:T().end,savedAt:Date.now(),counts:{items:S.items.length,places:S.places.filter(p=>!p.rec).length,expenses:S.expenses.length},data:snap};
   const next=a.filter(s=>s.no!==no);next.push(rec);if(writeSaves(next)){persist();render();toast(`#${no}에 저장했어요`)}}
 function loadSave(no){const s=saves().find(x=>x.no===no);if(!s)return;const d=s.data;S.trip=d.trip||null;COLS.forEach(c=>S[c]=Array.isArray(d[c])?d[c]:[]);if(S.trip)S.trip.saveNo=no;day=null;commit();toast(`#${no} "${s.name}"을 불러왔어요`)}
-function addDoc(col,data){data.id=data.id||uid();data.createdAt=data.createdAt||Date.now();S[col].push(data);commit();return data}
+function addDoc(col,data){
+  if(EDIT&&EDIT.col===col){const o=S[col].find(r=>r.id===EDIT.id);EDIT=null;
+    if(o){["id","createdAt","done","visited","rec","pid","src"].forEach(k=>delete data[k]);
+      if(data.photos)data.photos=(o.photos||[]).concat(data.photos);
+      const att=(o.att||[]).concat(PENDING_ATT||[]);PENDING_ATT=null;if(att.length)data.att=att;
+      Object.assign(o,data);o.updatedAt=Date.now();commit();toast("수정했어요");EDITED=Date.now();return o}}
+  if(PENDING_ATT&&PENDING_ATT.length)data.att=PENDING_ATT;PENDING_ATT=null;
+  data.id=data.id||uid();data.createdAt=data.createdAt||Date.now();S[col].push(data);commit();return data}
+const EDIT_MAP={items:{form:"itemForm",tab:"plan"},bookings:{form:"bookForm",tab:"book"},places:{form:"placeForm",tab:"place"},expenses:{form:"expForm",tab:"money"},checklist:{form:"ckForm",tab:"check"},memories:{form:"memForm",tab:"mem"}};
+function startEdit(col,id){const m=EDIT_MAP[col];const o=m&&S[col].find(r=>r.id===id);if(!o)return;EDIT={col,id};if(col==="items"&&o.day)day=o.day;tab=m.tab;render();
+  const f=document.getElementById(m.form);if(f)setTimeout(()=>f.scrollIntoView({behavior:"smooth",block:"center"}),50)}
+function fillEdit(){if(!EDIT)return;const m=EDIT_MAP[EDIT.col];const o=S[EDIT.col].find(r=>r.id===EDIT.id);const f=m&&document.getElementById(m.form);if(!o||!f)return;
+  const det=f.closest("details");if(det){det.open=true;det.classList.add("editing")}
+  for(const el of f.elements){if(!el.name||el.type==="file"||el.tagName==="BUTTON")continue;
+    if(el.name==="ll"){el.value=hasLL(o)?`${o.lat}, ${o.lng}`:"";continue}
+    if(el.type==="checkbox"){el.checked=el.name==="split"?(o.split||[]).includes(el.value):!!o[el.name];continue}
+    const v=o[el.name];if(v==null)continue;
+    if(el.tagName==="SELECT"&&![...el.options].some(op=>op.value===String(v))){const op=document.createElement("option");op.value=op.textContent=String(v);el.appendChild(op)}
+    el.value=String(v)}
+  const btn=[...f.querySelectorAll("button")].find(b=>!b.dataset.act&&b.type==="submit");
+  if(btn){btn.textContent="수정 저장";if(!f.querySelector('[data-act="cancelEdit"]')){const c=document.createElement("button");c.type="button";c.className="btn ghost";c.dataset.act="cancelEdit";c.textContent="수정 취소";btn.after(c)}}
+  const nm=o.title||o.name||o.text||o.place||"항목";const p=document.createElement("p");p.className="edit-note";p.textContent=`✏️ "${nm}" 수정 중 · 저장하면 이 항목이 바뀌어요${(o.att||[]).length?" · 기존 첨부는 그대로 두고 새 파일만 추가돼요":""}`;f.prepend(p)}
+/* ---- 첨부파일(영수증·티켓·바우처): 이 기기 IndexedDB + 로그인 시 계정(Firestore) ---- */
+const ATT_MAX=950000;
+function allPhotoIds(){const ids=[];S.memories.forEach(m=>(m.photos||[]).forEach(id=>ids.push(id)));["items","bookings","expenses"].forEach(c=>(S[c]||[]).forEach(o=>(o.att||[]).forEach(a=>ids.push(a.id))));return ids}
+function readDataURL(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=()=>rej(r.error);r.readAsDataURL(file)})}
+async function saveAtts(input){const out=[];const files=[...((input&&input.files)||[])];if(!files.length)return out;
+  if(!idb){toast("이 브라우저는 파일 저장을 지원하지 않아요(개인정보 보호 모드 등)");return out}
+  for(const file of files){try{const img=/^image\//.test(file.type);const pdf=file.type==="application/pdf"||/\.pdf$/i.test(file.name);if(!img&&!pdf)continue;
+    const data=img?await shrink(file):await readDataURL(file);const id="at"+uid();if(await putPhoto(id,data)){PH[id]=data;out.push({id,name:file.name.slice(0,60),type:img?"img":"pdf",size:data.length})}}catch(e){toast(`${file.name}을(를) 저장하지 못했어요`)}}
+  if(out.some(a=>a.size>ATT_MAX))toast("큰 파일은 이 기기에만 보관돼요(다른 기기 동기화는 약 700KB까지)");
+  return out}
+function attHtml(col,o){const a=o.att||[];if(!a.length)return"";
+  return `<div class="att">${a.map(x=>(PH[x.id]?(x.type==="img"?`<img src="${PH[x.id]}" alt="${esc(x.name)}" data-zoom="1">`:`<button class="btn sm" data-act="openAtt" data-aid="${x.id}">📄 ${esc(x.name)}</button>`):`<span class="chip">📎 ${esc(x.name)} · 다른 기기에 있음</span>`)+(x.size>ATT_MAX?`<span class="chip unv">이 기기에만</span>`:"")+`<button class="btn ghost sm" data-act="delAtt" data-col="${col}" data-id="${o.id}" data-aid="${x.id}" aria-label="첨부 삭제">✕</button>`).join("")}</div>`}
+function openAtt(aid){const d=PH[aid];if(!d)return;try{const [h,b64]=d.split(",");const mime=(h.match(/data:([^;]+)/)||[])[1]||"application/octet-stream";const bin=atob(b64);const u8=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);
+  const url=URL.createObjectURL(new Blob([u8],{type:mime}));const w=window.open(url,"_blank");if(!w){const a=document.createElement("a");a.href=url;a.download="첨부.pdf";document.body.appendChild(a);a.click();a.remove()}setTimeout(()=>URL.revokeObjectURL(url),60000)}catch(e){toast("파일을 열지 못했어요")}}
+const ATT_INPUT=`<label class="f">영수증·티켓 첨부 (사진·PDF, 여러 개 가능)<input type="file" name="attfile" data-att="1" accept="image/*,application/pdf" multiple></label>`;
 function setDoc(col,id,data){S[col]=S[col].filter(r=>r.id!==id);S[col].push(Object.assign({},data,{id}));commit()}
 function updDoc(col,id,patch){const x=S[col].find(r=>r.id===id);if(x)Object.assign(x,patch);commit()}
 function delDoc(col,id){S[col]=S[col].filter(r=>r.id!==id);commit()}
@@ -1431,7 +1485,7 @@ function armDelete(btn,fn){if(btn.dataset.armed){fn();return}btn.dataset.armed="
 /* ---------- 백업 내보내기/가져오기 ---------- */
 function exportData(){
   const o={app:"trip-planner",v:1,exportedAt:new Date().toISOString(),trip:S.trip,photos:{}};COLS.forEach(c=>o[c]=S[c]);
-  S.memories.forEach(m=>(m.photos||[]).forEach(id=>{if(PH[id])o.photos[id]=PH[id]}));
+  allPhotoIds().forEach(id=>{if(PH[id])o.photos[id]=PH[id]});
   const blob=new Blob([JSON.stringify(o)],{type:"application/json"});const a=document.createElement("a");
   a.href=URL.createObjectURL(blob);a.download=`여행플래너_${(T().city||"backup")}_${iso(new Date())}.json`;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000);
   toast("백업 파일을 내려받았어요");
@@ -1470,7 +1524,7 @@ const Sync={user:null,ready:false,state:"off",last:0,timer:null,db:null,auth:nul
       await this.ref().collection("data").doc("main").set(data);await this.pushPhotos();this.state="ok";this.last=Date.now();this.paint()}
     catch(e){this.state="error";this.err=(e&&e.code)==="permission-denied"?"권한 오류(보안 규칙 확인)":"네트워크 확인";this.paint()}},
   async pushPhotos(){const done=JSON.parse(localStorage.getItem("tp-photo-up")||"[]");const set=new Set(done);
-    for(const m of S.memories)for(const id of (m.photos||[])){if(set.has(id)||!PH[id])continue;if(PH[id].length>950000)continue;await this.ref().collection("photos").doc(id).set({data:PH[id],at:Date.now()});set.add(id)}
+    for(const id of allPhotoIds()){if(set.has(id)||!PH[id])continue;if(PH[id].length>950000)continue;await this.ref().collection("photos").doc(id).set({data:PH[id],at:Date.now()});set.add(id)}
     try{localStorage.setItem("tp-photo-up",JSON.stringify([...set]))}catch(_){}},
   async pull(){this.state="saving";this.paint();
     try{const snap=await this.ref().collection("data").doc("main").get();
@@ -1481,9 +1535,9 @@ const Sync={user:null,ready:false,state:"off",last:0,timer:null,db:null,auth:nul
       await this.pullPhotos();this.state="ok";this.last=Date.now()}
     catch(e){this.state="error";this.err=(e&&e.code)==="permission-denied"?"권한 오류(보안 규칙 확인)":"네트워크 확인"}
     this.paint()},
-  async pullPhotos(){const need=[];S.memories.forEach(m=>(m.photos||[]).forEach(id=>{if(!PH[id])need.push(id)}));
+  async pullPhotos(){const need=[];allPhotoIds().forEach(id=>{if(!PH[id])need.push(id)});
     for(const id of need){try{const d=await this.ref().collection("photos").doc(id).get();if(d.exists){PH[id]=d.data().data;await putPhoto(id,PH[id])}}catch(_){}}
-    if(need.length&&tab==="mem")render()},
+    if(need.length)render()},
   paint(){const el=document.getElementById("syncState");if(el)el.textContent=this.label();const st=document.getElementById("acctLine");if(st)st.textContent=this.label()}
 };
 function acctCard(){if(!Sync.enabled())return `<div class="card"><h3>계정·동기화</h3><p class="small muted">로그인 기능은 아직 설정 전이에요(관리자가 Firebase 설정을 넣으면 켜져요). 지금은 이 기기에만 저장돼요.</p></div>`;
@@ -1612,13 +1666,14 @@ function render(){
   const openD=[...document.querySelectorAll("details.add[open]")].map(d=>d.id),closedD=[...document.querySelectorAll("details.add:not([open])")].map(d=>d.id);
   const t=T();
   $("#tripTitle").textContent=t.title||"여행 올인원 플래너";
-  $("#status").innerHTML=Sync.user?`<span id="syncState">${esc(Sync.label())}</span> · ${esc(Sync.user.displayName||Sync.user.email||"")}`:Sync.enabled()?`<b>이 기기에 자동 저장</b> · <button class="btn ghost sm" data-act="login" style="padding:0">로그인하고 동기화</button>`:`<b>이 기기에 자동 저장</b> · Claude 없이 무료로 동작`;
-  $("#tabs").innerHTML=TABS.map(([k,v])=>`<button role="tab" data-tab="${k}" aria-selected="${k===tab}" class="${MORE.includes(k)?"t-more":""}">${v}</button>`).join("")+`<button class="t-morebtn" data-act="more" aria-expanded="false" aria-selected="${MORE.includes(tab)}">더보기</button>`;
+  $("#status").innerHTML=Sync.user?`<span id="syncState">${esc(Sync.label())}</span> · ${esc(Sync.user.displayName||Sync.user.email||"")} · <button class="btn ghost sm" data-act="logout" style="padding:0">로그아웃</button>`:Sync.enabled()?`<b>이 기기에 자동 저장</b> · <button class="btn ghost sm" data-act="login" style="padding:0">로그인하고 동기화</button>`:`<b>이 기기에 자동 저장</b> · Claude 없이 무료로 동작`;
+  $("#tabs").innerHTML=TABS.map(([k,v])=>`<button role="tab" data-tab="${k}" aria-selected="${k===tab}" class="${MORE.includes(k)?"t-more":""}">${v}</button>`).join("")+`<button class="t-morebtn" role="tab" data-tab="more" aria-selected="${tab==="more"||MORE.includes(tab)}">더보기</button>`;
   document.getElementById("tabs").classList.remove("open");
-  TABS.forEach(([k])=>{$("#p-"+k).hidden=k!==tab});
-  ({home:rHome,plan:rPlan,book:rBook,place:rPlace,money:rMoney,talk:rTalk,mem:rMem,check:rCheck})[tab]();
+  TABS.forEach(([k])=>{$("#p-"+k).hidden=k!==tab});$("#p-more").hidden=tab!=="more";
+  ({home:rHome,plan:rPlan,book:rBook,place:rPlace,money:rMoney,talk:rTalk,mem:rMem,check:rCheck,more:rMore})[tab]();
   openD.forEach(id=>{const d=document.getElementById(id);if(d)d.open=true});
   closedD.forEach(id=>{const d=document.getElementById(id);if(d)d.open=false});
+  if(EDIT)fillEdit();
   if(tab==="plan")drawMap();
 }
 function actualKRW(){return S.expenses.reduce((a,e)=>a+toKRW(e.amount,e.cur),0)}
@@ -1772,10 +1827,10 @@ function rPlan(){
       <span class="t">${esc(i.time||"--:--")}</span>
       <div class="body"><span class="title">${esc(i.title)}</span>
         <div class="chips"><span class="chip k-${esc(i.kind)}">${esc(i.kind||"기타")}</span>${i.cost?`<span class="chip ${i.done?"act":"est"} num">1인 ${fmt(i.cost)}${esc(t.cur)} × ${pax()}</span>`:`<span class="chip">무료/미입력</span>`}${i.costNote?`<span class="chip unv">${esc(i.costNote)}</span>`:""}${hasLL(i)?"":`<span class="chip">위치 없음</span>`}</div>
-        ${i.note?`<span class="small muted">${esc(i.note)}</span>`:""}</div>
+        ${i.note?`<span class="small muted">${esc(i.note)}</span>`:""}${attHtml("items",i)}</div>
       <div class="acts"><input type="time" class="small" aria-label="시간" value="${esc(i.time||"")}" data-act="time" data-id="${i.id}" style="width:96px;padding:3px 6px">
         <button class="btn ${i.done?"ghost":""} sm" data-act="toggleItem" data-id="${i.id}">${i.done?"완료 취소":"완료 → 실제 경비"}</button>
-        <button class="btn ghost sm" data-act="delItem" data-id="${i.id}">삭제</button></div></div>`}).join("")}</div>`:`<div class="empty">이 날은 비어 있어요. 추천 장소·맛집 탭에서 "일정에 담기"를 누르세요.</div>`}
+        <button class="btn ghost sm" data-act="edit" data-col="items" data-id="${i.id}">수정</button><button class="btn ghost sm" data-act="delItem" data-id="${i.id}">삭제</button></div></div>`}).join("")}</div>`:`<div class="empty">이 날은 비어 있어요. 추천 장소·맛집 탭에서 "일정에 담기"를 누르세요.</div>`}
     <p class="small muted">이동 수단은 거리로 자동 추천돼요(1km 미만 도보). 바꾸면 비용과 시간이 다시 계산돼요. "완료"를 누르면 입장료·이동비가 실제 경비로 들어가 정산에 반영돼요.</p>
   </div>
   <details class="add" id="dt-item"><summary>+ 직접 일정 추가</summary>
@@ -1787,6 +1842,7 @@ function rPlan(){
       <div class="row"><label class="f">1인 비용(${esc(t.cur)})<input id="if-cost" type="number" name="cost" inputmode="decimal"></label>
       <label class="f">위치(구글 지도 좌표 "위도, 경도")<input id="if-ll" name="ll" placeholder="37.7955, 128.8966"></label></div>
       <label class="f">메모<input id="if-note" name="note"></label>
+      ${ATT_INPUT}
       <p class="small muted">좌표는 구글 지도에서 장소를 길게 눌러 나오는 숫자를 붙여넣으면 돼요.</p>
       <div class="row"><button class="btn primary">추가</button></div>
     </form></details>`;
@@ -1824,8 +1880,8 @@ function rBook(){
     ${bk.length?`<div class="list">${bk.map(b=>`<div class="item"><span class="t">${b.date?dayLabel(b.date):"-"}</span>
       <div class="body"><span class="title">${esc(b.title)}</span>
       <div class="chips"><span class="chip">${esc(b.kind)}</span>${b.ref?`<span class="chip mono">예약번호 ${esc(b.ref)}</span>`:""}<span class="chip num">${won(b.cost)}</span></div>
-      ${b.note?`<span class="small muted">${esc(b.note)}</span>`:""}</div>
-      <div class="acts"><button class="btn ghost sm" data-act="delBook" data-id="${b.id}">삭제</button></div></div>`).join("")}</div>`:`<div class="empty">예약을 마치면 여기에 기록하세요. 예산에 자동으로 더해져요.</div>`}
+      ${b.note?`<span class="small muted">${esc(b.note)}</span>`:""}${attHtml("bookings",b)}</div>
+      <div class="acts"><button class="btn ghost sm" data-act="edit" data-col="bookings" data-id="${b.id}">수정</button><button class="btn ghost sm" data-act="delBook" data-id="${b.id}">삭제</button></div></div>`).join("")}</div>`:`<div class="empty">예약을 마치면 여기에 기록하세요. 예산에 자동으로 더해져요.</div>`}
   </div>
   <details class="add" id="dt-book"><summary>+ 예약 기록</summary><form id="bookForm">
     <div class="row"><label class="f">종류<select id="bf-kind" name="kind"><option>항공</option><option>기차·버스</option><option>숙소</option><option>교통</option><option>투어·입장권</option><option>eSIM·통신</option><option>보험</option></select></label>
@@ -1833,6 +1889,7 @@ function rBook(){
     <label class="f">이름<input id="bf-title" name="title" required placeholder="예: KTX 청량리→강릉"></label>
     <div class="row"><label class="f">예약번호<input id="bf-ref" name="ref"></label><label class="f">결제 금액(원)<input id="bf-cost" type="number" name="cost" inputmode="numeric"></label></div>
     <label class="f">메모<input id="bf-note" name="note"></label>
+    ${ATT_INPUT}
     <div class="row"><button class="btn primary">저장</button></div></form></details>`;
 }
 
@@ -1857,7 +1914,7 @@ function rPlace(){
         ${ds.length?`<div class="row"><select id="pd-${p.id}" aria-label="담을 날짜" class="small">${ds.map((d,i)=>`<option value="${d}" ${d===day?"selected":""}>DAY ${i+1} ${dayLabel(d)}</option>`).join("")}</select>${p.kind==="맛집"?`<input id="pc-${p.id}" type="number" class="small" placeholder="1인 식비" style="width:96px" aria-label="1인 식비">`:""}<button class="btn sm primary" data-act="placeToPlan" data-id="${p.id}">일정에 담기</button></div>`:`<span class="small muted">홈에서 날짜를 넣으면 일정에 담을 수 있어요.</span>`}</div>
       <div class="acts"><a class="btn ghost sm" href="${esc(l.wiki(p.name))}" target="_blank" rel="noopener">위키</a><a class="btn ghost sm" href="${esc(l.gmap(p.query||((p.nameEn||p.name)+" "+(t.cityEn||""))))}" target="_blank" rel="noopener">지도</a>
         <button class="btn ghost sm" data-act="visit" data-id="${p.id}">${p.visited?"취소":"방문"}</button>
-        ${p.rec?"":`<button class="btn ghost sm" data-act="delPlace" data-id="${p.id}">삭제</button>`}</div></div>`).join("")}</div>`:`<div class="empty">${S.places.length?"이 분류에는 장소가 없어요.":"홈 → 여행 기본 정보에서 도시 팩을 고르고 \"저장하고 추천 반영\"을 누르세요."}</div>`}
+        <button class="btn ghost sm" data-act="edit" data-col="places" data-id="${p.id}">수정</button>${p.rec?"":`<button class="btn ghost sm" data-act="delPlace" data-id="${p.id}">삭제</button>`}</div></div>`).join("")}</div>`:`<div class="empty">${S.places.length?"이 분류에는 장소가 없어요.":"홈 → 여행 기본 정보에서 도시 팩을 고르고 \"저장하고 추천 반영\"을 누르세요."}</div>`}
   </div>
   <div class="card"><h3>더 찾아보기</h3>
     <div class="links">${linkCard(l.gmapCity,"구글 지도 맛집","현지 리뷰·영업시간·혼잡도")}${linkCard(l.ta,"트립어드바이저","지역별 인기 명소·식당 순위")}${linkCard(l.klook,"클룩","입장권·투어·교통패스")}${linkCard(l.kkday,"KKday","현지 투어·티켓")}</div>
@@ -1892,7 +1949,7 @@ function rMoney(){
   <div class="card"><h2>일자별 예상 vs 실제 · 정산</h2>
     ${ds.length?ds.map((d,i)=>{const pl=dayPlan(d),ex=S.expenses.filter(e=>e.date===d).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0)),act=ex.reduce((a,e)=>a+toKRW(e.amount,e.cur),0),st=settle(ex);
       return `<div class="dayblock"><div class="row between"><h3>DAY ${i+1} · ${dayLabel(d)}</h3><span class="small"><span class="chip est">예상 ${won(toKRW(pl.total,t.cur))}</span> <span class="chip act">실제 ${won(act)}</span></span></div>
-      ${ex.length?`<div class="tbl"><table><thead><tr><th>내용</th><th>낸 사람</th><th class="r">금액</th><th class="r">원화</th><th></th></tr></thead><tbody>${ex.map(e=>`<tr><td>${esc(e.title)} <span class="chip">${esc(e.cat)}</span>${e.auto?` <span class="chip act">자동</span>`:""}</td><td><select aria-label="낸 사람" data-act="payer" data-id="${e.id}" class="small">${[...new Set([...ppl,e.payer])].map(p=>`<option ${p===e.payer?"selected":""}>${esc(p)}</option>`).join("")}</select></td><td class="r">${fmt(e.amount)} ${esc(e.cur)}</td><td class="r">${won(toKRW(e.amount,e.cur))}</td><td><button class="btn ghost sm" data-act="delExp" data-id="${e.id}">삭제</button></td></tr>`).join("")}</tbody></table></div>`:`<p class="small muted">아직 실제 지출이 없어요. 일정에서 "완료"를 누르거나 아래에서 추가하세요.</p>`}
+      ${ex.length?`<div class="tbl"><table><thead><tr><th>내용</th><th>낸 사람</th><th class="r">금액</th><th class="r">원화</th><th></th></tr></thead><tbody>${ex.map(e=>`<tr><td>${esc(e.title)} <span class="chip">${esc(e.cat)}</span>${e.auto?` <span class="chip act">자동</span>`:""}${attHtml("expenses",e)}</td><td><select aria-label="낸 사람" data-act="payer" data-id="${e.id}" class="small">${[...new Set([...ppl,e.payer])].map(p=>`<option ${p===e.payer?"selected":""}>${esc(p)}</option>`).join("")}</select></td><td class="r">${fmt(e.amount)} ${esc(e.cur)}</td><td class="r">${won(toKRW(e.amount,e.cur))}</td><td><button class="btn ghost sm" data-act="edit" data-col="expenses" data-id="${e.id}">수정</button><button class="btn ghost sm" data-act="delExp" data-id="${e.id}">삭제</button></td></tr>`).join("")}</tbody></table></div>`:`<p class="small muted">아직 실제 지출이 없어요. 일정에서 "완료"를 누르거나 아래에서 추가하세요.</p>`}
       ${ex.length?txHtml(st.tx):""}</div>`}).join(""):`<div class="empty">홈 탭에서 날짜를 먼저 입력하세요.</div>`}
     ${off.length?`<div class="dayblock"><h3>여행 날짜 밖 지출</h3><p class="small muted">${off.map(e=>esc(e.title)+" "+won(toKRW(e.amount,e.cur))).join(" · ")}</p></div>`:""}
   </div>
@@ -1903,6 +1960,7 @@ function rMoney(){
     <div class="row"><label class="f">금액<input id="ef-amount" type="number" step="0.01" name="amount" inputmode="decimal" required></label>
     <label class="f">통화<select id="ef-cur" name="cur"><option>${esc(t.cur)}</option>${t.cur!=="KRW"?"<option>KRW</option>":""}</select></label>
     <label class="f">낸 사람<select id="ef-payer" name="payer">${ppl.map(p=>`<option>${esc(p)}</option>`).join("")}</select></label></div>
+    ${ATT_INPUT}
     <fieldset style="border:0;padding:0;margin:0"><legend class="small muted">함께 나눌 사람</legend><div class="row">${ppl.map((p,i)=>`<label class="row small"><input type="checkbox" id="ef-sp-${i}" name="split" value="${esc(p)}" checked> ${esc(p)}</label>`).join("")}</div></fieldset>
     <div class="row"><button class="btn primary">추가</button></div></form></details>`;
 }
@@ -1914,7 +1972,7 @@ const GUIDES={
  tokyo:()=>`<h2>도쿄 교통, 처음부터 차근차근</h2>
   ${sec(1,"교통카드(IC카드) 만들기",["Suica·PASMO 같은 <b>IC카드</b> 하나면 지하철·JR·버스를 다 탈 수 있어요. 편의점 결제도 돼요.","역 발매기에서 현금으로 충전해요. 아이폰은 지갑 앱에 Suica를 추가할 수 있어요.","개찰구 패드에 <b>찍고 들어가서, 내릴 때 또 찍고 나가요</b>."],"jap")}
   ${sec(2,"지하철과 JR 구분하기",["도쿄 지하철은 <b>도쿄메트로 9개 + 도에이 4개 노선</b>, 회사가 두 개예요.","<b>JR</b>(야마노테선 등)은 별도 회사예요.","요금: 도쿄메트로 <b>180엔부터</b>, JR은 2026년 3월 개정 후 <b>160엔부터</b>.","회사가 바뀌는 환승은 요금이 따로 붙어요. 앱은 1인 200~280엔으로 <b>추정</b>해요."],"fun","jap","imp")}
-  ${sec(3,"여행자 패스",["<b>Tokyo Subway Ticket</b>: 24시간 800엔 · 48시간 1,200엔 · 72시간 1,500엔.","도쿄메트로+도에이 무제한, <b>JR·사설선 제외</b>. 살 때 <b>여권</b> 필요.","하루 지하철 5번 이상이면 이득이에요."],"jap","fun")}
+  ${sec(3,"여행자 패스",["<b>Tokyo Subway Ticket</b>: 24시간 1,000엔 · 48시간 1,500엔 · 72시간 2,000엔(어른, 도쿄메트로 공식 2026-10-15 확인).","도쿄메트로+도에이 지하철 전 노선 무제한, <b>JR·사설선 제외</b>. 공식 안내 구매처는 온라인(QR권은 동행자에게 나눠 보내기 가능).","하루 지하철 5~6번 이상 타면 이득이에요."],"tmS","jap","fun")}
   ${sec(4,"공항에서 시내로",["<b>나리타 → 우에노·닛포리</b>: 스카이라이너 약 53분. 요금은 공식 2,470엔, 다른 2026년 안내 2,580엔으로 출처마다 달라요.","나리타 익스프레스(JR)도 있어요. 신주쿠·시부야 숙소면 비교해 보세요.","<b>하네다</b>: 게이큐선·도쿄 모노레일이 대표적이에요."],"ks","ek")}
   ${sec(5,"택시",["2026년 4월 말부터 23구 기본요금 <b>500엔(첫 1km)</b>, 이후 <b>232m마다 100엔</b>(밤 할증 제외).","뒷문은 자동으로 열리고 닫혀요.","호출 앱: <b>GO</b>, <b>Uber</b>."],"tx1","tx2")}`,
  osaka:()=>`<h2>오사카 교통, 처음부터 차근차근</h2>
@@ -1973,7 +2031,7 @@ function rMem(){
     <div class="links">${linkCard(l.gphotos,"구글 포토","원본 자동 백업·공유 앨범")}${linkCard("https://www.notion.so/","노션","긴 여행기 정리")}</div>
   </div>
   <div class="card"><h2>추억 타임라인</h2>
-  ${ms.length?`<div>${ms.map(m=>`<div class="mem"><div class="row between"><span class="label">${m.date?dayLabel(m.date):""} ${m.place?"· "+esc(m.place):""}</span><button class="btn ghost sm" data-act="delMem" data-id="${m.id}">삭제</button></div>
+  ${ms.length?`<div>${ms.map(m=>`<div class="mem"><div class="row between"><span class="label">${m.date?dayLabel(m.date):""} ${m.place?"· "+esc(m.place):""}</span><span><button class="btn ghost sm" data-act="edit" data-col="memories" data-id="${m.id}">수정</button><button class="btn ghost sm" data-act="delMem" data-id="${m.id}">삭제</button></span></div>
     ${m.text?`<p>${esc(m.text)}</p>`:""}
     ${(m.photos||[]).length?`<div class="photos">${m.photos.filter(id=>PH[id]).map(id=>`<img src="${PH[id]}" alt="${esc(m.place||"여행 사진")}" loading="lazy" data-zoom="1">`).join("")}</div>`:""}</div>`).join("")}</div>`:`<div class="empty">여행 중 사진과 한 줄 일기를 남겨보세요.</div>`}
   </div>`;
@@ -1987,7 +2045,7 @@ function rCheck(){
    <div class="meter"><i style="width:${S.checklist.length?done/S.checklist.length*100:0}%;background:var(--good)"></i></div>
    ${S.checklist.length?"":`<div class="empty">비어 있어요.<div style="margin-top:10px"><button class="btn" data-act="loadBasic">기본 준비물 불러오기</button></div></div>`}
   </div>
-  ${Object.entries(groups).map(([g,arr])=>`<div class="card"><h3>${esc(g)}</h3><div>${arr.map(c=>`<div class="check ${c.done?"on":""}"><input type="checkbox" id="ck-${c.id}" data-act="toggleCk" data-id="${c.id}" ${c.done?"checked":""}><label class="txt" for="ck-${c.id}">${esc(c.text)}</label><button class="btn ghost sm" data-act="delCk" data-id="${c.id}">삭제</button></div>`).join("")}</div></div>`).join("")}
+  ${Object.entries(groups).map(([g,arr])=>`<div class="card"><h3>${esc(g)}</h3><div>${arr.map(c=>`<div class="check ${c.done?"on":""}"><input type="checkbox" id="ck-${c.id}" data-act="toggleCk" data-id="${c.id}" ${c.done?"checked":""}><label class="txt" for="ck-${c.id}">${esc(c.text)}</label><button class="btn ghost sm" data-act="edit" data-col="checklist" data-id="${c.id}">수정</button><button class="btn ghost sm" data-act="delCk" data-id="${c.id}">삭제</button></div>`).join("")}</div></div>`).join("")}
   <details class="add" id="dt-ck"><summary>+ 준비물 추가</summary><form id="ckForm">
     <div class="row"><label class="f">항목<input id="cf-text" name="text" required></label><label class="f">분류<select id="cf-cat" name="cat"><option>서류</option><option>돈·결제</option><option>통신·전자</option><option>건강</option><option>의류·생활</option><option>기타</option></select></label></div>
     <div class="row"><button class="btn primary">추가</button></div></form></details>`;
@@ -2016,6 +2074,63 @@ async function applyRecs(trip){
 }
 
 async function applyPackToTrip(pk){if(!pk)return;const trip=Object.assign({},T(),{city:pk.city,cityEn:pk.cityEn,to:pk.to||T().to});if(!S.trip||!T().title||T().title==="새 여행"||/여행$/.test(T().title))trip.title=pk.city+" 여행";const n=await applyRecs(trip);S.trip=trip;commit();toast(`${pk.city} 팩 적용: 추천 ${n}곳·숙소 ${S.hotels.length}곳`)}
+
+/* ===== 더보기: 목적지별 유용한 사이트 (2026-10-15 링크·내용 직접 확인) ===== */
+const INFO_CHECKED="2026-10-15";
+const INFO_CATS=[["교통권","🎫 교통권·패스 사용법"],["교통","🚆 교통·예매"],["맛집","🍜 맛집 찾기"],["관광","🗺️ 공식 관광 정보"],["정보","ℹ️ 입국·안전·긴급 연락"]];
+const INFO={
+ all:[{c:"정보",n:"외교부 해외안전여행",d:"나라별 여행경보·안전공지. 영사콜센터 +82-2-3210-0404(해외에서), 02-3210-0404",u:"https://www.0404.go.kr/"}],
+ jp:[{c:"관광",n:"JNTO 일본 공식 관광 가이드",d:"일본정부관광국 공식 사이트. 지역별 여행지·교통·비자 정보",u:"https://www.japan.travel/ko/"},
+  {c:"정보",n:"Visit Japan Web",d:"출국 전 등록해 입국·세관 QR을 받아두면 지원 공항에서 종이 신고서 없이 진행",u:"https://services.digital.go.jp/visit-japan-web"},
+  {c:"맛집",n:"타베로그 (한국어)",d:"일본 전국 약 90만 곳 식당 검색·온라인 예약",u:"https://tabelog.com/kr/"},
+  {c:"정보",n:"Japan Visitor Hotline (JNTO)",d:"24시간 365일 한국어 상담 050-3816-2787 · 긴급: 경찰 110, 화재·구급 119",u:"https://www.japan.travel/en/plan/hotline/"},
+  {c:"정보",n:"Safety tips for travelers (JNTO)",d:"지진·기상 경보, 재해 시 행동 요령, 교통 정보",u:"https://www.jnto.go.jp/safety-tips/kor/"}],
+ tokyo:[{c:"관광",n:"GO TOKYO (도쿄 관광 공식)",d:"도쿄도 공식 관광 사이트: 코스·명소·숙박·이벤트",u:"https://www.gotokyo.org/kr/"},
+  {c:"교통권",n:"Tokyo Subway Ticket (도쿄메트로 공식)",d:"도쿄메트로·도에이 지하철 전 노선 무제한. 어른 24시간 1,000엔 · 48시간 1,500엔 · 72시간 2,000엔. 온라인 구매, QR권은 동행자에게 나눠 보내기 가능",u:"https://www.tokyometro.jp/kr/ticket/value/travel/index.html"},
+  {c:"교통권",n:"Welcome Suica (JR동일본)",d:"여행자용 교통카드. 보증금 없음, 구입일 포함 28일 사용, 남은 잔액 환불 불가. 나리타·하네다 공항역 전용 발매기 등에서 구매",u:"https://www.jreast.co.jp/multi/ko/welcomesuica/purchase.html"},
+  {c:"교통",n:"스카이라이너 (게이세이 전철)",d:"나리타공항↔게이세이 우에노 공항특급(최고속도 기준 41분). 할인 승차권·시각표",u:"https://www.keisei.co.jp/keisei/tetudou/skyliner/kr/"}],
+ osaka:[{c:"관광",n:"OSAKA-INFO (오사카 관광 공식)",d:"오사카 관광 공식 가이드: 명소·이벤트·여행 팁",u:"https://osaka-info.jp/ko/"},
+  {c:"교통권",n:"Osaka Metro 1일·2일 패스",d:"오사카메트로 전 노선 + 대부분 시내버스 무제한. 어른 1일 1,000엔 · 2일 1,700엔. 간사이공항 T1 관광안내소·온라인 판매(시내에선 발매기의 엔조이 에코 카드 1일권 안내)",u:"https://metronine.osaka/en/ticket/ticket-b02"},
+  {c:"교통권",n:"오사카 주유패스 (공식 안내)",d:"관광명소 40곳 이상 무료 + 전철·버스 1일 무제한. 이 사이트 판매는 종료, 새 판매 페이지로 연결 안내",u:"https://www.osp.osaka-info.jp/kr/"},
+  {c:"교통",n:"난카이 특급 라피트",d:"난바↔간사이국제공항 공항특급 (일본어 페이지)",u:"https://www.nankai.co.jp/traffic/express/rapit.html"}],
+ fukuoka:[{c:"관광",n:"VISIT FUKUOKA (후쿠오카현 공식)",d:"관광지·먹거리·추천 코스·체험을 한국어로 안내",u:"https://www.crossroadfukuoka.jp/kr/"},
+  {c:"교통",n:"후쿠오카 공항",d:"항공편 조회·공항 교통편·터미널 지도",u:"https://www.fukuoka-airport.jp/ko/"},
+  {c:"교통권",n:"후쿠오카 지하철 1일 승차권 안내 (FUN! JAPAN)",d:"어른 640엔, 역 자동발매기에서 구매. 공항→하카타 260엔 (2026년 2월 기사, 구매 전 재확인)",u:"https://www.fun-japan.jp/ko/articles/13679"}],
+ kr:[{c:"교통",n:"코레일 승차권 예매",d:"KTX·일반열차 예매",u:"https://www.korail.com/"},
+  {c:"교통",n:"고속버스 통합예매",d:"전국 고속버스 예매",u:"https://www.kobus.co.kr/"},
+  {c:"교통",n:"시외버스 통합예매",d:"시외버스 예매",u:"https://txbus.t-money.co.kr/"},
+  {c:"교통",n:"카카오맵",d:"장소 검색·길찾기·버스·지하철 정보",u:"https://map.kakao.com/"},
+  {c:"맛집",n:"다이닝코드",d:"빅데이터 기반 맛집 검색·추천",u:"https://www.diningcode.com/"}],
+ gangneung:[{c:"관광",n:"솔향강릉 (강릉시 관광포털)",d:"강릉시 공식 관광: 지역별 명소·추천 코스·채팅 상담",u:"https://www.gn.go.kr/tour/index.do"}],
+ vn:[{c:"정보",n:"베트남 비자 안내 (베트남 관광청)",d:"대한민국 여권은 무비자 최대 45일(2023-08-15 시행). 더 머물려면 전자비자",u:"https://vietnam.travel/kr/node/71"},
+  {c:"정보",n:"베트남 긴급전화 (베트남 관광청)",d:"경찰 113 · 소방 114 · 구급차 115",u:"https://vietnam.travel/kr/node/26"},
+  {c:"교통",n:"Grab (베트남)",d:"차량·오토바이 호출, 배달 앱",u:"https://www.grab.com/vn/en/"}],
+ danang:[{c:"관광",n:"Danang Fantasticity (다낭시 관광국)",d:"다낭시 공식 관광 포털: 명소·축제·숙박·미식",u:"https://danangfantasticity.com/"}]
+};
+function infoLinks(){const t=T(),pk=PK();const cc=(pk&&pk.country)||({JPY:"jp",KRW:"kr",VND:"vn"})[t.cur]||"";const key=pk&&INFO[pk.id]?pk.id:({"도쿄":"tokyo","오사카":"osaka","후쿠오카":"fukuoka","강릉":"gangneung","다낭":"danang"})[(t.city||"").trim()]||"";
+  const list=[...(key?INFO[key]:[]),...(INFO[cc]||[]),...INFO.all];
+  const q=(t.cityEn||t.city||"").trim();if(q)list.push({c:"맛집",n:"구글 지도 맛집 검색",d:`${t.city||q} 식당을 평점·리뷰·위치로 찾기`,u:"https://www.google.com/maps/search/"+enc(q+" restaurants")});
+  return list}
+function rMore(){const t=T(),pk=PK(),list=infoLinks();const city=t.city||"";
+  const link=x=>`<a class="lk" href="${esc(x.u)}" target="_blank" rel="noopener"><b>${esc(x.n)} ↗</b><span>${esc(x.d)}</span><span class="url">${esc(x.u.replace(/^https?:\/\//,"").replace(/\/$/,""))}</span></a>`;
+  const tr=pk?[pk.access&&`<li><b>공항↔시내</b>: ${esc(pk.access.name)} — ${esc(pk.access.note||"")}</li>`,pk.pass&&`<li><b>추천 패스</b>: ${esc(pk.pass.name)} — ${esc(pk.pass.note||"")}</li>`].filter(Boolean).join(""):"";
+  $("#p-more").innerHTML=`
+  <div class="card"><h2>더보기</h2>
+    <div class="more-grid">
+      <button data-tab="book"><b>✈️ 항공·숙소</b><span>최저가 검색·예약 기록</span></button>
+      <button data-tab="talk"><b>🗣️ 번역·교통</b><span>현지어·교통 안내</span></button>
+      <button data-tab="mem"><b>📷 추억</b><span>사진 일기</span></button>
+      <button data-tab="check"><b>✅ 준비물</b><span>체크리스트</span></button>
+    </div></div>
+  ${acctCard()}
+  <div class="card"><div class="row between"><h2>${city?esc(city)+" ":""}여행 정보</h2><span class="small muted">링크 확인 ${INFO_CHECKED}</span></div>
+    ${city?"":`<p class="note">홈 → 여행 기본 정보에서 도시를 정하면 그 도시에 맞는 사이트가 나와요. 지금은 공통 정보만 보여요.</p>`}
+    ${pk?"":city?`<p class="small muted">${esc(city)}은(는) 앱에 도시 팩이 없어 나라 공통·검색 링크만 보여요.</p>`:""}
+    ${INFO_CATS.map(([c,label])=>{const xs=list.filter(x=>x.c===c);return xs.length?`<h3 class="info-cat">${label}</h3><div class="links">${xs.map(link).join("")}</div>`:""}).join("")}
+    <p class="small muted">요금·정책은 바뀔 수 있어요. 결제 전 각 공식 사이트에서 다시 확인하세요.</p>
+  </div>
+  ${pk?`<div class="card"><h2>🚇 교통 정리</h2>${tr?`<ul style="margin:0;padding-left:18px">${tr}</ul>`:""}<div class="row"><button class="btn primary" data-go="talk">교통 안내 자세히 보기 (출처 포함)</button></div></div>`:""}`;
+}
 /* ---------- events ---------- */
 document.addEventListener("click",async e=>{
   const b=e.target.closest("button,[data-zoom]");if(!b)return;
@@ -2032,6 +2147,10 @@ document.addEventListener("click",async e=>{
     case "more":{const n=document.getElementById("tabs");const o=!n.classList.contains("open");n.classList.toggle("open",o);b.setAttribute("aria-expanded",o);break}
     case "login":await Sync.login();break;
     case "logout":await Sync.logout();render();break;
+    case "edit":startEdit(b.dataset.col,id);break;
+    case "cancelEdit":EDIT=null;render();break;
+    case "openAtt":openAtt(b.dataset.aid);break;
+    case "delAtt":armDelete(b,async()=>{const col=b.dataset.col,aid=b.dataset.aid;const o=(S[col]||[]).find(r=>r.id===id);if(!o)return;o.att=(o.att||[]).filter(a=>a.id!==aid);delete PH[aid];await delPhoto(aid);commit();toast("첨부를 지웠어요")});break;
     case "syncNow":await Sync.pull();render();break;
     case "install":if(window.__bip){window.__bip.prompt();window.__bip=null}break;
     case "exportX":exportXlsx(b);break;
@@ -2072,7 +2191,7 @@ document.addEventListener("change",async e=>{if(["tf-cur","tf-lang"].includes(e.
 function autoCity(force){const c=document.getElementById("tf-city");if(!c)return;const d=dictFor(c.value);if(!d)return;const set=(id,v)=>{const el=document.getElementById(id);if(el&&el.dataset.auto!=="0"){el.value=v;el.dataset.auto="1"}};set("tf-cityEn",d[1]);set("tf-to",d[2]);set("tf-cur",d[3]);set("tf-lang",d[4]);const hint=document.getElementById("cityHint");if(hint)hint.textContent=`"${d[0]}" → ${d[1]} · 공항 ${d[2]||"없음(기차·버스)"} · ${d[3]} 자동 입력됨`}
 document.addEventListener("input",e=>{if(e.target.id==="tf-city"){clearTimeout(window.__ct);window.__ct=setTimeout(()=>autoCity(true),250)}if(["tf-cityEn","tf-to"].includes(e.target.id))e.target.dataset.auto="0";if(e.target.id==="tr-text"){const v=e.target.value;window.__draft=v;const l=L(),tl=T().lang||"ja";$("#tr-g").href=l.gt(v,tl);$("#tr-p").href=l.pp(v,tl)}});
 document.addEventListener("submit",async e=>{
-  e.preventDefault();const f=e.target,d=formData(f);
+  e.preventDefault();const f=e.target,d=formData(f);delete d.attfile;{const ai=f.querySelector("input[data-att]");PENDING_ATT=ai&&ai.files.length?await saveAtts(ai):null}
   if(f.id==="tripForm"){const apply=e.submitter&&e.submitter.value==="apply";{const dd=dictFor(d.city);if(dd){if(!d.cityEn)d.cityEn=dd[1];if(!d.to)d.to=dd[2]}}const trip=Object.assign({},T(),{title:d.title,city:d.city,cityEn:d.cityEn,from:(d.from||"").toUpperCase(),to:(d.to||"").toUpperCase(),start:d.start,end:d.end,budget:Number(d.budget)||0,bud:Object.fromEntries(BCATS.map(k=>[k,Number(d["b_"+k])||0])),cur:d.cur,rate:Number(d.rate)||0,lang:d.lang,travelers:d.travelers.split(",").map(s=>s.trim()).filter(Boolean)});
     if(apply&&(!trip.title||trip.title==="새 여행")&&trip.city)trip.title=trip.city+" 여행";if(apply){const ab=e.submitter;if(ab){ab.disabled=true;ab.textContent="추천 찾는 중…"}const n=await applyRecs(trip);S.trip=trip;commit();toast(n?`추천 ${n}곳·숙소 ${S.hotels.length}곳을 반영했어요`:"추천 칸을 비워뒀어요");}else{saveTrip(trip);toast("저장했어요")}return}
   if(f.id==="itemForm"){const ll=parseLL(d.ll);const data={day:d.day,time:d.time,kind:d.kind,title:d.title,cost:Number(d.cost)||0,note:d.note,done:false};if(ll)Object.assign(data,ll);day=d.day;addDoc("items",data);toast(ll||!d.ll?"일정을 추가했어요":"좌표 형식이 달라 위치 없이 추가했어요");return}
@@ -2096,11 +2215,11 @@ async function saveMemory(f){
 }
 
 /* ---------- boot ---------- */
-try{const saved=localStorage.getItem("tp-tab");if(saved&&TABS.some(([k])=>k===saved))tab=saved}catch(_){}
-if(location.hash&&TABS.some(([k])=>k===location.hash.slice(1)))tab=location.hash.slice(1);
+try{const saved=localStorage.getItem("tp-tab");if(saved&&(saved==="more"||TABS.some(([k])=>k===saved)))tab=saved}catch(_){}
+if(location.hash&&(location.hash==="#more"||TABS.some(([k])=>k===location.hash.slice(1))))tab=location.hash.slice(1);
 loadLocal();
 render();
-openIDB().then(async()=>{await loadPhotos();if(tab==="mem")render();Sync.init()});
+openIDB().then(async()=>{await loadPhotos();render();Sync.init()});
 })();
 
 </script>
