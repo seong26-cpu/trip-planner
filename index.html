@@ -1223,6 +1223,21 @@ a.pthumb img{display:block;width:100%;height:100%;object-fit:cover;opacity:0;tra
 a.pthumb.on img{opacity:1}
 a.pthumb.none{display:none}
 @media (max-width:720px){.pban{height:150px;border-radius:18px}.pb-bot{left:12px;right:8px;bottom:8px}.pban .th-cnt{display:none}}
+/* v11: 도시 팩 진행 표시 */
+.pprog{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:1200;width:min(440px,calc(100vw - 24px))}
+@media (min-width:721px){.pprog{bottom:24px}}
+.pp-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.18);padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.pp-bar{height:10px;border-radius:999px;background:var(--surface-2);overflow:hidden}
+.pp-bar i{display:block;height:100%;background:var(--accent);border-radius:999px;transition:width .4s}
+.pp-bar.bad i{background:var(--bad)}
+.pp-steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px;font-size:.86rem}
+.pp-steps li{display:flex;gap:8px;align-items:flex-start;color:var(--muted)}
+.pp-steps li.run,.pp-steps li.ok{color:var(--fg)}
+.pp-steps li.fail{color:var(--bad)}
+.pp-steps small{color:var(--muted)}
+.bad-t{color:var(--bad)}
+.pstat{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);font-size:.88rem}
+.pstat.warn{border-color:var(--warn);background:var(--accent-soft)}
 </style>
 </head>
 <body>
@@ -2060,6 +2075,7 @@ function rHome(){
       <p class="small muted">"추천 반영"은 도시(영문)에 맞는 검증된 도시 팩(장소·맛집 17~23곳, 숙소 4곳, 교통 안내)으로 추천 목록을 바꿔요. 팩이 없는 도시나 영문이 비었거나 틀리면 추천 칸은 비워둬요. 직접 저장한 장소·일정·경비·사진은 그대로예요.</p>
     </form>
   </details>
+  ${packStatus()}
   ${t.recStatus?`<p class="note">${esc(t.recStatus)}</p>`:""}
   ${acctCard()}
   ${installCard()}
@@ -2225,6 +2241,7 @@ function rPlace(){
   const sp=sightPick(),B=bud(),nd=Math.max(1,days().length);
   $("#p-place").innerHTML=`
   <div class="card">
+    ${packStatus()}
     <div class="row between"><h2>추천 장소·맛집</h2><span class="small muted">${S.places.length}곳 · ${S.places.filter(p=>p.visited).length}곳 방문</span></div>
     <p class="small muted">이름을 누르면 어떤 곳인지 검색 결과가 열려요("위키"=백과사전, "지도"=구글 지도). 요금은 웹 출처로 확인한 값이고, <span class="chip unv">노란 표시</span>는 날짜별 변동·출처 1곳·출처끼리 다른 경우예요.</p>
     ${B.관광?(sp?`<p class="note">관광 예산 ${won(B.관광)} → 유료 장소 ${sp.ids.size}곳 <b>${won(sp.total)}</b>로 예산에 가장 가깝게 골랐어요(${pax()}명 기준). <span class="chip act">관광 예산 추천</span> 표시를 먼저 담으세요. 무료 장소는 언제나 추가 가능.</p>`:`<p class="note">관광 예산을 비교하려면 환율을 넣어주세요.</p>`):`<p class="small muted">홈에서 <b>관광 예산</b>을 넣으면 그 안에서 유료 장소 조합을 골라 드려요.</p>`}
@@ -2325,69 +2342,109 @@ const GUIDES={
 /* ===== 자동 도시 팩: Claude 없이 앱이 공개 데이터로 직접 만듦 (무료·키 없음) =====
    위치: OpenStreetMap Nominatim · 명소/맛집/숙소: OpenStreetMap(Overpass) · 인기순·한글 이름: Wikidata · 교통 안내: Wikivoyage(영문) · 참고 환율: ExchangeRate-API */
 const AUTO_SRC={osm:{n:"OpenStreetMap",u:"https://www.openstreetmap.org/copyright"},wd:{n:"Wikidata",u:"https://www.wikidata.org/"},wv:{n:"Wikivoyage",u:"https://en.wikivoyage.org/"},fx:{n:"Rates By Exchange Rate API",u:"https://www.exchangerate-api.com"}};
-async function jget(u,o){const r=await fetch(u,o);if(!r.ok)throw new Error("HTTP "+r.status);return r.json()}
-async function overpass(q){let last;for(let i=0;i<2;i++){try{const r=await fetch("https://overpass-api.de/api/interpreter",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:"data="+encodeURIComponent(q)});if(r.ok)return (await r.json()).elements||[];last=new Error("지도 데이터 서버 "+r.status)}catch(e){last=e}await new Promise(r=>setTimeout(r,3000))}throw last}
+/* 네트워크: 요청마다 시간 제한(멈춤 방지) */
+function tfetch(u,o,ms){const c=new AbortController();const t=setTimeout(()=>c.abort(),ms||30000);return fetch(u,Object.assign({},o||{},{signal:c.signal})).catch(e=>{throw new Error(e.name==="AbortError"?"응답 시간 초과":"연결 실패")}).finally(()=>clearTimeout(t))}
+async function jget(u,o,ms){const r=await tfetch(u,o,ms);if(!r.ok)throw new Error("HTTP "+r.status);return r.json()}
+/* 지도 데이터 서버(Overpass): 공식 서버 → 실패 시 공개 미러 */
+const OVP=["https://overpass-api.de/api/interpreter","https://overpass.kumi.systems/api/interpreter"];
+async function overpass(q){let last;for(const u of OVP){try{const r=await tfetch(u,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:"data="+encodeURIComponent(q)},50000);if(r.ok)return (await r.json()).elements||[];last=new Error("지도 서버 응답 "+r.status+(r.status===429?"(요청 많음)":r.status===504?"(서버 바쁨)":""))}catch(e){last=e}}throw last}
 function osmKind(t){if(t.amenity==="restaurant")return"맛집";if(t.tourism==="viewpoint"||t.man_made==="tower"||t.natural==="peak")return"전망대";if(/theme_park|zoo|aquarium/.test(t.tourism||"")||t.natural==="beach"||t.natural==="cave_entrance")return"체험";if(t.amenity==="marketplace"||t.shop)return"쇼핑";return"명소"}
+function descKind(d){d=String(d||"").toLowerCase();if(/observation|tower|lookout|전망/.test(d))return"전망대";if(/zoo|aquarium|theme park|amusement|beach|동물원|수족관|해변|테마파크/.test(d))return"체험";if(/market|mall|shopping|시장|쇼핑/.test(d))return"쇼핑";return"명소"}
+const NOT_SIGHT=/(railway station|metro station|train station|bus station|suburb|neighbo(u)?rhood|district|street|road|avenue|highway|school|university|college|hospital|company|business|electoral|local government|council|airport|역$|행정|선거구|대학교|고등학교|초등학교|병원|도로)/i;
 const osmLL=e=>e.lat!=null?{lat:e.lat,lng:e.lon}:e.center?{lat:e.center.lat,lng:e.center.lon}:null;
 const osmArea=t=>t["addr:suburb"]||t["addr:district"]||t["addr:quarter"]||t["addr:city"]||"";
 const osmUrl=e=>`https://www.openstreetmap.org/${e.type}/${e.id}`;
 async function fxHint(cur){if(!cur||cur==="KRW")return null;const c=lsj("tp-fx",null);let j=c&&Date.now()-c.at<864e5?c.j:null;
-  if(!j){try{j=await jget("https://open.er-api.com/v6/latest/KRW");if(j&&j.rates)lss("tp-fx",{at:Date.now(),j})}catch(_){return null}}
+  if(!j){j=await jget("https://open.er-api.com/v6/latest/KRW",null,15000);if(j&&j.rates)lss("tp-fx",{at:Date.now(),j})}
   const r=j&&j.rates&&j.rates[cur];if(!r)return null;const v=1/r;return{value:Math.round(v*(v<1?10000:100))/(v<1?10000:100),note:`ExchangeRate-API ${String(j.time_last_update_utc||"").slice(5,16)} 기준 참고 환율`}}
 function txt(h,max){const d=new DOMParser().parseFromString(h,"text/html");return [...d.querySelectorAll("p,li")].map(x=>x.textContent.replace(/\[\d+\]|\[edit\]/g,"").replace(/\s+/g," ").trim()).filter(x=>x.length>25).slice(0,max).map(x=>x.length>280?x.slice(0,277)+"…":x)}
 async function wvGuide(en){const base="https://en.wikivoyage.org/w/api.php?format=json&origin=*&action=parse&redirects=1&page="+enc(en);
-  const sec=await jget(base+"&prop=sections");if(!sec.parse)return[];const title=sec.parse.title,url="https://en.wikivoyage.org/wiki/"+enc(title.replace(/ /g,"_"));
+  const sec=await jget(base+"&prop=sections",null,20000);if(!sec.parse)return[];const title=sec.parse.title,url="https://en.wikivoyage.org/wiki/"+enc(title.replace(/ /g,"_"));
   const want=[["Get in","도착하기 (공항·입국 교통)"],["Get around","시내 교통"],["Stay safe","안전 정보"]];const out=[];
   for(const [w,ko] of want){const s=(sec.parse.sections||[]).find(x=>x.line===w&&String(x.toclevel)==="1");if(!s)continue;
-    const h=await jget(base+"&prop=text&section="+s.index);const items=txt((h.parse&&h.parse.text&&h.parse.text["*"])||"",6);
+    const h=await jget(base+"&prop=text&section="+s.index,null,20000);const items=txt((h.parse&&h.parse.text&&h.parse.text["*"])||"",6);
     if(items.length)out.push({title:ko+" — Wikivoyage(영문)",items:items.map(esc),src:[{n:"Wikivoyage: "+title+" (CC BY-SA)",u:url+"#"+enc(w.replace(/ /g,"_"))},{n:"구글 번역으로 읽기",u:"https://translate.google.com/translate?sl=en&tl=ko&u="+enc(url)}]})}
   return out}
+
+/* ===== 진행 표시(프로그레스 바) ===== */
+const PP_STEPS=[["loc","도시 위치 찾기"],["sights","명소·전망대·시장 찾기"],["rank","인기순·한글 이름 정리"],["fh","식당·숙소 찾기"],["guide","교통·안전 안내"],["fx","참고 환율"],["apply","추천 목록에 반영"]];
+const PP={on:false,st:{},msg:{},city:"",done:null};
+function ppOpen(city){PP.on=true;PP.city=city;PP.st={};PP.msg={};PP.done=null;PP.t0=Date.now();ppPaint()}
+function ppSet(k,st,msg){if(!PP.on)return;PP.st[k]=st;if(msg!=null)PP.msg[k]=msg;ppPaint()}
+function ppFinish(ok,text){PP.done={ok,text};ppPaint()}
+function ppPaint(){let el=document.getElementById("packProg");if(!PP.on){if(el)el.remove();return}
+  if(!el){el=document.createElement("div");el.id="packProg";el.className="pprog";el.setAttribute("role","status");el.setAttribute("aria-live","polite");document.body.appendChild(el)}
+  const n=PP_STEPS.length,fin=PP_STEPS.filter(([k])=>/ok|fail|skip/.test(PP.st[k]||"")).length,run=PP_STEPS.some(([k])=>PP.st[k]==="run");
+  const pct=PP.done?100:Math.round((fin+(run?0.5:0))/n*100);const sec=Math.round((Date.now()-PP.t0)/1000);
+  const ic={ok:"✅",fail:"⚠️",skip:"➖",run:"⏳"};
+  el.innerHTML=`<div class="pp-card"><div class="row between"><b>📦 ${esc(PP.city)} 도시 팩 ${PP.done?(PP.done.ok?"반영 완료":"만들기 실패"):"만드는 중…"}</b><span class="small muted mono">${pct}% · ${sec}초</span></div>
+    <div class="pp-bar ${PP.done&&!PP.done.ok?"bad":""}"><i style="width:${pct}%"></i></div>
+    <ol class="pp-steps">${PP_STEPS.map(([k,l])=>`<li class="${PP.st[k]||"wait"}"><span>${ic[PP.st[k]]||"○"}</span><span>${l}${PP.msg[k]?` <small>· ${esc(PP.msg[k])}</small>`:""}</span></li>`).join("")}</ol>
+    ${PP.done?`<p class="small ${PP.done.ok?"":"bad-t"}">${esc(PP.done.text)}</p><div class="row">${PP.done.ok?`<button class="btn sm primary" data-pp="place">추천 장소 보기</button>`:`<button class="btn sm primary" data-pp="retry">다시 시도</button>`}<button class="btn sm ghost" data-pp="close">닫기</button></div>`:`<p class="small muted">공개 지도·백과 데이터를 모으는 중이에요(보통 10~40초). 창을 닫아도 계속 진행돼요. <button class="btn ghost sm" data-pp="close" style="padding:0">닫기</button></p>`}</div>`}
+setInterval(()=>{if(PP.on&&!PP.done)ppPaint()},1000);
+document.addEventListener("click",e=>{const b=e.target.closest("[data-pp]");if(!b)return;const a=b.dataset.pp;PP.on=false;ppPaint();
+  if(a==="place"){tab="place";placeFilter="전체";render();window.scrollTo({top:0})}
+  if(a==="retry"){const t=Object.assign({},T());const old=packFor(t);if(old&&old.auto)delPack(old.id);applyPackOrBuild(t)}});
+
 async function buildCityPack(trip,prog){prog=prog||(()=>{});const en=(trip.cityEn||"").trim();if(!cityOK(en))throw new Error("도시(영문)를 먼저 넣어주세요");
   const dd=dictFor(trip.city)||dictFor(en);const cc0=dd?dd[5]:"";
-  prog("도시 위치 찾는 중");
-  const nm=await jget(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&accept-language=en&addressdetails=1&q=${enc(en)}${cc0?"&countrycodes="+cc0.toLowerCase():""}`);
-  if(!nm.length)throw new Error(`"${en}" 위치를 찾지 못했어요(도시 영문 확인)`);
+  prog("loc","run");
+  let nm;try{nm=await jget(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&accept-language=en&addressdetails=1&q=${enc(en)}${cc0?"&countrycodes="+cc0.toLowerCase():""}`,null,20000)}catch(e){prog("loc","fail",e.message);throw new Error("도시 위치를 찾지 못했어요("+e.message+"). 인터넷 연결을 확인하세요.")}
+  if(!nm.length){prog("loc","fail","결과 없음");throw new Error(`"${en}" 위치를 찾지 못했어요(도시 영문 확인)`)}
   const lat=+nm[0].lat,lng=+nm[0].lon,cc=String((nm[0].address||{}).country_code||cc0).toUpperCase(),ci=COUNTRY[cc]||[];
-  const warn=[];let places=[],hotels=[],guide=[];
-  prog("명소·시장 찾는 중 (OpenStreetMap)");
-  try{const A=`(around:15000,${lat},${lng})`;
-    const el=await overpass(`[out:json][timeout:40];(nwr${A}["tourism"~"^(attraction|museum|viewpoint|theme_park|zoo|aquarium|gallery)$"]["wikidata"];nwr${A}["historic"~"^(castle|monument|memorial|ruins|archaeological_site|city_gate|fort)$"]["wikidata"];nwr${A}["amenity"="place_of_worship"]["wikidata"];nwr${A}["leisure"~"^(park|garden)$"]["wikidata"];nwr${A}["amenity"="marketplace"]["wikidata"];nwr${A}["shop"="mall"]["wikidata"];nwr${A}["man_made"="tower"]["tower:type"="observation"]["wikidata"];nwr${A}["natural"~"^(peak|beach|cave_entrance)$"]["wikidata"];);out center tags 300;`);
-    const byQ={};el.forEach(e=>{const q=String(e.tags.wikidata||"").split(";")[0].trim();if(/^Q\d+$/.test(q)&&osmLL(e)&&!byQ[q])byQ[q]=e});
-    const ids=Object.keys(byQ);const W={};prog(`인기순·한글 이름 확인 중 (Wikidata ${ids.length}곳)`);
-    for(let i=0;i<ids.length;i+=50){const j=await jget(`https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&origin=*&props=labels|descriptions|sitelinks&languages=ko|en&ids=${ids.slice(i,i+50).join("|")}`);Object.assign(W,j.entities||{})}
+  prog("loc","ok",`${lat.toFixed(3)}, ${lng.toFixed(3)}`);
+  const warn=[];let places=[],hotels=[],guide=[],rateHint=null,foodL=[];
+  /* ① 명소 후보: OpenStreetMap + 한국어 위키백과 주변 문서 → ② Wikidata로 인기순·한글 이름 */
+  const sightsJob=(async()=>{prog("sights","run");const cand={};
+    const R=10000,A=`(around:${R},${lat},${lng})`;
+    const osm=overpass(`[out:json][timeout:30];(nwr${A}["tourism"~"^(attraction|museum|viewpoint|theme_park|zoo|aquarium|gallery)$"]["wikidata"];nwr${A}["historic"~"^(castle|monument|ruins|archaeological_site|city_gate|fort)$"]["wikidata"];nwr${A}["leisure"~"^(park|garden)$"]["wikidata"];nwr${A}["amenity"="marketplace"]["wikidata"];nwr${A}["shop"="mall"]["wikidata"];nwr${A}["man_made"="tower"]["tower:type"="observation"]["wikidata"];nwr${A}["natural"~"^(peak|beach|cave_entrance)$"]["wikidata"];);out center tags 250;`)
+      .then(el=>{el.forEach(e=>{const q=String(e.tags.wikidata||"").split(";")[0].trim();const ll=osmLL(e);if(/^Q\d+$/.test(q)&&ll&&!cand[q])cand[q]={ll,kind:osmKind(e.tags),area:osmArea(e.tags),osm:e,tags:e.tags}});return el.length}).catch(e=>{warn.push("지도 데이터: "+e.message);return -1});
+    const wiki=jget(`https://ko.wikipedia.org/w/api.php?action=query&format=json&origin=*&generator=geosearch&ggscoord=${lat}|${lng}&ggsradius=${R}&ggslimit=50&prop=coordinates|pageprops&ppprop=wikibase_item`,null,20000)
+      .then(j=>{let n=0;Object.values((j.query||{}).pages||{}).forEach(p=>{const q=p.pageprops&&p.pageprops.wikibase_item,c=(p.coordinates||[])[0];if(q&&c&&!cand[q]){cand[q]={ll:{lat:c.lat,lng:c.lon},kind:"",area:"",ko:p.title,wikiOnly:true};n++}});return n}).catch(e=>{warn.push("위키백과: "+e.message);return -1});
+    const [no,nw]=await Promise.all([osm,wiki]);
+    if(no<0&&nw<0){prog("sights","fail","지도·위키 서버 모두 실패");prog("rank","skip");return}
+    prog("sights","ok",`지도 ${Math.max(no,0)}곳${nw>0?` · 위키 ${nw}곳`:""}${no<0?" (지도 서버 실패)":""}`);
+    prog("rank","run");const ids=Object.keys(cand);const W={};
+    try{for(let i=0;i<ids.length;i+=50){const j=await jget(`https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&origin=*&props=labels|descriptions|sitelinks&languages=ko|en&ids=${ids.slice(i,i+50).join("|")}`,null,25000);Object.assign(W,j.entities||{});prog("rank","run",`${Math.min(i+50,ids.length)}/${ids.length}`)}}catch(e){warn.push("Wikidata: "+e.message)}
     const seen=new Set();
-    places=ids.map(q=>{const e=byQ[q],w=W[q]||{},t=e.tags,L=w.labels||{},Dn=w.descriptions||{},sl=w.sitelinks||{};
-        const ko=t["name:ko"]||(L.ko&&L.ko.value)||"",enName=t["name:en"]||(L.en&&L.en.value)||t.name||"";
-        return{q,e,score:Object.keys(sl).length,name:ko||enName,nameEn:enName,desc:(Dn.ko&&Dn.ko.value)||(Dn.en&&Dn.en.value)||"",wiki:sl.kowiki?"https://ko.wikipedia.org/wiki/"+enc(sl.kowiki.title):sl.enwiki?"https://en.wikipedia.org/wiki/"+enc(sl.enwiki.title):""}})
-      .filter(x=>x.name&&!seen.has(norm(x.name))&&seen.add(norm(x.name))).sort((a,b)=>b.score-a.score).slice(0,22)
-      .map((x,i)=>{const ll=osmLL(x.e),k=osmKind(x.e.tags);return{pid:"a"+(i+1),name:x.name,nameEn:x.nameEn,kind:k,area:osmArea(x.e.tags),lat:ll.lat,lng:ll.lng,cost:0,costUnknown:true,costNote:k==="쇼핑"?"":"요금 미확인·방문 전 확인",note:x.desc,src:[x.wiki&&{n:"위키백과",u:x.wiki},{n:"OpenStreetMap",u:osmUrl(x.e)}].filter(Boolean)}})}
-  catch(e){warn.push("명소: "+e.message)}
-  prog("식당 찾는 중 (OpenStreetMap)");
-  try{const el=await overpass(`[out:json][timeout:30];nwr(around:2500,${lat},${lng})["amenity"="restaurant"]["name"]["cuisine"];out center tags 200;`);
+    places=ids.map(q=>{const c=cand[q],w=W[q]||{},t=c.tags||{},L=w.labels||{},Dn=w.descriptions||{},sl=w.sitelinks||{};
+        const ko=t["name:ko"]||(L.ko&&L.ko.value)||c.ko||"",enName=t["name:en"]||(L.en&&L.en.value)||t.name||"";const descEn=(Dn.en&&Dn.en.value)||"",desc=(Dn.ko&&Dn.ko.value)||descEn;
+        return{q,c,score:Object.keys(sl).length+(c.osm?3:0),name:ko||enName,nameEn:enName||ko,desc,descEn,wiki:sl.kowiki?"https://ko.wikipedia.org/wiki/"+enc(sl.kowiki.title):sl.enwiki?"https://en.wikipedia.org/wiki/"+enc(sl.enwiki.title):""}})
+      .filter(x=>x.name&&!(x.c.wikiOnly&&(NOT_SIGHT.test(x.descEn)||NOT_SIGHT.test(x.desc)||NOT_SIGHT.test(x.name)))&&!seen.has(norm(x.name))&&seen.add(norm(x.name))).sort((a,b)=>b.score-a.score).slice(0,22)
+      .map((x,i)=>{const k=x.c.kind||descKind(x.descEn+" "+x.desc);return{pid:"a"+(i+1),name:x.name,nameEn:x.nameEn,kind:k,area:x.c.area||"",lat:x.c.ll.lat,lng:x.c.ll.lng,cost:0,costUnknown:true,costNote:k==="쇼핑"?"":"요금 미확인·방문 전 확인",note:x.desc,src:[x.wiki&&{n:"위키백과",u:x.wiki},x.c.osm&&{n:"OpenStreetMap",u:osmUrl(x.c.osm)}].filter(Boolean)}});
+    prog("rank",places.length?"ok":"fail",places.length?`${places.length}곳 (위키 문서 많은 순)`:"정리할 장소 없음")})();
+  /* 식당·숙소: 한 번의 요청 */
+  const fhJob=(async()=>{prog("fh","run");try{
+    const el=await overpass(`[out:json][timeout:30];nwr(around:2500,${lat},${lng})["amenity"="restaurant"]["name"]["cuisine"];out center tags 150;nwr(around:4000,${lat},${lng})["tourism"="hotel"]["name"];out center tags 100;`);
     const intl=/^(pizza|burger|italian|american|coffee_shop|sandwich|kebab|chicken|fast_food|international|mexican|steak_house)$/;
     const sc=t=>(t["name:ko"]?3:0)+(t["name:en"]?2:0)+(t.wikidata?3:0)+(t.website||t["contact:website"]?1:0)+(t.opening_hours?1:0)+(intl.test(String(t.cuisine).split(";")[0])?-2:0);
-    const used=new Set();
-    el.filter(osmLL).sort((a,b)=>sc(b.tags)-sc(a.tags)).forEach(e=>{const c=String(e.tags.cuisine).split(";")[0];if(places.filter(p=>p.kind==="맛집").length>=6||used.has(c)&&used.size<4)return;used.add(c);const ll=osmLL(e),t=e.tags;
-      places.push({pid:"r"+e.id,name:t["name:ko"]||t["name:en"]||t.name,nameEn:t["name:en"]||t.name,kind:"맛집",area:osmArea(t),lat:ll.lat,lng:ll.lng,cost:0,costUnknown:true,note:`음식 종류: ${String(t.cuisine).replace(/_/g," ").replace(/;/g,", ")}${t.opening_hours?" · 영업: "+t.opening_hours:""} · 지도 데이터 식당(평점 아님)`,src:[{n:"OpenStreetMap",u:osmUrl(e)}]})})}
-  catch(e){warn.push("식당: "+e.message)}
-  prog("숙소 찾는 중 (OpenStreetMap)");
-  try{const el=await overpass(`[out:json][timeout:30];nwr(around:4000,${lat},${lng})["tourism"="hotel"]["name"];out center tags 150;`);
-    const st=t=>parseFloat(t.stars)||0;const sc=t=>(t.wikidata?2:0)+(t.website||t["contact:website"]?1:0)+(t["name:en"]?1:0);
-    const L=el.filter(osmLL).sort((a,b)=>sc(b.tags)-sc(a.tags));const pick=[...L.filter(e=>st(e.tags)>=4).slice(0,2),...L.filter(e=>st(e.tags)===3).slice(0,2),...L.filter(e=>st(e.tags)<3).slice(0,3)];
-    (pick.length>=3?pick:L.slice(0,6)).slice(0,7).forEach((e,i)=>{const t=e.tags,ll=osmLL(e);hotels.push({name:t["name:ko"]||t["name:en"]||t.name,nameEn:t["name:en"]||t.name,area:osmArea(t),lat:ll.lat,lng:ll.lng,price:null,priceTier:st(t)?st(t)+"성급(지도 데이터)":"등급 정보 없음",why:"도시 중심 4km 안 · 가격은 아고다·부킹에서 확인",src:[{n:"OpenStreetMap",u:osmUrl(e)}]})})}
-  catch(e){warn.push("숙소: "+e.message)}
-  prog("교통 안내 찾는 중 (Wikivoyage)");
-  try{guide=await wvGuide(en)}catch(e){warn.push("교통 안내: "+e.message)}
-  const rateHint=await fxHint(ci[0]||trip.cur);
+    const food=[],used=new Set();
+    el.filter(e=>e.tags.amenity==="restaurant"&&osmLL(e)).sort((a,b)=>sc(b.tags)-sc(a.tags)).forEach(e=>{const c=String(e.tags.cuisine).split(";")[0];if(food.length>=6||used.has(c)&&used.size<4)return;used.add(c);const ll=osmLL(e),t=e.tags;
+      food.push({pid:"r"+e.id,name:t["name:ko"]||t["name:en"]||t.name,nameEn:t["name:en"]||t.name,kind:"맛집",area:osmArea(t),lat:ll.lat,lng:ll.lng,cost:0,costUnknown:true,note:`음식 종류: ${String(t.cuisine).replace(/_/g," ").replace(/;/g,", ")}${t.opening_hours?" · 영업: "+t.opening_hours:""} · 지도 데이터 식당(평점 아님)`,src:[{n:"OpenStreetMap",u:osmUrl(e)}]})});
+    const st=t=>parseFloat(t.stars)||0,hs=t=>(t.wikidata?2:0)+(t.website||t["contact:website"]?1:0)+(t["name:en"]?1:0);
+    const H=el.filter(e=>e.tags.tourism==="hotel"&&osmLL(e)).sort((a,b)=>hs(b.tags)-hs(a.tags));const pick=[...H.filter(e=>st(e.tags)>=4).slice(0,2),...H.filter(e=>st(e.tags)===3).slice(0,2),...H.filter(e=>st(e.tags)<3).slice(0,3)];
+    (pick.length>=3?pick:H.slice(0,6)).slice(0,7).forEach(e=>{const t=e.tags,ll=osmLL(e);hotels.push({name:t["name:ko"]||t["name:en"]||t.name,nameEn:t["name:en"]||t.name,area:osmArea(t),lat:ll.lat,lng:ll.lng,price:null,priceTier:st(t)?st(t)+"성급(지도 데이터)":"등급 정보 없음",why:"도시 중심 4km 안 · 가격은 아고다·부킹에서 확인",src:[{n:"OpenStreetMap",u:osmUrl(e)}]})});
+    foodL=food;prog("fh","ok",`식당 ${food.length} · 숙소 ${hotels.length}`)}catch(e){warn.push("식당·숙소: "+e.message);prog("fh","fail",e.message)}})();
+  const guideJob=(async()=>{prog("guide","run");try{guide=await wvGuide(en);prog("guide",guide.length?"ok":"skip",guide.length?`${guide.length}개 주제`:"Wikivoyage 문서 없음")}catch(e){warn.push("교통 안내: "+e.message);prog("guide","fail",e.message)}})();
+  const fxJob=(async()=>{if(!ci[0]||ci[0]==="KRW"){prog("fx","skip","원화");return}prog("fx","run");try{rateHint=await fxHint(ci[0]);prog("fx",rateHint?"ok":"skip",rateHint?`1${ci[0]} ≈ ${rateHint.value}원`:"")}catch(e){prog("fx","fail",e.message)}})();
+  await Promise.all([sightsJob,fhJob,guideJob,fxJob]);
+  places=places.concat(foodL);
   guide.unshift({title:"기본 정보 (앱 자동 생성)",items:[`통화: <b>${esc(ci[0]||trip.cur||"-")}</b>${rateHint?` · 참고 환율 1${esc(ci[0])} ≈ ${esc(String(rateHint.value))}원 (${esc(rateHint.note)})`:""}`,`도착 공항 코드: <b>${esc(trip.to||"-")}</b> · 번역 언어: ${esc(langName(ci[1]||trip.lang||"en"))}`,"이 팩은 공개 지도·백과 데이터로 자동으로 만들었어요. 입장료·숙소 가격·교통 요금은 들어 있지 않으니 방문 전 공식 사이트에서 확인하세요."],src:[AUTO_SRC.osm,AUTO_SRC.wd].concat(rateHint?[AUTO_SRC.fx]:[])});
-  if(!places.length&&!hotels.length)throw new Error("공개 데이터에서 장소를 찾지 못했어요"+(warn.length?" ("+warn.join(" / ")+")":"")+". 잠시 후 다시 시도하거나 영문 도시명을 확인하세요.");
+  if(!places.length&&!hotels.length)throw new Error("공개 데이터 서버에서 장소를 받지 못했어요"+(warn.length?" ("+warn.join(" / ")+")":"")+". 서버가 바쁠 수 있어요. 1~2분 뒤 다시 시도하세요.");
   const id="auto-"+en.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
   return{id,auto:true,city:trip.city||en,cityEn:en,to:trip.to||(dd&&dd[2])||"",cur:ci[0]||trip.cur,lang:ci[1]||trip.lang,country:cc.toLowerCase(),center:{lat,lng},version:"자동 "+iso(new Date()),warn,places,hotels,guide,rateHint,sources:{}}}
 async function autoPackFor(trip,force){const ex=packFor(trip);if(ex&&!force)return ex;
-  const pk=await buildCityPack(trip,m=>toast(`🛠 ${trip.city||trip.cityEn} 팩 만드는 중 · ${m}`));installPack(pk);cachePack(pk);return pk}
+  ppOpen(trip.city||trip.cityEn);
+  try{const pk=await buildCityPack(trip,ppSet);if(!pk.places.length&&!pk.hotels.length)throw new Error("장소가 없어요");installPack(pk);cachePack(pk);ppSet("apply","run");return pk}
+  catch(e){ppFinish(false,e.message);throw e}}
+async function applyPackOrBuild(t){try{const pk=await autoPackFor(t,true);await applyPackToTrip(pk)}catch(_){render()}}
 function delPack(id){if(BUILTIN.has(id))return;delete PACKS[id];const c=cachedPacks();delete c[id];try{localStorage.setItem("trip-planner-packs-v1",JSON.stringify(c))}catch(_){}}
 function exportPack(id){const pk=PACKS[id];if(!pk)return;const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(pk)],{type:"application/json"}));a.download=`도시팩_${pk.city}_${(pk.version||"").replace(/\s/g,"")}.json`;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000);toast("팩 파일을 내려받았어요 · 다른 기기에서 '팩 파일 가져오기'로 넣을 수 있어요")}
 async function importPack(file){try{const pk=JSON.parse(await file.text());if(!pk||!pk.id||!Array.isArray(pk.places)||!pk.cityEn)throw 0;installPack(pk);cachePack(pk);toast(`${pk.city} 팩을 설치했어요`);render()}catch(_){toast("도시 팩 파일(.json)이 아니에요")}}
+function packStatus(){const t=T(),pk=PK();if(!t.city&&!t.cityEn)return"";
+  if(pk){const nf=pk.places.filter(p=>p.kind==="맛집").length,inList=S.places.filter(p=>p.rec).length;
+    return `<div class="pstat ${inList?"":"warn"}"><span>📦 적용된 도시 팩: <b>${esc(pk.city)}</b> · ${BUILTIN.has(pk.id)?"내장 검증 팩":pk.auto?"자동 팩":"내려받은 검증 팩"}${pk.version?" ("+esc(pk.version)+")":""} · 명소 ${pk.places.length-nf} · 맛집 ${nf} · 숙소 ${pk.hotels.length}${inList?"":" · <b>추천 목록에 아직 반영 안 됨</b>"}</span>${inList?`<button class="btn sm" data-go="place">추천 장소 보기</button>`:`<button class="btn sm primary" data-act="usePack" data-id="${pk.id}">지금 반영</button>`}</div>`}
+  return `<div class="pstat warn"><span>📦 ${esc(t.city||t.cityEn)}: 아직 도시 팩이 없어요 (추천 장소·숙소가 비어 있는 이유)</span>${cityOK()?`<button class="btn sm primary" data-act="buildPack">🛠 자동으로 만들기</button>`:`<span class="small">도시(영문)를 넣어주세요</span>`}</div>`}
 function packCard(){const inst=Object.values(PACKS);const idx=packIndex;const avail=idx?(idx.packs||[]):[];
   return `<div><div class="row between"><span class="small muted">설치·새 팩 목록</span><button class="btn ghost sm" data-act="refreshPacks">목록 새로고침</button></div>
   <p class="small muted">팩 = 추천 장소·맛집·숙소·교통 안내 묶음. <b>내장·검증 팩</b>(가격 포함)이 없으면 앱이 공개 데이터로 <b>자동 팩</b>을 바로 만들어요(무료, Claude 없이). 이 기기에 저장되고 "저장하고 추천 반영" 때 자동 적용돼요.</p>
@@ -2593,7 +2650,7 @@ async function applyRecs(trip){
   if(pk.rateHint&&(!trip.rate||trip.rateFrom===pk.id)){trip.rate=pk.rateHint.value;trip.rateFrom=pk.id}
   pk.places.forEach((p,i)=>S.places.push(Object.assign({id:"rec-"+p.pid,rec:true,visited:false,query:p.nameEn+" "+pk.cityEn,createdAt:i},p)));
   pk.hotels.forEach((h,i)=>S.hotels.push(Object.assign({id:"htl-"+pk.id+"-"+i,rank:i+1},h)));
-  if(pk.auto){const nf=pk.places.filter(p=>p.kind==="맛집").length;trip.recStatus=`${pk.city} 자동 팩을 반영했어요(${pk.version}): 명소 ${pk.places.length-nf}곳·맛집 ${nf}곳·숙소 ${pk.hotels.length}곳. OpenStreetMap·Wikidata·Wikivoyage 공개 데이터라 입장료·숙소 가격은 없어요. 인기순은 위키 문서 수 기준이에요.${pk.warn&&pk.warn.length?" (일부 실패: "+pk.warn.join(" / ")+")":""}${trip.rateFrom===pk.id&&pk.rateHint?" 환율 칸에 참고 환율 "+pk.rateHint.value+"을 넣었어요("+pk.rateHint.note+").":""}`;return pk.places.length}
+  if(pk.auto){const nf=pk.places.filter(p=>p.kind==="맛집").length;if(PP.on){ppSet("apply","ok",`장소 ${pk.places.length} · 숙소 ${pk.hotels.length}`);ppFinish(true,`추천 장소 ${pk.places.length-nf}곳·맛집 ${nf}곳·숙소 ${pk.hotels.length}곳을 반영했어요.${pk.warn&&pk.warn.length?" 일부 실패: "+pk.warn.join(" / "):""}`)}trip.recStatus=`${pk.city} 자동 팩을 반영했어요(${pk.version}): 명소 ${pk.places.length-nf}곳·맛집 ${nf}곳·숙소 ${pk.hotels.length}곳. OpenStreetMap·Wikidata·Wikivoyage 공개 데이터라 입장료·숙소 가격은 없어요. 인기순은 위키 문서 수 기준이에요.${pk.warn&&pk.warn.length?" (일부 실패: "+pk.warn.join(" / ")+")":""}${trip.rateFrom===pk.id&&pk.rateHint?" 환율 칸에 참고 환율 "+pk.rateHint.value+"을 넣었어요("+pk.rateHint.note+").":""}`;return pk.places.length}
   trip.recStatus=`${pk.city} 검증 팩을 반영했어요: 추천 ${pk.places.length}곳, 숙소 ${pk.hotels.length}곳 (${pk.version||"2026년 10월"} 웹검색 기준, 출처 표시).${trip.rateFrom===pk.id&&pk.rateHint?" 환율 칸에 참고 환율 "+pk.rateHint.value+"을 넣었어요("+pk.rateHint.note+"). 출발 전 다시 확인하세요.":""}`;
   return pk.places.length;
 }
@@ -2851,7 +2908,7 @@ document.addEventListener("click",async e=>{
       b.disabled=true;try{const r=await fetch(u,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"ping"})});const j=await r.json();if(!j.ok)throw new Error(j.error||"응답 오류");lss("tp-ai-url",u);toast(j.hasAI?"✅ 연결됐어요 · AI 사용 가능":"연결은 됐지만 서버에 AI 키가 없어요(나의 하루 설정 확인)");render()}catch(e){toast("연결 실패: "+e.message)}b.disabled=false;break}
     case "aiClear":{try{localStorage.removeItem("tp-ai-url")}catch(_){}render();break}
     case "cityLookup":{const c=$("#tf-city");if(c)cityLookup(c.value);break}
-    case "buildPack":{const t=Object.assign({},T());b.disabled=true;b.textContent="만드는 중…";try{const old=packFor(t);if(old&&old.auto)delPack(old.id);const pk=await autoPackFor(t,true);await applyPackToTrip(pk)}catch(err){toast("팩을 만들지 못했어요: "+err.message);render()}break}
+    case "buildPack":{const t=Object.assign({},T());b.disabled=true;b.textContent="만드는 중…";const old=packFor(t);if(old&&old.auto)delPack(old.id);await applyPackOrBuild(t);break}
     case "exportPack":exportPack(id);break;
     case "delPack":{if(!confirm("이 도시 팩을 이 기기에서 지울까요? (일정·장소 기록은 그대로)"))break;delPack(id);render();toast("팩을 지웠어요");break}
     case "loadBasic":basicList().forEach(([cat,text])=>S.checklist.push({id:uid(),cat,text,done:false,createdAt:Date.now()}));commit();break;
