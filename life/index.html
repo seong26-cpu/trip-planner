@@ -135,6 +135,19 @@ ol.num li::before{content:counter(n);position:absolute;left:0;top:8px;width:26px
 .addrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin:8px 0}.addrow button{min-height:48px;font-weight:700}
 .b-pub{background:#2563eb!important;border-color:#2563eb!important;color:#fff!important}.b-pri{background:#db2777!important;border-color:#db2777!important;color:#fff!important}
 .sum3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0}.sum3 div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}.sum3 b{display:block;font-size:20px}.sum3 span{font-size:12px;color:var(--sub)}
+.wk{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:6px 0}
+.wk button{padding:6px 2px;border-radius:12px;flex-direction:column;gap:1px;min-height:74px;font-size:11px;line-height:1.25;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+.wk button b{font-size:15px}.wk button small{font-size:10px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.wk button.td{border:2px solid var(--brand)}.wk .st{font-size:13px;font-weight:800}
+.wk .done{background:var(--brand2)}.wk .done .st{color:var(--brand)}.wk .miss .st{color:var(--bad)}.wk .rest{opacity:.55}
+.chk{display:flex;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--line);margin:0;color:var(--ink);font-size:15px}.chk:first-child{border-top:0}
+.chk input{width:22px;height:22px;flex:0 0 auto;accent-color:var(--brand)}.chk.on span{text-decoration:line-through;color:var(--sub)}
+.prog{height:10px;border-radius:99px;background:var(--line);overflow:hidden}.prog i{display:block;height:100%;background:var(--brand);border-radius:99px}
+.ed-day{border:1px solid var(--line);border-radius:14px;padding:10px;margin:10px 0}
+.ed-it{display:grid;grid-template-columns:1fr 92px auto;gap:4px;align-items:center;margin:4px 0}.ed-it input{padding:8px}.ed-it .ops{display:flex}
+.ed-it .ops button{padding:4px 6px;border:0;background:none;color:var(--sub)}
+.dsel{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.dsel span{text-align:center;padding:8px 0;border-radius:10px;border:1px solid var(--line);cursor:pointer;font-weight:700}.dsel span.on{background:var(--brand);color:var(--onbrand);border-color:var(--brand)}
+.plist .item .b{cursor:pointer}
 .gbtn{width:100%;background:#fff;color:#1f1f1f;border:1px solid #dadce0;font-weight:600;gap:10px}.gbtn svg{width:18px;height:18px}
 /* ===== 골든아워 마을 테마 (samsy.ninja 풍 · 따뜻한 실사 사진) ===== */
 header{background:rgba(255,243,230,.92);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
@@ -273,12 +286,13 @@ const CLOUD={auth:null,db:null,user:null,ready:false,failed:false,t:null,busy:fa
   },
   async logout(){if(this.auth&&confirm('로그아웃할까요? (이 기기 데이터는 그대로 남아요)')){await this.auth.signOut();render()}},
   ref(){return this.db.collection('users').doc(this.user.uid).collection('life').doc('state')},
-  cfgOut(){return {url:CFG.url||'',kcal:CFG.kcal||'',hasAI:!!CFG.hasAI,sheetUrl:CFG.sheetUrl||'',plan:LS.get('plan',null),at:CFG.at||0,themes:THM,themesAt:THM_AT}},
+  cfgOut(){return {url:CFG.url||'',kcal:CFG.kcal||'',hasAI:!!CFG.hasAI,sheetUrl:CFG.sheetUrl||'',plan:LS.get('plan',null),at:CFG.at||0,themes:THM,themesAt:THM_AT,plans:LS.get('plans',[]),woOv:LS.get('woOv',{}),plansAt:LS.get('plansAt',0)}},
   async pull(){
     if(!this.user)return;this.busy=true;setSync('☁︎ 불러오는 중…');
     try{
       const snap=await this.ref().get();const r=snap.exists?snap.data():{};
       const rc=r.cfg||{};
+      if((rc.plansAt||0)>LS.get('plansAt',0)){LS.set('plans',rc.plans||[]);LS.set('woOv',rc.woOv||{});if(rc.plan!==undefined)LS.set('plan',rc.plan);LS.set('plansAt',rc.plansAt)}else if(LS.get('plansAt',0)>(rc.plansAt||0))await this.saveCfg(true);
       if((rc.themesAt||0)>THM_AT){THM=rc.themes||[];THM_AT=rc.themesAt;LS.set('themes',THM);LS.set('themesAt',THM_AT)}else if(THM_AT>(rc.themesAt||0))await this.saveCfg(true);
       if(rc.url&&(!CFG.url||(rc.at||0)>(CFG.at||0))){
         const changed=rc.url!==CFG.url;
@@ -496,7 +510,7 @@ V.home=()=>{
   const burn=DB.운동.filter(x=>x.날짜===t).reduce((a,x)=>a+num(x.칼로리),0);
   const exp=DB.식재료.filter(x=>x.유통기한&&x.유통기한<=addDays(t,3)).sort((a,b)=>a.유통기한.localeCompare(b.유통기한));
   const pins=DB.메모.filter(x=>x.고정===true||x.고정==='TRUE'||x.고정==='true');
-  const plan=LS.get('plan',null);const todayPlan=plan&&plan.days?plan.days.find(d=>d.day==='일월화수목금토'[new Date().getDay()]):null;
+  const plan=LS.get('plan',null);const todayPlan=sessionFor(t);
   return `${loginCard()}${CLOUD.user&&!CFG.url?`<div class="notice">☁︎ 로그인 완료 — 메모·일정·운동·맛집 등은 <b>모든 기기에서 자동 동기화</b>돼요. AI 사진 인식·구글 캘린더까지 쓰려면 <a href="#" data-act="go" data-t="more" data-s="설정">서버 주소를 한 번만 연결</a>하세요 (1분, 평생 1번).</div>`:''}
   ${(()=>{const d=new Date(),dt=(d.getMonth()+1)+'.'+String(d.getDate()).padStart(2,'0')+' '+['SUN','MON','TUE','WED','THU','FRI','SAT'][d.getDay()];
     const pin=(l,t,x='')=>`<button data-act="go" data-t="${t}" ${x}><b></b>${l}</button>`;
@@ -724,22 +738,28 @@ V.fit=()=>{
   const m=sub.fit||'오늘',t=today();
   let h=chips('fit',['오늘','운동 사전','운동 계획','식단','기록','1RM']);
   if(m==='오늘'){h+=heroFit();
-    const plan=LS.get('plan',null);const tp=plan&&plan.days?plan.days.find(d=>d.day==='일월화수목금토'[new Date().getDay()]):null;
+    const plan=LS.get('plan',null);
     const meals=DB.식단.filter(x=>x.날짜===t),kc=meals.reduce((a,x)=>a+num(x.칼로리),0);
     const wk=[...Array(7)].map((_,i)=>addDays(t,i-6)).map(d=>({d,k:DB.식단.filter(x=>x.날짜===d).reduce((a,x)=>a+num(x.칼로리),0)}));const mx=Math.max(1,...wk.map(x=>x.k),num(CFG.kcal));
-    h+=`<div class="card"><h2>🏋️ 오늘의 운동</h2>${tp?`<div class="t"><b>${esc(tp.title)}</b> <span class="muted">(${esc(plan.name)})</span></div><ul>${tp.items.map(i=>`<li>${esc(i)}</li>`).join('')}</ul><button class="p s" data-act="doneWo" data-t="${esc(tp.title)}" data-i="${esc(tp.items.join(', '))}">완료 기록</button>`:plan?'<div class="muted">오늘은 쉬는 날 😌 가벼운 스트레칭 추천</div>':'<div class="muted">운동 계획이 없어요 → \'운동 계획\' 탭에서 선택</div>'}</div>
+    h+=todayWoCard(t)+`
     <div class="card"><h2>🍽 오늘 식단 <span class="sp"></span><button class="s" data-act="add" data-s="식단">＋</button></h2>
      <div class="big">${kc.toLocaleString()} <small style="font-size:14px">kcal ${CFG.kcal?'/ 목표 '+CFG.kcal:''}</small></div>
      ${meals.map(x=>`<div class="item" data-ed="식단|${x.id}"><span class="tag">${esc(x.끼니)}</span><div class="b"><div class="t">${esc(x.음식)}</div></div><div class="muted">${esc(x.칼로리)}</div></div>`).join('')}
      <label class="btn" style="margin-top:10px;width:100%">📷 음식 사진으로 칼로리 추정<input type="file" accept="image/*" capture="environment" id="mealIn" class="hide"></label><div id="mealOut"></div>
      <div class="bars">${wk.map(x=>`<div class="${x.d===t?'on':''}" style="height:${Math.round(x.k/mx*100)}%"><span>${dname(x.d).split(' ')[0]}</span></div>`).join('')}</div><div style="height:20px"></div></div>`;
   }else if(m==='운동 계획'){
-    const plan=LS.get('plan',null);
-    h+=`<h3 style="margin:6px 0">기본 계획</h3><div class="rail">${Object.keys(PLANS).map((k,i)=>`<div class="rcard"><img src="${['img/ex/Barbell_Squat_1.jpg','img/ex/Dumbbell_Bench_Press_0.jpg','img/ex/Plank_0.jpg'][i%3]}" alt=""><div class="rb"><div class="t" style="font-weight:700">${k}</div><div class="muted">${PLANS[k].days.map(d=>d.day).join(' · ')}</div><button class="s ${plan&&plan.name===k?'p':''}" data-act="setPlan" data-k="${k}" style="margin-top:8px">${plan&&plan.name===k?'적용 중':'선택'}</button></div></div>`).join('')}</div><div class="card"><p class="muted">일반적인 입문 예시예요. 통증·질환이 있으면 전문가와 상의하세요.</p></div>
+    const plan=LS.get('plan',null),lib=LS.get('plans',[]),pv=sub.pv||'스케줄';
+    h+=`<div class="seg" style="margin:4px 0 10px">${['스케줄','내 계획','새 계획'].map(k=>`<span class="${pv===k?'on':''}" style="flex:1;text-align:center;padding:9px 0;font-size:14px" data-act="chip" data-k="pv" data-v="${k}">${k==='스케줄'?'📅 스케줄':k==='내 계획'?'📂 내 계획 '+lib.length:'＋ 새 계획'}</span>`).join('')}</div>`;
+    if(pv==='스케줄')h+=scheduleView(plan);
+    else if(pv==='내 계획')h+=`<div class="card plist"><h2>📂 저장한 계획<span class="sp"></span><button class="s" data-act="newPlan">＋ 직접 만들기</button></h2>${lib.length?lib.map(x=>`<div class="item"><div class="b" data-act="viewPlan" data-id="${x.id}"><div class="t">${plan&&plan.id===x.id?'<span class="tag">적용 중</span> ':''}${esc(x.name)}</div><div class="d">${esc(x.src||'')} · ${x.days.map(d=>d.day).join('·')} · ${x.days.reduce((a,d)=>a+d.items.length,0)}개 운동</div></div><button class="s" data-act="editPlan" data-id="${x.id}">편집</button>${plan&&plan.id===x.id?'':`<button class="s p" data-act="usePlan" data-id="${x.id}">적용</button>`}</div>`).join(''):'<div class="empty">저장한 계획이 없어요. ‘새 계획’에서 고르거나 AI로 만들어 저장하세요.</div>'}</div>`;
+    else{
+      h+=`<h3 style="margin:6px 0">기본 계획 <span class="muted" style="font-weight:400">눌러서 미리보기 → 저장</span></h3><div class="rail">${Object.keys(PLANS).map((k,i)=>`<div class="rcard"><img src="${['img/ex/Barbell_Squat_1.jpg','img/ex/Dumbbell_Bench_Press_0.jpg','img/ex/Plank_0.jpg'][i%3]}" alt=""><div class="rb"><div class="t" style="font-weight:700">${k}</div><div class="muted">${PLANS[k].days.map(d=>d.day).join(' · ')}</div><button class="s p" data-act="previewBase" data-k="${k}" style="margin-top:8px">미리보기</button></div></div>`).join('')}</div><div class="card"><p class="muted" style="margin:0">일반적인 입문 예시예요. 통증·질환이 있으면 전문가와 상의하세요.</p></div>
     <div class="card"><h2>🤖 AI 맞춤 계획</h2><div class="grid2"><div><label>목표</label><select id="pg"><option>체중 감량</option><option>근력 향상</option><option>체력·건강 유지</option></select></div><div><label>주 몇 회</label><select id="pd"><option>3</option><option>2</option><option>4</option><option>5</option></select></div></div>
      <div class="grid2"><div><label>1회 시간(분)</label><input id="pm" value="40"></div><div><label>장소</label><select id="pl"><option>집(맨몸)</option><option>헬스장</option><option>야외</option></select></div></div>
-     <button class="p" style="width:100%;margin-top:10px" data-act="aiPlan">계획 만들기</button><div id="planOut"></div></div>
-    ${plan?`<div class="card"><h2>현재: ${esc(plan.name)}</h2>${plan.days.map(d=>`<div class="item"><span class="tag">${d.day}</span><div class="b"><div class="t">${esc(d.title)}</div><div class="d">${esc(d.items.join(' / '))}</div></div></div>`).join('')}</div>`:''}`;
+     <button class="p" style="width:100%;margin-top:10px" data-act="aiPlan" ${CK.busy.plan?'disabled':''}>${CK.busy.plan?'🤖 계획을 만드는 중… (다른 메뉴 다녀와도 돼요)':'계획 만들기'}</button>
+     ${LS.get('aiPlanDraft',null)?`<div class="notice" style="margin-top:10px">🤖 저장하지 않은 AI 계획이 있어요 <button class="s p" data-act="aiDraft">다시 보기</button></div>`:''}</div>
+    <div class="card"><h2>✏️ 처음부터 직접 만들기</h2><p class="muted" style="margin:0 0 8px">요일·운동·세트를 직접 정해요. 운동 사전에서 골라 넣을 수도 있어요.</p><button style="width:100%" data-act="newPlan">＋ 빈 계획 만들기</button></div>`;
+    }
   }else if(m==='식단'){
     h+=`<div class="card"><h2>🥗 저칼로리 메뉴 아이디어</h2>${LOWCAL.map(x=>`<span class="chip" style="display:inline-block;margin:3px">${x}</span>`).join('')}<p class="muted">일반적으로 칼로리가 낮은 편인 메뉴 예시예요 (양·조리법에 따라 달라짐).</p></div>
     <div class="card"><h2>🤖 내 재료로 저칼로리 식단 추천</h2><p class="muted">내 냉장고 재료를 활용해 하루 식단을 짜 드려요.</p><button class="p" style="width:100%" data-act="aiMeal">추천 받기</button><div id="mealPlan"></div></div>`;
@@ -777,12 +797,161 @@ ACT.ex=d=>{const x=EXDB.find(e=>e.id===d.id);if(!x)return;const dl=$('#dlg');
    <div class="row" style="margin-top:8px"><a class="btn" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=${encodeURIComponent(x.n+' 자세')}">▶ 영상</a><span style="flex:1"></span><button id="exClose">닫기</button><button class="p" id="exLog">기록하기</button></div></div>`;
   dl.showModal();$('#exClose').onclick=()=>dl.close();
   $('#exLog').onclick=()=>{dl.close();setTimeout(()=>form('운동',{날짜:today(),종류:x.n,부위:x.p}),0)}};
-ACT.setPlan=d=>{LS.set('plan',{name:d.k,days:PLANS[d.k].days});setCfg({});toast('계획 설정: '+d.k);render()};
-ACT.doneWo=d=>{put('운동',{날짜:today(),종류:d.t,부위:'전신',세트시간:d.i,칼로리:'',메모:'계획 완료'});toast('수고했어요! 💪');render()};
-ACT.aiPlan=async()=>{const out=$('#planOut');out.innerHTML='<p class="muted">🤖 계획을 만들고 있어요…</p>';
-  try{const r=await ai(`초보~중급 직장인을 위한 주간 운동 계획을 만들어. 목표: ${$('#pg').value}, 주 ${$('#pd').value}회, 1회 ${$('#pm').value}분, 장소: ${$('#pl').value}. 안전한 일반 운동만. 반드시 JSON으로만: {"name":"계획 이름","days":[{"day":"월|화|수|목|금|토|일 중 하나","title":"제목","items":["운동 세트×횟수"]}],"tip":"주의사항 한 줄"}`);
+/* ===== 운동 계획: 저장 · 스케줄 · 편집 ===== */
+const DOW='일월화수목금토',WEEK=['월','화','수','목','금','토','일'];
+const dowOf=ds=>DOW[new Date(ds+'T00:00').getDay()];
+const pid=()=>'p'+uid();
+function savePlans(lib,active){if(lib)LS.set('plans',lib);if(active!==undefined)LS.set('plan',active);LS.set('plansAt',Date.now());setCfg({})}
+function sessionFor(ds){
+  const plan=LS.get('plan',null);if(!plan||!plan.days)return null;
+  if(plan.start&&ds<plan.start)return null;
+  const ov=LS.get('woOv',{})[ds];if(ov==='skip')return null;if(ov&&ov.items)return Object.assign({moved:1},ov);
+  const d=plan.days.find(x=>x.day===dowOf(ds));return d?Object.assign({},d,{items:d.items.slice()}):null;
+}
+const doneOn=ds=>DB.운동.some(x=>x.날짜===ds);
+function exFind(item){const base=String(item).replace(/\s*\d+\s*[×x*].*$|\s*\d+\s*(분|초|회).*$/,'').replace(/\(.*?\)/g,'').replace(/\s/g,'');if(!base)return null;
+  return EXDB.find(e=>{const n=e.n.replace(/\(.*?\)/g,'').replace(/\s/g,'');return n===base})||EXDB.find(e=>{const n=e.n.replace(/\(.*?\)/g,'').replace(/\s/g,'');return n.includes(base)||base.includes(n)})}
+function weekStart(ds){const k=(new Date(ds+'T00:00').getDay()+6)%7;return addDays(ds,-k)}
+function stats(plan){const t=today();let st=plan&&plan.start?plan.start:t;
+  const past=[];for(let i=1;i<=56;i++){const d=addDays(t,-i);if(d<st)break;if(sessionFor(d))past.push(d)}
+  const ws=weekStart(t);const thisWk=[...Array(7)].map((_,i)=>addDays(ws,i)).filter(d=>sessionFor(d));
+  const wkDone=thisWk.filter(d=>doneOn(d)).length;let streak=0;for(const d of past){if(doneOn(d))streak++;else break}if(sessionFor(t)&&doneOn(t))streak++;
+  const rate=past.length?Math.round(past.filter(doneOn).length/past.length*100):null;
+  const weekN=Math.floor((new Date(t)-new Date(st))/864e5/7)+1;
+  return {thisWk:thisWk.length,wkDone,streak,rate,weekN}}
+function dayBtn(d,t){const s=sessionFor(d),done=doneOn(d),cls=[d===t?'td':'',done?'done':'',!s&&!done?'rest':'',s&&!done&&d<t?'miss':''].join(' ');
+  return `<button class="${cls}" data-act="woDay" data-d="${d}"><span>${dowOf(d)}</span><b>${+d.slice(8)}</b><small>${s?esc(s.title):'휴식'}</small><span class="st">${done?'✓':s&&d<t?'✕':s&&d===t?'●':''}</span></button>`}
+function scheduleView(plan){
+  const t=today();
+  if(!plan)return `<div class="card empty">적용 중인 계획이 없어요.<br><button class="p" style="margin-top:10px" data-act="chip" data-k="pv" data-v="새 계획">＋ 계획 고르기</button></div>`;
+  const S=stats(plan),ws=weekStart(t),ofs=+(sub.wkofs||0);
+  const w1=[...Array(7)].map((_,i)=>addDays(ws,i+ofs*7)),w2=w1.map(d=>addDays(d,7));
+  const pct=S.thisWk?Math.round(S.wkDone/S.thisWk*100):0;
+  return `<div class="card"><h2>🏋️ ${esc(plan.name)}<span class="sp"></span><button class="s" data-act="editPlan" data-id="${plan.id}">✏️ 편집</button></h2>
+   <div class="muted">${plan.start?esc(plan.start)+' 시작 · ':''}${S.weekN}주차${plan.time?' · ⏰ '+esc(plan.time):''}</div>
+   <div class="row" style="justify-content:space-between;margin:10px 0 4px"><b>이번 주 ${S.wkDone}/${S.thisWk}회</b><span class="muted">🔥 연속 ${S.streak}회${S.rate!==null?' · 달성률 '+S.rate+'%':''}</span></div><div class="prog"><i style="width:${pct}%"></i></div></div>
+  <div class="card"><h2>📅 ${ofs===0?'이번 주 · 다음 주':ofs<0?Math.abs(ofs)+'주 전':ofs+'주 후'}<span class="sp"></span><button class="s" data-act="wkMove" data-v="-1">‹</button><button class="s" data-act="wkMove" data-v="0">오늘</button><button class="s" data-act="wkMove" data-v="1">›</button></h2>
+   <div class="wk">${w1.map(d=>dayBtn(d,t)).join('')}</div><div class="wk">${w2.map(d=>dayBtn(d,t)).join('')}</div>
+   <p class="muted" style="margin:4px 0 0">✓ 완료 · ✕ 놓침 · ● 오늘 — 날짜를 누르면 운동 보기·완료·미루기·그날만 수정</p></div>
+  ${todayWoCard(t)}
+  <div class="card"><h2>⏰ 알림 · 캘린더</h2><div class="row"><input id="woTime" type="time" value="${esc(plan.time||'')}" style="flex:1;width:auto"><button data-act="woTimeSave">시간 저장</button></div>
+   <button style="width:100%;margin-top:8px" data-act="woCal" ${CFG.url?'':'disabled'}>📆 앞으로 4주 운동을 구글 캘린더에 등록</button><p class="muted" style="margin:6px 0 0">${CFG.url?'캘린더 앱 알림으로 운동 시간을 알려줘요. 다시 누르면 이전 등록을 지우고 새로 등록해요.':'서버 연결 후 사용할 수 있어요 (더보기 → 설정).'}</p></div>`;
+}
+function todayWoCard(t){
+  const plan=LS.get('plan',null),s=sessionFor(t),done=doneOn(t),chk=(LS.get('woChk',{})[t])||{};
+  if(!plan)return `<div class="card"><h2>🏋️ 오늘의 운동</h2><div class="muted">운동 계획이 없어요 → <a href="#" data-act="goPlan">운동 계획에서 고르기</a></div></div>`;
+  if(!s){let nx='';for(let i=1;i<8;i++){const d=addDays(t,i),x=sessionFor(d);if(x){nx=dname(d)+' · '+x.title;break}}
+    return `<div class="card"><h2>🏋️ 오늘의 운동</h2><div class="muted">오늘은 쉬는 날 😌 가벼운 스트레칭 추천${nx?'<br>다음 운동: <b>'+esc(nx)+'</b>':''}</div><button class="s" style="margin-top:8px" data-act="woExtra" data-d="${t}">＋ 오늘 운동 추가</button></div>`}
+  const n=s.items.filter((_,i)=>chk[i]).length;
+  return `<div class="card"><h2>🏋️ 오늘: ${esc(s.title)}${s.moved?' <span class="tag w">변경됨</span>':''}<span class="sp"></span><span class="muted">${n}/${s.items.length}</span></h2>
+   ${s.items.map((it,i)=>{const e=exFind(it);return `<label class="chk ${chk[i]?'on':''}"><input type="checkbox" data-wck="${i}" ${chk[i]?'checked':''}><span style="flex:1">${esc(it)}</span>${e?`<button class="s" data-act="ex" data-id="${e.id}" type="button">방법</button>`:''}</label>`}).join('')}
+   <div class="row" style="margin-top:10px">${done?'<span class="tag">✓ 오늘 완료 기록됨</span>':`<button class="p" data-act="doneWo" data-d="${t}">완료 기록</button>`}<button class="s" data-act="woDay" data-d="${t}">미루기·수정</button></div></div>`;
+}
+ACT.goPlan=()=>{sub.fit='운동 계획';sub.pv='새 계획';render()};
+ACT.wkMove=d=>{sub.wkofs=d.v==='0'?0:(+(sub.wkofs||0))+(+d.v);render()};
+ACT.doneWo=d=>{const ds=d.d||today(),s=sessionFor(ds),plan=LS.get('plan',{});if(!s)return;const chk=(LS.get('woChk',{})[ds])||{};
+  const items=s.items.filter((_,i)=>chk[i]);const list=(items.length?items:s.items).join(', ');
+  put('운동',{날짜:ds,종류:s.title,부위:'전신',세트시간:list,칼로리:'',메모:'계획 완료 · '+(plan.name||'')});toast('수고했어요! 💪');render()};
+AFTER.fit0=AFTER.fit;
+AFTER.fit=()=>{AFTER.fit0();document.querySelectorAll('[data-wck]').forEach(c=>c.onchange=()=>{const t=today(),all=LS.get('woChk',{});for(const k in all)if(k<addDays(t,-14))delete all[k];
+  (all[t]=all[t]||{})[c.dataset.wck]=c.checked;LS.set('woChk',all);c.closest('.chk').classList.toggle('on',c.checked);
+  const s=sessionFor(t);if(s&&s.items.every((_,i)=>all[t][i])&&!doneOn(t)){toast('모든 운동 체크! 완료 기록할게요 💪');ACT.doneWo({d:t})}})};
+/* 날짜별: 보기 · 완료 · 미루기 · 그날만 수정 */
+ACT.woDay=d=>{const ds=d.d,s=sessionFor(ds),t=today(),dl=$('#dlg');
+  dl.innerHTML=`<div style="padding:18px"><h3>${dname(ds)} ${s?esc(s.title):'휴식'}</h3>
+   ${s?s.items.map(it=>{const e=exFind(it);return `<div class="drow"><b>${esc(it)}</b>${e?`<button class="s" data-x="${e.id}">방법</button>`:''}</div>`}).join(''):'<p class="muted">계획상 쉬는 날이에요.</p>'}
+   ${doneOn(ds)?'<p><span class="tag">✓ 완료 기록 있음</span></p>':''}
+   <div class="grid2" style="margin-top:12px">${s&&ds<=t&&!doneOn(ds)?'<button class="p" id="wDone">완료 기록</button>':''}${s?'<button id="wMove">다음 날로 미루기</button>':''}${s?'<button id="wSkip">이 날 쉬기</button>':''}<button id="wEdit">${s?'이 날만 수정':'＋ 이 날 운동 추가'}</button>${LS.get('woOv',{})[ds]!==undefined?'<button id="wReset">원래 계획으로</button>':''}</div>
+   <div class="row" style="margin-top:12px"><span style="flex:1"></span><button class="p" id="wClose">닫기</button></div></div>`;
+  dl.showModal();const q=x=>dl.querySelector(x),close=()=>{dl.returnValue='';dl.close()};
+  q('#wClose').onclick=close;dl.querySelectorAll('[data-x]').forEach(b=>b.onclick=()=>{close();setTimeout(()=>ACT.ex({id:b.dataset.x}),0)});
+  const ov=LS.get('woOv',{}),setOv=()=>{for(const k in ov)if(k<addDays(t,-30))delete ov[k];LS.set('woOv',ov);savePlans();render()};
+  if(q('#wDone'))q('#wDone').onclick=()=>{close();ACT.doneWo({d:ds})};
+  if(q('#wMove'))q('#wMove').onclick=()=>{const nx=addDays(ds,1);if(sessionFor(nx)&&!confirm('다음 날에도 운동이 있어요. 그 날 운동을 덮어쓸까요?'))return;ov[nx]={title:s.title,items:s.items};ov[ds]='skip';close();setOv();toast('다음 날로 옮겼어요')};
+  if(q('#wSkip'))q('#wSkip').onclick=()=>{ov[ds]='skip';close();setOv();toast('이 날은 쉬어요')};
+  if(q('#wReset'))q('#wReset').onclick=()=>{delete ov[ds];close();setOv()};
+  q('#wEdit').onclick=()=>{close();setTimeout(()=>ACT.woExtra({d:ds}),0)}};
+ACT.woExtra=d=>{const ds=d.d,s=sessionFor(ds)||{title:'추가 운동',items:[]};
+  openEditor({id:'__day',name:dname(ds)+' 운동',days:[{day:dowOf(ds),title:s.title,items:s.items.slice()}]},{single:ds})};
+ACT.woTimeSave=()=>{const p=LS.get('plan',null);if(!p)return;p.time=$('#woTime').value;const lib=LS.get('plans',[]).map(x=>x.id===p.id?Object.assign(x,{time:p.time}):x);savePlans(lib,p);toast('운동 시간 저장')};
+ACT.woCal=async()=>{const p=LS.get('plan',null);if(!p||!CFG.url)return;const tm=p.time||'19:00';if(!confirm(`앞으로 4주 운동을 ${tm}에 구글 캘린더에 등록할까요?`))return;
+  toast('캘린더 등록 중… (잠시 걸려요)',4000);for(const id of (p.calIds||[]))try{await api('calDelete',{eventId:id})}catch(e){}
+  const ids=[],t=today(),[h,mi]=tm.split(':').map(Number),end=String(Math.min(23,h+1)).padStart(2,'0')+':'+String(mi).padStart(2,'0');
+  for(let i=0;i<28;i++){const ds=addDays(t,i),s=sessionFor(ds);if(!s)continue;
+    try{ids.push(await api('calSave',{ev:{title:'[사적] 🏋️ '+s.title,date:ds,start:tm,end,location:'',description:s.items.join('\n')+'\n(나의 하루 운동 계획: '+p.name+')'}}))}catch(e){toast('일부 실패: '+e.message,4000);break}}
+  p.calIds=ids;savePlans(LS.get('plans',[]).map(x=>x.id===p.id?Object.assign(x,{calIds:ids}):x),p);toast(`📆 ${ids.length}개 운동 일정을 캘린더에 등록했어요`,3500)};
+/* 계획 미리보기 → 저장/적용 */
+function previewPlan(pl,opts={}){const dl=$('#dlg');
+  dl.innerHTML=`<div style="padding:18px"><h3>${esc(pl.name)}</h3><p class="muted" style="margin:0 0 6px">${esc(pl.src||'')}${pl.tip?' · 💡 '+esc(pl.tip):''}</p>
+   ${pl.days.map(d=>`<div class="ed-day"><b><span class="tag">${d.day}</span> ${esc(d.title)}</b>${d.items.map(it=>`<div class="d" style="padding:3px 0">· ${esc(it)}</div>`).join('')}</div>`).join('')}
+   <div class="grid2" style="margin-top:10px">${opts.saved?'':'<button class="p" id="pvApply">저장하고 적용</button><button id="pvSave">저장만</button>'}<button id="pvEdit">✏️ 고쳐서 저장</button>${opts.saved?'<button class="p" id="pvUse">이 계획 적용</button><button id="pvDel" style="color:var(--bad)">삭제</button>':''}${opts.retry?'<button id="pvRetry">🤖 다시 만들기</button>':''}</div>
+   <div class="row" style="margin-top:12px"><span style="flex:1"></span><button id="pvClose">닫기</button></div></div>`;
+  dl.showModal();const q=x=>dl.querySelector(x),close=()=>{dl.returnValue='';dl.close()};
+  q('#pvClose').onclick=close;
+  const store=apply=>{const lib=LS.get('plans',[]);const np=Object.assign({},pl,{id:pl.id&&!pl.id.startsWith('__')?pl.id:pid()});const i=lib.findIndex(x=>x.id===np.id);if(i>=0)lib[i]=np;else lib.unshift(np);
+    if(opts.ai)LS.set('aiPlanDraft',null);if(apply){np.start=today();savePlans(lib.map(x=>x.id===np.id?np:x),np);toast('✅ 저장하고 적용했어요 — 오늘부터 스케줄 시작');sub.pv='스케줄'}else{savePlans(lib);toast('📂 내 계획에 저장했어요');sub.pv='내 계획'}close();render()};
+  if(q('#pvApply'))q('#pvApply').onclick=()=>store(true);if(q('#pvSave'))q('#pvSave').onclick=()=>store(false);
+  if(q('#pvUse'))q('#pvUse').onclick=()=>{close();ACT.usePlan({id:pl.id})};
+  if(q('#pvDel'))q('#pvDel').onclick=()=>{if(!confirm('이 계획을 삭제할까요?'))return;const act=LS.get('plan',null);savePlans(LS.get('plans',[]).filter(x=>x.id!==pl.id),act&&act.id===pl.id?null:undefined);close();render()};
+  if(q('#pvRetry'))q('#pvRetry').onclick=()=>{close();ACT.aiPlan()};
+  q('#pvEdit').onclick=()=>{close();setTimeout(()=>openEditor(JSON.parse(JSON.stringify(pl)),{ai:opts.ai}),0)}}
+ACT.previewBase=d=>previewPlan({name:d.k,src:'기본 계획',days:JSON.parse(JSON.stringify(PLANS[d.k].days))});
+ACT.viewPlan=d=>{const x=LS.get('plans',[]).find(p=>p.id===d.id);if(x)previewPlan(x,{saved:1})};
+ACT.usePlan=d=>{const x=LS.get('plans',[]).find(p=>p.id===d.id);if(!x)return;const cur=LS.get('plan',null);if(cur&&cur.id!==x.id&&!confirm(`지금 계획(${cur.name}) 대신 ‘${x.name}’을 오늘부터 적용할까요? (기록은 그대로 남아요)`))return;
+  const np=Object.assign({},x,{start:today()});savePlans(LS.get('plans',[]).map(p=>p.id===x.id?np:p),np);LS.set('woOv',{});sub.pv='스케줄';toast('✅ ‘'+x.name+'’ 적용');render()};
+ACT.editPlan=d=>{const x=LS.get('plans',[]).find(p=>p.id===d.id)||LS.get('plan',null);if(!x)return;openEditor(JSON.parse(JSON.stringify(x)),{})};
+ACT.newPlan=()=>openEditor({name:'나의 계획',src:'직접 만들기',days:[{day:'월',title:'운동 A',items:[]},{day:'수',title:'운동 B',items:[]},{day:'금',title:'운동 C',items:[]}]},{});
+/* 편집기: 요일 · 제목 · 운동(추가/삭제/순서) · 세트 */
+const splitIt=it=>{const m=String(it).match(/^(.*?)\s+((?:\d+\s*[×x*]\s*\S+|\d+\s*(?:분|초|회|km)).*)$/);return m?[m[1],m[2]]:[String(it),'']};
+function openEditor(ED,opt){const dl=$('#dlg'),single=opt.single;
+  const draw=()=>{ED.days.sort((a,b)=>WEEK.indexOf(a.day)-WEEK.indexOf(b.day));
+   dl.innerHTML=`<form method="dialog" style="padding:16px"><h3>${single?'✏️ '+esc(dname(single))+' 운동 수정':'✏️ 계획 편집'}</h3>
+    ${single?'<p class="muted" style="margin:0">이 날짜에만 적용돼요. 원래 계획은 그대로예요.</p>':`<label>계획 이름</label><input data-f="name" value="${esc(ED.name)}">
+    <label>운동 요일 (눌러서 추가/빼기)</label><div class="dsel">${WEEK.map(w=>`<span class="${ED.days.some(d=>d.day===w)?'on':''}" data-day="${w}">${w}</span>`).join('')}</div>`}
+    ${ED.days.map((d,di)=>`<div class="ed-day"><div class="row" style="flex-wrap:nowrap">${single?'':`<span class="tag" style="font-size:14px">${d.day}</span>`}<input data-t="${di}" value="${esc(d.title)}" placeholder="제목 (예: 하체)" style="flex:1"></div>
+     ${d.items.map((it,ii)=>{const [n,r]=splitIt(it);return `<div class="ed-it"><input data-n="${di}.${ii}" value="${esc(n)}" list="exl2" placeholder="운동 이름"><input data-r="${di}.${ii}" value="${esc(r)}" placeholder="3×10"><div class="ops"><button type="button" data-up="${di}.${ii}" aria-label="위로">▲</button><button type="button" data-dn="${di}.${ii}" aria-label="아래로">▼</button><button type="button" data-rm="${di}.${ii}" aria-label="삭제" style="color:var(--bad)">✕</button></div></div>`}).join('')||'<div class="muted" style="padding:6px 0">아직 운동이 없어요</div>'}
+     <div class="grid2" style="margin-top:6px"><button type="button" class="s" data-add="${di}">＋ 운동 추가</button><button type="button" class="s" data-pick="${di}">📖 사전에서 고르기</button></div></div>`).join('')}
+    <datalist id="exl2">${EXDB.map(x=>`<option value="${esc(x.n)}">`).join('')}</datalist>
+    <div class="row" style="margin-top:14px"><span style="flex:1"></span><button value="cancel">취소</button><button value="ok" class="p">저장</button></div></form>`;
+   const all=s=>dl.querySelectorAll(s),ix=v=>v.split('.').map(Number);
+   all('[data-f=name]').forEach(i=>i.oninput=()=>ED.name=i.value);
+   all('[data-t]').forEach(i=>i.oninput=()=>ED.days[+i.dataset.t].title=i.value);
+   const setIt=(di,ii)=>{const n=dl.querySelector(`[data-n="${di}.${ii}"]`).value.trim(),r=dl.querySelector(`[data-r="${di}.${ii}"]`).value.trim();ED.days[di].items[ii]=(n+' '+r).trim()};
+   all('[data-n],[data-r]').forEach(i=>i.oninput=()=>{const[a,b]=ix(i.dataset.n||i.dataset.r);setIt(a,b)});
+   all('[data-rm]').forEach(b=>b.onclick=()=>{const[a,c]=ix(b.dataset.rm);ED.days[a].items.splice(c,1);draw()});
+   all('[data-up],[data-dn]').forEach(b=>b.onclick=()=>{const up=!!b.dataset.up,[a,c]=ix(b.dataset.up||b.dataset.dn),L=ED.days[a].items,j=up?c-1:c+1;if(j<0||j>=L.length)return;[L[c],L[j]]=[L[j],L[c]];draw()});
+   all('[data-add]').forEach(b=>b.onclick=()=>{ED.days[+b.dataset.add].items.push('');draw();const L=dl.querySelectorAll(`[data-n^="${b.dataset.add}."]`);L[L.length-1].focus()});
+   all('[data-pick]').forEach(b=>b.onclick=()=>pickEx(+b.dataset.pick));
+   all('[data-day]').forEach(b=>b.onclick=()=>{const w=b.dataset.day,i=ED.days.findIndex(d=>d.day===w);
+     if(i>=0){if(ED.days[i].items.filter(Boolean).length&&!confirm(w+'요일 운동을 빼면 안의 운동도 지워져요. 뺄까요?'))return;ED.days.splice(i,1)}else ED.days.push({day:w,title:'운동',items:[]});draw()})};
+  const pickEx=di=>{const pt=ED._pt||'전체';const box=document.createElement('div');box.style.cssText='position:fixed;inset:0;z-index:100;background:var(--card);overflow:auto;padding:16px';
+    const pickDraw=()=>{const L=EXDB.filter(x=>(ED._pt||'전체')==='전체'||x.p===ED._pt);
+     box.innerHTML=`<h3>📖 ${esc(ED.days[di].day)} ${esc(ED.days[di].title)}에 추가할 운동</h3><div class="chips">${EXPARTS.map(x=>`<span class="chip ${(ED._pt||'전체')===x?'on':''}" data-pt="${x}">${x}</span>`).join('')}</div>
+      <div class="exgrid">${L.map(x=>`<button class="excard" data-ex="${x.id}" type="button"><img src="img/ex/${x.id}_0.jpg" alt="" loading="lazy"><div><b>${esc(x.n)}</b><span>${x.p} · ${esc(x.eq)}</span></div></button>`).join('')}</div>
+      <div style="position:sticky;bottom:0;background:var(--card);padding:10px 0"><button class="p" style="width:100%" id="pkDone">완료</button></div>`;
+     box.querySelectorAll('[data-pt]').forEach(c=>c.onclick=()=>{ED._pt=c.dataset.pt;pickDraw()});
+     box.querySelectorAll('[data-ex]').forEach(c=>c.onclick=()=>{const x=EXDB.find(e=>e.id===c.dataset.ex);const rr=x.p==='유산소'?'20분':x.p==='스트레칭'?'2×30초':'3×10';ED.days[di].items.push(x.n+' '+rr);c.style.outline='3px solid var(--brand)';toast('＋ '+x.n,1200)});
+     box.querySelector('#pkDone').onclick=()=>{box.remove();draw()}};
+    dl.appendChild(box);pickDraw()};
+  draw();if(!dl.open)dl.showModal();
+  dl.onclose=()=>{if(dl.returnValue!=='ok'||!dl.querySelector('form'))return;
+    ED.days.forEach(d=>d.items=d.items.map(s=>String(s).trim()).filter(Boolean));
+    if(single){const ov=LS.get('woOv',{});ov[single]=ED.days[0].items.length?{title:ED.days[0].title||'운동',items:ED.days[0].items}:'skip';LS.set('woOv',ov);savePlans();toast('이 날 운동을 수정했어요');render();return}
+    if(!ED.name.trim())ED.name='나의 계획';if(!ED.days.length)return toast('운동 요일을 하나 이상 골라 주세요');
+    delete ED._pt;const lib=LS.get('plans',[]);if(!ED.id||ED.id.startsWith('__'))ED.id=pid();const i=lib.findIndex(x=>x.id===ED.id);if(i>=0)lib[i]=ED;else lib.unshift(ED);
+    if(opt.ai)LS.set('aiPlanDraft',null);
+    const act=LS.get('plan',null);
+    if(act&&act.id===ED.id){savePlans(lib,Object.assign({},ED,{start:act.start||today()}));toast('✅ 적용 중인 계획을 수정했어요 — 스케줄에 바로 반영')}
+    else{savePlans(lib);if(confirm('저장했어요. 이 계획을 지금 적용할까요?')){ACT.usePlan({id:ED.id});return}toast('📂 내 계획에 저장')}
+    render()}}
+ACT.aiDraft=()=>{const r=LS.get('aiPlanDraft',null);if(r)previewPlan(r,{ai:1,retry:1})};
+ACT.aiPlan=async()=>{if(CK.busy.plan)return;const g=$('#pg'),q={g:g?g.value:'체력·건강 유지',d:($('#pd')||{}).value||3,m:($('#pm')||{}).value||40,l:($('#pl')||{}).value||'집(맨몸)'};
+  CK.busy.plan=1;render();
+  try{const r=await ai(`초보~중급 직장인을 위한 주간 운동 계획을 만들어. 목표: ${q.g}, 주 ${q.d}회, 1회 ${q.m}분, 장소: ${q.l}. 안전한 일반 운동만. 가능하면 다음 운동 이름을 그대로 써: ${EXDB.map(x=>x.n).join(', ')}. items는 "운동이름 세트×횟수" 형식. 반드시 JSON으로만: {"name":"계획 이름","days":[{"day":"월|화|수|목|금|토|일 중 하나","title":"제목","items":["운동 세트×횟수"]}],"tip":"주의사항 한 줄"}`);
     if(!r.days)throw new Error('계획을 만들지 못했어요. 다시 시도해 주세요.');
-    LS.set('plan',{name:r.name||'AI 맞춤',days:r.days});setCfg({});toast('AI 계획을 적용했어요');render();if(r.tip)setTimeout(()=>toast('💡 '+r.tip,5000),300)}catch(e){out.innerHTML=`<div class="notice">${esc(e.message)}</div>`}};
+    const pl={name:r.name||'AI 맞춤 계획',src:`AI 추천 · ${q.g} · 주${q.d}회 · ${q.m}분 · ${q.l}`,tip:r.tip||'',days:r.days.filter(d=>WEEK.includes(d.day)).map(d=>({day:d.day,title:d.title||'운동',items:(d.items||[]).map(String)}))};
+    LS.set('aiPlanDraft',pl);CK.busy.plan=0;toast('🤖 AI 계획이 나왔어요 — 확인 후 저장하세요');if(tab==='fit')render();previewPlan(pl,{ai:1,retry:1})}
+  catch(e){CK.busy.plan=0;toast(e.message,4000);if(tab==='fit')render()}};
 ACT.aiMeal=async()=>{const out=$('#mealPlan');out.innerHTML='<p class="muted">🤖 식단을 짜고 있어요…</p>';
   try{const list=DB.식재료.map(x=>x.이름).join(', ')||'(등록 재료 없음 — 구하기 쉬운 재료로)';
     const r=await ai(`보유 재료: ${list}. 이 재료를 최대한 활용한 하루 저칼로리 한국 가정식 식단(아침·점심·저녁·간식)을 추천해. 칼로리는 대략 추정치. 반드시 JSON으로만: {"meals":[{"time":"아침","menu":"메뉴","kcal":350,"how":"간단 조리법 한 줄"}],"total":1400,"note":"한 줄 조언"}`);
