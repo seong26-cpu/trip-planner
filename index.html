@@ -7,7 +7,7 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>여행 올인원 플래너</title>
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#D9264E">
+<meta name="theme-color" content="#C2451F">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="여행플래너">
@@ -15,7 +15,7 @@
 <link rel="icon" href="icons/icon-192.png">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;600;700;800&family=Space+Mono:wght@700&display=swap">
 <style>
 html{-webkit-text-size-adjust:100%}body{margin:0}img{max-width:100%}[hidden]{display:none!important}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 
@@ -1141,6 +1141,66 @@ nav.tabs button[data-tab="what"]{--ico:url("data:image/svg+xml,%3Csvg xmlns='htt
 .camrow label{justify-content:center;text-align:center}
 .wsec{display:flex;flex-direction:column;gap:4px;padding-top:8px;border-top:1px solid var(--line)}
 .wsec ol,.wsec ul{margin:0;padding-left:20px}
+/* ===== v9: 나의 여행 — 따뜻한 실사 사진 테마 + 메뉴 정리 (기존 규칙 위에 덮어쓰기) ===== */
+:root{
+  --bg:#FFF5EC; --surface:#FFFFFF; --surface-2:#FFF0E4; --fg:#2B1734; --muted:#7A5A66;
+  --line:#F1DCCD; --ink:#2B1734; --ink-fg:#FFF5EC; --accent:#C2451F; --accent-soft:#FFE6D6;
+  --good:#3E7A3A; --warn:#9A5A00; --bad:#B3261E; --route:#C2451F;
+  --f-display:"Black Han Sans","Noto Sans KR",system-ui,sans-serif;
+  --f-mono:"Space Mono",ui-monospace,monospace;
+  --shadow:0 22px 44px -28px rgba(214,72,40,.65); --shadow-s:0 12px 28px -22px rgba(214,72,40,.7);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#1C1317; --surface:#281C21; --surface-2:#33242A; --fg:#FBEDE4; --muted:#CDB2A8;
+  --line:#45323A; --ink:#FBEDE4; --ink-fg:#1C1317; --accent:#FF8A5C; --accent-soft:#4A2A20;
+  --good:#7CC27A; --warn:#E8B04A; --bad:#FF8A7A; --route:#FF8A5C;
+  --shadow:0 22px 44px -26px rgba(0,0,0,.7); --shadow-s:0 10px 24px -18px rgba(0,0,0,.7)}}
+:root[data-theme="dark"]{
+  --bg:#1C1317; --surface:#281C21; --surface-2:#33242A; --fg:#FBEDE4; --muted:#CDB2A8;
+  --line:#45323A; --ink:#FBEDE4; --ink-fg:#1C1317; --accent:#FF8A5C; --accent-soft:#4A2A20;
+  --good:#7CC27A; --warn:#E8B04A; --bad:#FF8A7A; --route:#FF8A5C;
+  --shadow:0 22px 44px -26px rgba(0,0,0,.7); --shadow-s:0 10px 24px -18px rgba(0,0,0,.7)}
+h1,h2{font-family:var(--f-display);font-weight:400;letter-spacing:0}
+header.top h1{font-family:var(--f-display);font-weight:400;color:var(--fg)}
+.card{border-color:transparent;border-radius:24px}
+.ticket{border:0;border-radius:24px}
+.ticket .dday{font-family:var(--f-display);font-weight:400}
+.btn.primary{color:#FFF5EC}
+nav.tabs button[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent)}
+/* 주 메뉴에서 숨김: 메모 · 번역·교통 · 경비·정산 (더보기 안에서 열기) */
+nav.tabs .t-hide{display:none!important}
+.more-grid button.new{position:relative;border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.more-grid button.new::after{content:"NEW";position:absolute;top:10px;right:10px;font-size:.66rem;font-weight:700;padding:2px 7px;border-radius:999px;background:var(--accent);color:#FFF5EC}
+@media (max-width:720px){nav.tabs{grid-template-columns:repeat(4,1fr)}}
+/* 홈 히어로: 도시 사진 로테이션 */
+.thero{position:relative;height:clamp(320px,46vw,560px);border-radius:30px;overflow:hidden;background:linear-gradient(160deg,#FFB38A,#FFE2B8);box-shadow:0 0 0 3px var(--surface),0 28px 56px -30px rgba(214,72,40,.8)}
+.thero>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .7s ease;filter:saturate(1.1) sepia(.14) hue-rotate(-6deg)}
+.thero>img.on{opacity:1}
+.thero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,140,70,.16) 0%,rgba(255,170,90,0) 38%,rgba(43,23,52,.68) 100%);pointer-events:none}
+.th-empty{position:absolute;left:24px;right:24px;top:42%;text-align:center;color:#5A2E1E;font-size:.95rem}
+.th-hud{position:absolute;left:14px;top:14px;z-index:2;display:flex;align-items:center;gap:7px;min-height:32px;padding:0 13px;border-radius:16px;background:rgba(255,255,255,.92);color:#2B1734;font-family:var(--f-mono);font-size:11px;letter-spacing:1px;max-width:calc(100% - 90px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.th-hud i{width:8px;height:8px;border-radius:4px;background:#FF6A3D;flex:none}
+.th-btn{width:44px;height:44px;border:0;border-radius:22px;background:rgba(255,255,255,.92);color:#2B1734;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.th-btn svg{width:20px;height:20px}
+.th-btn:focus-visible{outline:2px solid #FFF5EC;outline-offset:2px}
+.th-cyc{position:absolute;right:12px;top:10px;z-index:2}
+.th-bot{position:absolute;left:22px;right:16px;bottom:18px;z-index:2;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px}
+.th-title{margin:0;font-family:var(--f-display);font-weight:400;font-size:clamp(44px,7vw,92px);line-height:1;color:#FFF7EE;text-shadow:0 4px 22px rgba(43,23,52,.55)}
+.th-sub{margin:8px 0 0;color:#FFF7EE;font-size:1rem;text-shadow:0 2px 10px rgba(43,23,52,.6)}
+.th-nav{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.th-cap{color:#FFF7EE;font-size:.86rem;text-shadow:0 2px 10px rgba(43,23,52,.7);text-align:right}
+.th-ctl{display:flex;align-items:center;gap:8px}
+.th-cnt{color:#FFF7EE;font-family:var(--f-mono);font-size:12px;min-width:46px;text-align:center;text-shadow:0 2px 8px rgba(43,23,52,.7)}
+.th-credit{margin:-14px 8px 0;font-size:.72rem;color:var(--muted);text-align:right;min-height:1em;overflow-wrap:anywhere}
+.th-credit a{color:var(--muted)}
+@media (max-width:720px){
+  .thero{height:340px;border-radius:24px}
+  .th-bot{left:16px;right:12px;bottom:12px}
+  .th-nav{align-items:flex-start;width:100%;flex-direction:row;justify-content:space-between;align-items:center}
+  .th-cap{text-align:left;font-size:.8rem}
+  .th-credit{margin-top:-8px}
+}
+@media (prefers-reduced-motion:reduce){.thero>img{transition:none}}
 </style>
 </head>
 <body>
@@ -1417,7 +1477,9 @@ const GSRC={
 "use strict";
 /* ===== 독립 실행판: Claude 기능 없음. 데이터는 이 기기 브라우저(localStorage + IndexedDB)에 저장 ===== */
 const TABS=[["home","홈"],["plan","일정·동선"],["book","항공·숙소"],["place","추천 장소·맛집"],["money","경비·정산"],["talk","번역·교통"],["mem","추억"],["check","준비물·버킷"],["memo","메모"],["what","WHAT"]];
-const MORE=["book","talk","mem","check","memo","what"];
+const MORE=["book","money","talk","mem","check","memo","what"];
+/* v9: 주 메뉴에서 숨김(더보기 안에서만 열기) */
+const MAIN_HIDE=["money","talk","memo"];
 const COLS=["items","bookings","places","expenses","checklist","memories","daycfg","hotels","bucket","notes"];
 const KEY="trip-planner-v1";
 const DEFAULT_TRIP={title:"새 여행",city:"",cityEn:"",from:"ICN",to:"",start:"",end:"",travelers:["나"],budget:0,cur:"JPY",rate:0,lang:"ja"};
@@ -1717,10 +1779,11 @@ function render(){
   const t=T();
   $("#tripTitle").textContent=t.title||"여행 올인원 플래너";
   $("#status").innerHTML=Sync.user?`<span id="syncState">${esc(Sync.label())}</span> · ${esc(Sync.user.displayName||Sync.user.email||"")} · <button class="btn ghost sm" data-act="logout" style="padding:0">로그아웃</button>`:Sync.enabled()?`<b>이 기기에 자동 저장</b> · <button class="btn ghost sm" data-act="login" style="padding:0">로그인하고 동기화</button>`:`<b>이 기기에 자동 저장</b> · Claude 없이 무료로 동작`;
-  $("#tabs").innerHTML=TABS.map(([k,v])=>`<button role="tab" data-tab="${k}" aria-selected="${k===tab}" class="${MORE.includes(k)?"t-more":""}">${v}</button>`).join("")+`<button class="t-morebtn" role="tab" data-tab="more" aria-selected="${tab==="more"||MORE.includes(tab)}">더보기</button>`;
+  $("#tabs").innerHTML=TABS.map(([k,v])=>`<button role="tab" data-tab="${k}" aria-selected="${k===tab}" class="${MORE.includes(k)?"t-more":""}${MAIN_HIDE.includes(k)?" t-hide":""}">${v}</button>`).join("")+`<button class="t-morebtn" role="tab" data-tab="more" aria-selected="${tab==="more"||MORE.includes(tab)}">더보기</button>`;
   document.getElementById("tabs").classList.remove("open");
   TABS.forEach(([k])=>{$("#p-"+k).hidden=k!==tab});$("#p-more").hidden=tab!=="more";
   ({home:rHome,plan:rPlan,book:rBook,place:rPlace,money:rMoney,talk:rTalk,mem:rMem,check:rCheck,memo:rMemo,what:rWhat,more:rMore})[tab]();
+  if(tab==="home")heroMount();
   openD.forEach(id=>{const d=document.getElementById(id);if(d)d.open=true});
   closedD.forEach(id=>{const d=document.getElementById(id);if(d)d.open=false});
   if(EDIT)fillEdit();
@@ -1731,6 +1794,86 @@ const fold=(id,title,body,o)=>{o=o||{};return `<details class="fold" id="${id}" 
 const foldBar=scope=>`<div class="foldbar"><button class="btn ghost sm" data-act="foldAll" data-scope="${scope}" data-open="1">모두 펼치기</button><button class="btn ghost sm" data-act="foldAll" data-scope="${scope}" data-open="0">모두 접기</button></div>`;
 function actualKRW(){return S.expenses.reduce((a,e)=>a+toKRW(e.amount,e.cur),0)}
 function bookKRW(){return S.bookings.reduce((a,b)=>a+(Number(b.cost)||0),0)}
+
+/* ===== v9: 나의 여행 — 도시별 실사 사진 로테이션 =====
+   - 사진: Wikimedia Commons(자유 라이선스) 검색 결과. 작가·라이선스·원본 링크를 사진 아래에 표시
+   - 도시 팩이 있으면 팩의 장소(명소·랜드마크·시장·인기 장소)로 검색, 없으면 도시 영문명 + 랜드마크/시장/구시가지 등으로 검색
+   - 도시별로 이 기기에 30일 저장 · ‹ › ↻ 로 넘기기 · 6초마다 자동 넘김(동작 줄이기 설정 시 끔) */
+const HERO={key:"",list:[],i:0,timer:null,loading:null};
+const PHOTO_KEY="trip-planner-photos-v1";
+function photoCache(){try{return JSON.parse(localStorage.getItem(PHOTO_KEY)||"{}")}catch(e){return{}}}
+function savePhotoCache(c){try{localStorage.setItem(PHOTO_KEY,JSON.stringify(c))}catch(e){}}
+function spotCat(p){const s=(p.name||"")+" "+(p.nameEn||"");
+  if(/시장|market|야타이|yatai/i.test(s))return"시장";
+  if(p.kind==="맛집")return null;
+  if(p.kind==="전망대"||/tower|타워|bridge|용다리|castle|천수각|성터|skytree|cathedral|대성당|harukas|tsutenkaku|쓰텐카쿠|경포대/i.test(s))return"랜드마크";
+  if(p.kind==="명소")return /거리|street|crossing|교차로|beach|해변|dotonbori|도톤보리/i.test(s)?"인기 장소":"명소";
+  if(p.kind==="쇼핑"||p.kind==="체험")return"인기 장소";
+  return null}
+function heroKey(){const pk=PK(),t=T();return pk?pk.id:(t.cityEn||"").trim().toLowerCase()}
+function heroSpots(){const t=T(),pk=PK(),en=(pk&&pk.cityEn)||t.cityEn||"";
+  if(pk&&Array.isArray(pk.places)&&pk.places.length){
+    const g={"랜드마크":[],"명소":[],"시장":[],"인기 장소":[]};
+    pk.places.forEach(p=>{const c=spotCat(p);if(c&&p.nameEn&&g[c].length<3)g[c].push({label:String(p.name).replace(/\s*\(.*?\)\s*/g," ").trim()||p.name,cat:c,q:(en&&!p.nameEn.toLowerCase().includes(en.toLowerCase())?p.nameEn+" "+en:p.nameEn)})});
+    const out=[];for(let r=0;r<3;r++)Object.keys(g).forEach(k=>{if(g[k][r])out.push(g[k][r])});
+    if(out.length)return out}
+  if(!en)return[];
+  const nm=t.city||en;
+  return [["랜드마크","landmark","랜드마크"],["명소","old town","구시가지"],["시장","market","시장"],["인기 장소","shopping street","번화가"],["명소","skyline","도시 전경"]].map(([cat,q,l])=>({label:nm+" "+l,cat,q:en+" "+q}))}
+async function commonsSearch(q){
+  const u="https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrnamespace=6&gsrlimit=12&gsrsearch="+encodeURIComponent(q+" filetype:bitmap")+"&prop=imageinfo&iiprop=url|size|mime|extmetadata&iiextmetadatafilter=Artist|LicenseShortName&iiurlwidth=1600";
+  const j=await (await fetch(u)).json();
+  return Object.values((j.query||{}).pages||{}).sort((a,b)=>(a.index||0)-(b.index||0)).map(p=>{const ii=(p.imageinfo||[])[0]||{},md=ii.extmetadata||{};
+    return {u:ii.thumburl||"",w:ii.width||0,h:ii.height||0,m:ii.mime||"",t:p.title||"",a:String((md.Artist||{}).value||"").replace(/<[^>]*>/g,"").replace(/\s+/g," ").trim().slice(0,40),l:String((md.LicenseShortName||{}).value||""),p:ii.descriptionurl||""}})
+    .filter(x=>x.u&&/jpe?g/i.test(x.m)&&x.w>=x.h*1.25&&x.w>=1200&&!/\bmap\b|logo|diagram|floor ?plan|signboard|ticket|interior of train/i.test(x.t))}
+function heroLoad(key){
+  const c=photoCache()[key];if(c&&c.list&&c.list.length&&Date.now()-(c.at||0)<30*864e5)return Promise.resolve(c);
+  if(HERO.loading&&HERO.loading.key===key)return HERO.loading.p;
+  const spots=heroSpots();if(!spots.length)return Promise.resolve(null);
+  const p=Promise.all(spots.map(s=>commonsSearch(s.q).then(r=>r.slice(0,2).map(x=>Object.assign(x,{label:s.label,cat:s.cat}))).catch(()=>[]))).then(rs=>{
+    const seen=new Set(),list=[];
+    for(let r=0;r<2;r++)rs.forEach(arr=>{const x=arr[r];if(x&&!seen.has(x.u)){seen.add(x.u);list.push(x)}});
+    const out={at:Date.now(),list:list.slice(0,16),i:0};
+    if(out.list.length){const all=photoCache();all[key]=out;Object.keys(all).filter(k=>Date.now()-(all[k].at||0)>30*864e5).forEach(k=>delete all[k]);savePhotoCache(all)}
+    return out}).finally(()=>{if(HERO.loading&&HERO.loading.key===key)HERO.loading=null});
+  HERO.loading={key,p};return p}
+function heroHTML(t,dd,ds){
+  const city=t.city||"",en=t.cityEn||"";
+  const sub=[city?`${city} ${nights()}박 ${ds.length}일`:"여행지 미정",t.start?`${dayLabel(t.start)} – ${dayLabel(t.end)}`:"",`${pax()}명`].filter(Boolean).join(" · ");
+  const ic=d=>`<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${d}"/></svg>`;
+  return `<section class="thero" id="thero" aria-label="${esc(city||"여행지")} 사진">
+    <img id="th-img" alt="" decoding="async">
+    <div class="th-empty" id="th-empty">${city||en?esc(city||en)+" 사진을 불러오는 중…":"아래 여행 기본 정보에서 도시를 정하면 그 도시 사진이 나와요"}</div>
+    <span class="th-hud"><i></i>TRIP.LOG · ${esc((en||city||"MY TRIP").toUpperCase())} · ${esc(dd)}</span>
+    <button type="button" class="th-btn th-cyc" data-hero="next" aria-label="다른 사진 보기">${ic("M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7")}</button>
+    <div class="th-bot">
+      <div class="th-text"><h2 class="th-title">나의 여행</h2><p class="th-sub">${esc(sub)}</p></div>
+      <div class="th-nav"><span class="th-cap" id="th-cap"></span>
+        <div class="th-ctl"><button type="button" class="th-btn" data-hero="prev" aria-label="이전 사진">${ic("M15 5l-7 7 7 7")}</button><span class="th-cnt" id="th-cnt"></span><button type="button" class="th-btn" data-hero="next" aria-label="다음 사진">${ic("M9 5l7 7-7 7")}</button></div></div>
+    </div>
+  </section><p class="th-credit" id="th-credit"></p>`}
+function heroShow(){const im=$("#th-img");if(!im||!HERO.list.length)return;
+  const x=HERO.list[HERO.i%HERO.list.length];
+  const em=$("#th-empty");if(em)em.hidden=true;
+  if(im.dataset.u!==x.u){im.classList.remove("on");im.onload=()=>im.classList.add("on");im.src=x.u;im.dataset.u=x.u}
+  im.alt=x.label;
+  const cap=$("#th-cap");if(cap)cap.textContent=x.cat+" · "+x.label;
+  const cn=$("#th-cnt");if(cn)cn.textContent=(HERO.i%HERO.list.length+1)+" / "+HERO.list.length;
+  const cr=$("#th-credit");if(cr)cr.innerHTML=`📷 <a href="${esc(x.p)}" target="_blank" rel="noopener">${esc(x.a||"작가 미상")}</a> · ${esc(x.l||"자유 라이선스")} · Wikimedia Commons`;
+  const nx=HERO.list[(HERO.i+1)%HERO.list.length];if(nx&&nx.u!==x.u){const pre=new Image();pre.src=nx.u}}
+function heroStep(n,save){if(!HERO.list.length)return;HERO.i=(HERO.i+n+HERO.list.length)%HERO.list.length;
+  if(save){const all=photoCache();if(all[HERO.key]){all[HERO.key].i=HERO.i;savePhotoCache(all)}}heroShow()}
+function heroArm(){clearInterval(HERO.timer);HERO.timer=null;
+  if(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+  HERO.timer=setInterval(()=>{if(document.hidden||tab!=="home"||!$("#th-img"))return;heroStep(1,false)},6000)}
+function heroMount(){if(!$("#thero"))return;const key=heroKey();
+  if(HERO.key!==key){HERO.key=key;HERO.list=[];HERO.i=0}
+  if(HERO.list.length){heroShow();heroArm();return}
+  if(!key)return;
+  heroLoad(key).then(c=>{if(HERO.key!==key)return;
+    if(c&&c.list&&c.list.length){HERO.list=c.list;HERO.i=(c.i||0)%c.list.length;heroShow();heroArm()}
+    else{const e=$("#th-empty");if(e)e.textContent="사진을 불러오지 못했어요. 인터넷 연결과 도시(영문) 이름을 확인해 주세요."}})}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-hero]");if(!b)return;heroStep(b.dataset.hero==="prev"?-1:1,true);heroArm()});
 
 function rHome(){
   const t=T(),ds=days(),budget=budTotal(),est=toKRW(estimateAll(),t.cur),act=actualKRW(),bk=bookKRW(),B=bud(),CE=catEstimates(),CA=catActuals(),hasB=BCATS.some(k=>B[k]>0);
@@ -1744,6 +1887,7 @@ function rHome(){
   const next=S.items.filter(i=>i.day>=today&&!i.done).sort((x,y)=>(x.day+(x.time||"")).localeCompare(y.day+(y.time||""))).slice(0,4);
   const ckDone=S.checklist.filter(c=>c.done).length;
   $("#p-home").innerHTML=`
+  ${heroHTML(t,dd,ds)}
   ${S.trip?"":`<div class="note">처음이세요? 아래 "여행 기본 정보"에서 <b>도시 팩</b>(도쿄·오사카·후쿠오카·강릉)을 누르고 날짜를 넣은 뒤 <b>"저장하고 추천 반영"</b>을 누르세요. 예전 데이터가 있으면 맨 아래 "백업 가져오기"로 불러올 수 있어요.</div>`}
   <div class="ticket">
     <div class="main">
@@ -2435,6 +2579,7 @@ function rMore(){const t=T(),pk=PK(),list=infoLinks();const city=t.city||"";
   $("#p-more").innerHTML=`
   <div class="card"><h2>더보기</h2>
     <div class="more-grid">
+      <button data-tab="money" class="new"><b>💳 경비·정산</b><span>지출 기록 · 1/N 정산</span></button>
       <button data-tab="book"><b>✈️ 항공·숙소</b><span>최저가 검색·예약 기록</span></button>
       <button data-tab="talk"><b>🗣️ 번역·교통</b><span>현지어·교통 안내</span></button>
       <button data-tab="mem"><b>📷 추억</b><span>사진 일기</span></button>
