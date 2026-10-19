@@ -1797,6 +1797,28 @@ function rHome(){
   </div>`;
 }
 
+/* ---------- 한글 지명 지도: OpenFreeMap 벡터 지도(무료·키 없음, OpenMapTiles 스키마의 name:ko 사용)
+   한글 이름이 없는 곳은 현지 이름으로 표시. WebGL 미지원·로딩 실패 시 OSM 기본 지도(현지어)로 자동 대체 ---------- */
+const KO_MAP={js:"https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js",css:"https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css",plug:"https://cdn.jsdelivr.net/npm/@maplibre/maplibre-gl-leaflet@0.1.3/leaflet-maplibre-gl.js",style:"https://tiles.openfreemap.org/styles/liberty",state:"idle"};
+const KO_ATTR='<a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> &copy; <a href="https://www.openmaptiles.org/" target="_blank" rel="noopener">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> 기여자';
+function webglOK(){try{const c=document.createElement("canvas");return !!(c.getContext("webgl2")||c.getContext("webgl"))}catch(_){return false}}
+function loadKoMap(){if(KO_MAP.state!=="idle")return;if(!webglOK()){KO_MAP.state="fail";return}KO_MAP.state="loading";
+  if(!document.querySelector(`link[href="${KO_MAP.css}"]`)){const l=document.createElement("link");l.rel="stylesheet";l.href=KO_MAP.css;document.head.appendChild(l)}
+  const add=src=>new Promise((res,rej)=>{const s=document.createElement("script");s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s)});
+  add(KO_MAP.js).then(()=>add(KO_MAP.plug)).then(()=>{KO_MAP.state=window.maplibregl&&window.L&&window.L.maplibreGL?"ready":"fail";if(KO_MAP.state==="ready"&&tab==="plan")render()}).catch(()=>{KO_MAP.state="fail"})}
+const KO_FIELD=["coalesce",["get","name:ko"],["get","name"]];
+function koreanize(m){if(!m.isStyleLoaded||!m.isStyleLoaded()){clearTimeout(m.__koT);m.__koT=setTimeout(()=>koreanize(m),200);return}try{const want=JSON.stringify(KO_FIELD);(m.getStyle().layers||[]).forEach(ly=>{if(ly.type!=="symbol")return;const tf=m.getLayoutProperty(ly.id,"text-field");if(tf==null)return;const js=JSON.stringify(tf);if(js===want||!/name/.test(js))return;m.setLayoutProperty(ly.id,"text-field",KO_FIELD)})}catch(_){}}
+function osmRaster(LF,map){LF.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,referrerPolicy:"strict-origin-when-cross-origin",attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map)}
+function addBaseMap(LF,map){
+  if(KO_MAP.state==="ready"){try{const gl=LF.maplibreGL({style:KO_MAP.style,attribution:KO_ATTR}).addTo(map);if(map.attributionControl)map.attributionControl.addAttribution(KO_ATTR);
+      let tries=0;const hook=()=>{const m=gl.getMaplibreMap&&gl.getMaplibreMap();if(!m){if(++tries<50)setTimeout(hook,100);return}
+        m.on("styledata",()=>koreanize(m));m.on("load",()=>koreanize(m));koreanize(m);
+        const fb=()=>{if(map.__osmFallback||m.isStyleLoaded())return;map.__osmFallback=1;try{map.removeLayer(gl)}catch(_){}osmRaster(LF,map);mapLangNote("현지어")};
+        m.on("error",fb);setTimeout(fb,8000)};hook();
+      mapLangNote("한글");return}catch(e){KO_MAP.state="fail"}}
+  osmRaster(LF,map);mapLangNote(KO_MAP.state==="loading"||KO_MAP.state==="idle"?"loading":"현지어");loadKoMap()}
+function mapLangNote(k){const el=document.getElementById("mapLang");if(!el)return;el.textContent=k==="한글"?"지명: 한글 우선 (한글 이름이 없는 작은 가게·골목은 현지 이름)":k==="loading"?"한글 지도를 불러오는 중… (잠시 현지어 지도)":"지명: 현지어 (이 기기·브라우저는 한글 지도를 지원하지 않거나 연결이 안 돼요)"}
+
 /* ---------- Leaflet 지도 (실제 지도 타일) ---------- */
 function drawMap(){
   const el=document.getElementById("lmap");const LF=window.L;if(!el)return;
@@ -1804,7 +1826,7 @@ function drawMap(){
   const pl=dayPlan(day);const pts=pl.list.filter(hasLL);
   lmap=LF.map(el,{zoomControl:true,minZoom:3,maxZoom:18,zoomSnap:0.25});
   const dark=document.documentElement.getAttribute("data-theme")==="dark"||(!document.documentElement.getAttribute("data-theme")&&matchMedia("(prefers-color-scheme: dark)").matches);
-  LF.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,referrerPolicy:"strict-origin-when-cross-origin",attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(lmap);
+  addBaseMap(LF,lmap);
   LF.control.scale({metric:true,imperial:false}).addTo(lmap);
   const cs=getComputedStyle(document.documentElement);
   const route=cs.getPropertyValue("--route").trim()||"#E07B24",muted=cs.getPropertyValue("--muted").trim(),acc=cs.getPropertyValue("--accent").trim();
@@ -1833,7 +1855,7 @@ function rPlan(){
   <div class="card">
     <div class="row between"><h2>DAY ${ds.indexOf(day)+1} · ${dayLabel(day)}</h2>${route?`<a class="btn sm" href="${esc(route)}" target="_blank" rel="noopener">구글 지도로 전체 동선 ↗</a>`:""}</div>
     <div class="lmapwrap"><div id="lmap" role="img" aria-label="하루 동선 지도"></div>${stops.length?"":`<div class="lmap-empty">추천 장소에서 "일정에 담기"를 누르면 여기에 번호 순서대로 표시돼요.</div>`}</div>
-    <div class="legend"><span><i style="border-top-color:var(--route)"></i>${esc(modeName("지하철·전철"))}</span><span><i class="walk"></i>도보</span><span><i class="taxi"></i>택시</span><span>번호 = 방문 순서 · 초록 = 완료 · 핀을 누르면 주변 맛집·편의점 찾기</span></div><p class="src">지도 © OpenStreetMap 기여자. 확대하면 주변 건물·가게·역 이름이 보여요. 왼쪽 아래 축척 막대로 실제 거리를 가늠하세요.</p>
+    <div class="legend"><span><i style="border-top-color:var(--route)"></i>${esc(modeName("지하철·전철"))}</span><span><i class="walk"></i>도보</span><span><i class="taxi"></i>택시</span><span>번호 = 방문 순서 · 초록 = 완료 · 핀을 누르면 주변 맛집·편의점 찾기</span></div><p class="src"><b id="mapLang"></b> · 지도 © OpenFreeMap·OpenMapTiles·OpenStreetMap 기여자. 확대하면 주변 건물·가게·역 이름이 보여요. 왼쪽 아래 축척 막대로 실제 거리를 가늠하세요.</p>
     <div class="stat3">
       <div><span class="label">입장·체험·식비</span><b>${fmt(pl.entry)}${esc(t.cur)}</b></div>
       <div><span class="label">이동비</span><b>${fmt(pl.move+pl.passCost)}${esc(t.cur)}</b></div>
