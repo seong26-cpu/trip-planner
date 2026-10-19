@@ -139,7 +139,7 @@ function calSave_(ev) {
   if (e) {
     e.setTitle(ev.title);
     if (allDay) e.setAllDayDate(s); else e.setTime(s, en);
-    e.setLocation(opt.location); e.setDescription(opt.description);
+    e.setLocation(opt.location); if (!ev.keepDesc) e.setDescription(opt.description); // 날짜만 옮길 때는 설명 유지
   } else {
     e = allDay ? cal.createAllDayEvent(ev.title, s, opt) : cal.createEvent(ev.title, s, en, opt);
   }

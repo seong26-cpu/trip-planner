@@ -171,6 +171,11 @@ textarea.auto{overflow:hidden;resize:none;min-height:120px}
 .wres .big3{font-size:22px;font-weight:800;margin:6px 0 2px}.wres .ws{margin-top:12px}.wres .ws b{display:block;margin-bottom:4px}
 .whist{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.whist button{padding:0;border-radius:12px;overflow:hidden;flex-direction:column;align-items:stretch;gap:0;font-size:11px}
 .whist img{width:100%;height:84px;object-fit:cover;display:block}.whist span{padding:4px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left}
+.faq{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.faq .chip{font-size:12px;padding:5px 10px}
+.mcal .ev{touch-action:none;cursor:grab}.mcal button.drop{outline:3px dashed var(--brand);outline-offset:-3px;background:var(--brand2)}
+.dragghost{position:fixed;z-index:200;pointer-events:none;padding:4px 8px;border-radius:8px;font-size:12px;font-weight:700;box-shadow:0 8px 20px rgba(0,0,0,.25);transform:translate(-50%,-120%);white-space:nowrap}
+.mcal .ev.lift{opacity:.35}
+.savebar{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
 .gbtn{width:100%;background:#fff;color:#1f1f1f;border:1px solid #dadce0;font-weight:600;gap:10px}.gbtn svg{width:18px;height:18px}
 /* ===== 골든아워 마을 테마 (samsy.ninja 풍 · 따뜻한 실사 사진) ===== */
 header{background:rgba(255,243,230,.92);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
@@ -456,7 +461,7 @@ function form(sheet,row={},opt={}){
       try{toast('캘린더 등록 중…');o['캘린더ID']=await api('calSave',{ev:{eventId:o['캘린더ID'],title:'['+o.구분+'] '+(o.종류==='약속'?'[약속] ':'')+o.제목+(o.상대?' - '+o.상대:''),date:o.날짜,start:o.시작,end:o.종료,location:o.장소,description:o.메모}});toast('구글 캘린더에 등록했어요')}
       catch(e){toast('캘린더 등록 실패: '+e.message+' (앱에는 저장됨)',4000)}
     }
-    put(sheet,o);opt.after&&opt.after(o);render();
+    const sv=put(sheet,o);opt.after&&opt.after(sv);render();
   };
 }
 
@@ -574,7 +579,7 @@ ACT.qm=()=>{const v=$('#qm').value.trim();if(!v)return;put('메모',{제목:v.sl
 const KIND_RE=/^\s*\[(공적|사적)\]\s*/;
 function kindOf(x){if(x.구분==='공적'||x.구분==='사적')return x.구분;const m=String(x.제목||'').match(KIND_RE);return m?m[1]:'미분류'}
 function kindTag(g){return g==='공적'?'<span class="tag pub">💼 공적</span>':g==='사적'?'<span class="tag pri">🏠 사적</span>':'<span class="tag unk">미분류</span>'}
-function calRows(){return CAL.filter(x=>!DB.일정.some(y=>y['캘린더ID']===x.eventId)).map(x=>{const m=String(x.title||'').match(KIND_RE);return {제목:String(x.title||'').replace(KIND_RE,''),구분:m?m[1]:'',날짜:x.date,시작:x.start,장소:x.location,종류:'캘린더',_cal:1,eventId:x.eventId}})}
+function calRows(){return CAL.filter(x=>!DB.일정.some(y=>y['캘린더ID']===x.eventId)).map(x=>{const m=String(x.title||'').match(KIND_RE);return {제목:String(x.title||'').replace(KIND_RE,''),구분:m?m[1]:'',날짜:x.date,시작:x.start,장소:x.location,종류:'캘린더',_cal:1,eventId:x.eventId,종료:x.end||'',_title:x.title}})}
 function planList(rows,mode,t){
   if(mode==='약속')rows=rows.filter(x=>x.종류==='약속');
   rows=mode==='지난'?rows.filter(x=>x.날짜<t).sort((a,b)=>b.날짜.localeCompare(a.날짜)):rows.filter(x=>x.날짜>=t).sort((a,b)=>(a.날짜+(a.시작||'')).localeCompare(b.날짜+(b.시작||'')));
@@ -602,13 +607,40 @@ function monthCal(view,mode){
   const L=calItems(view,mode),by={};L.forEach(x=>(by[x.날짜]=by[x.날짜]||[]).push(x));for(const k in by)by[k].sort((a,b)=>(a.시작||'').localeCompare(b.시작||''));
   const cls=x=>({공적:'pub',사적:'pri'}[kindOf(x)]||'unk')+(x.종류==='약속'?' mt':'');
   const cells=[...Array(42)].map((_,i)=>{const d=addDays(start,i),E=by[d]||[],dw=i%7;
-    return `<button class="${d.slice(0,7)!==ym?'out':''} ${d===t?'td':''} ${dw===0?'sun':dw===6?'sat':''}" data-act="calDay" data-d="${d}" aria-label="${dname(d)} 일정 ${E.length}건"><span class="dn">${+d.slice(8)}</span>${E.slice(0,2).map(x=>`<span class="ev ${cls(x)}">${x.시작?x.시작.slice(0,5)+' ':''}${esc(x.제목)}</span>`).join('')}${E.length>2?`<span class="more">+${E.length-2}</span>`:''}</button>`}).join('');
+    return `<button class="${d.slice(0,7)!==ym?'out':''} ${d===t?'td':''} ${dw===0?'sun':dw===6?'sat':''}" data-act="calDay" data-d="${d}" aria-label="${dname(d)} 일정 ${E.length}건"><span class="dn">${+d.slice(8)}</span>${E.slice(0,2).map(x=>`<span class="ev ${cls(x)}" data-mv="${x._cal?'c|'+esc(x.eventId):'d|'+x.id}">${x.시작?x.시작.slice(0,5)+' ':''}${esc(x.제목)}</span>`).join('')}${E.length>2?`<span class="more">+${E.length-2}</span>`:''}</button>`}).join('');
   const mv=n=>{const d=new Date(Y,M-1+n,1);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')};
   return `<div class="card"><h2>${Y}년 ${M}월<span class="sp"></span><button class="s" data-act="chip" data-k="cm" data-v="${mv(-1)}" aria-label="이전 달">‹</button><button class="s" data-act="chip" data-k="cm" data-v="${t.slice(0,7)}">오늘</button><button class="s" data-act="chip" data-k="cm" data-v="${mv(1)}" aria-label="다음 달">›</button></h2>
    <div class="legend"><span><i style="background:#2563eb"></i>공적</span><span><i style="background:#db2777"></i>사적</span><span><i style="background:#ea580c"></i>약속</span><span><i style="background:var(--line)"></i>미분류·캘린더</span></div>
+   <p class="muted" style="margin:0 0 6px">💡 일정을 <b>끌어서</b>(휴대폰은 <b>길게 누른 뒤 끌기</b>) 다른 날짜에 놓으면 옮겨져요.</p>
    <div class="mcal">${'일월화수목금토'.split('').map(w=>`<div class="h">${w}</div>`).join('')}${cells}</div></div>`;
 }
-ACT.calDay=d=>{const ds=d.d,view=sub.pk||'전체',mode=sub.plan||'다가오는',E=calItems('전체',mode).filter(x=>x.날짜===ds).sort((a,b)=>(a.시작||'').localeCompare(b.시작||'')),dl=$('#dlg'),ap=mode==='약속';
+/* ===== 달력 드래그로 날짜 옮기기 (마우스: 끌기 / 휴대폰: 길게 눌러 끌기) ===== */
+let DRAG=null,DRAG_JUST=0;
+function calDragBind(){const cal=document.querySelector('.mcal');if(!cal)return;
+  cal.querySelectorAll('.ev[data-mv]').forEach(ev=>{
+    ev.onpointerdown=e=>{if(e.button>0)return;const cell=ev.closest('button[data-d]');const st={ev,from:cell.dataset.d,key:ev.dataset.mv,x:e.clientX,y:e.clientY,on:0,id:e.pointerId,touch:e.pointerType!=='mouse'};
+      st.timer=st.touch?setTimeout(()=>start(st),350):0;DRAG=st;
+      const start=s=>{if(s.on)return;s.on=1;navigator.vibrate&&navigator.vibrate(15);try{ev.setPointerCapture(s.id)}catch(_){}ev.classList.add('lift');
+        const g=document.createElement('div');g.className='dragghost ev '+[...ev.classList].filter(c=>c==='pub'||c==='pri'||c==='unk').join(' ');g.textContent='📅 '+ev.textContent;document.body.appendChild(g);s.g=g;move(s.x,s.y)};
+      const move=(x,y)=>{if(!DRAG||!DRAG.g)return;DRAG.g.style.left=x+'px';DRAG.g.style.top=y+'px';cal.querySelectorAll('.drop').forEach(c=>c.classList.remove('drop'));
+        const el=document.elementFromPoint(x,y),c=el&&el.closest&&el.closest('.mcal button[data-d]');if(c&&c.dataset.d!==DRAG.from)c.classList.add('drop');DRAG.over=c?c.dataset.d:''};
+      ev.onpointermove=m=>{const s=DRAG;if(!s)return;const dx=m.clientX-s.x,dy=m.clientY-s.y;
+        if(!s.on){if(s.touch){if(Math.hypot(dx,dy)>10){clearTimeout(s.timer);DRAG=null}return}if(Math.hypot(dx,dy)>6)start(s);else return}
+        m.preventDefault();move(m.clientX,m.clientY)};
+      const end=async()=>{const s=DRAG;DRAG=null;if(!s)return;clearTimeout(s.timer);ev.classList.remove('lift');cal.querySelectorAll('.drop').forEach(c=>c.classList.remove('drop'));if(s.g)s.g.remove();
+        if(!s.on)return;DRAG_JUST=Date.now();if(s.over&&s.over!==s.from)await moveEvent(s.key,s.from,s.over)};
+      ev.onpointerup=end;ev.onpointercancel=end;
+      ev.oncontextmenu=c=>c.preventDefault()}});
+}
+async function moveEvent(key,from,to){const [k,id]=key.split('|');
+  if(k==='d'){const x=DB.일정.find(y=>y.id===id);if(!x)return;if(!confirm(`‘${x.제목}’을(를)\n${dname(from)} → ${dname(to)}로 옮길까요?`))return;
+    const o=Object.assign({},x,{날짜:to});put('일정',o);render();toast(`📅 ${dname(to)}로 옮겼어요`);
+    if(x['캘린더ID']&&CFG.url){try{await api('calSave',{ev:{eventId:x['캘린더ID'],title:'['+(o.구분||'사적')+'] '+(o.종류==='약속'?'[약속] ':'')+o.제목+(o.상대?' - '+o.상대:''),date:to,start:o.시작,end:o.종료,location:o.장소,description:o.메모}});toast('구글 캘린더도 함께 옮겼어요')}catch(e){toast('캘린더 반영 실패: '+e.message+' (앱에는 옮겨짐)',4000)}}}
+  else{const c=CAL.find(y=>y.eventId===id);if(!c)return;if(!CFG.url)return toast('구글 캘린더 일정은 서버 연결 후 옮길 수 있어요');
+    if(!confirm(`구글 캘린더 일정 ‘${c.title}’을(를)\n${dname(from)} → ${dname(to)}로 옮길까요?\n(캘린더에 적어 둔 설명은 서버 코드가 최신이어야 그대로 남아요)`))return;
+    try{await api('calSave',{ev:{eventId:id,title:c.title,date:to,start:c.start,end:c.end,location:c.location||'',keepDesc:true}});c.date=to;LS.set('cal',CAL);render();toast(`📅 ${dname(to)}로 옮겼어요`)}catch(e){toast('옮기지 못했어요: '+e.message,4000)}}}
+AFTER.plan=()=>calDragBind();
+ACT.calDay=d=>{if(Date.now()-DRAG_JUST<400)return;const ds=d.d,view=sub.pk||'전체',mode=sub.plan||'다가오는',E=calItems('전체',mode).filter(x=>x.날짜===ds).sort((a,b)=>(a.시작||'').localeCompare(b.시작||'')),dl=$('#dlg'),ap=mode==='약속';
   dl.innerHTML=`<div style="padding:18px"><h3>📅 ${dname(ds)}${ds===today()?' <span class="tag">오늘</span>':''}</h3>
    ${E.length?E.map((x,i)=>`<div class="item" data-i="${i}" style="cursor:pointer"><div class="muted" style="width:46px">${x.시작||'종일'}</div><div class="b"><div class="t">${esc(x.제목)}</div><div class="d">${esc([x.장소,x.상대].filter(Boolean).join(' · '))}</div></div>${kindTag(kindOf(x))}${x.종류==='약속'?'<span class="tag w">약속</span>':''}${x._cal?'<span class="tag">캘린더</span>':''}</div>`).join(''):'<div class="empty">이 날 일정이 없어요</div>'}
    <div class="addrow">${view!=='사적'?`<button class="b-pub" data-k="공적">＋ 공적 ${ap?'약속':'일정'}</button>`:''}${view!=='공적'?`<button class="b-pri" data-k="사적">＋ 사적 ${ap?'약속':'일정'}</button>`:''}</div>
@@ -625,7 +657,10 @@ function calPopup(x){const dl=$('#dlg');
   $('#cpImp').onclick=()=>{close();setTimeout(()=>form('일정',{구분:kindOf(x)==='미분류'?'':kindOf(x),종류:'일정',제목:x.제목,날짜:x.날짜,시작:x.시작||'',장소:x.장소||'',캘린더ID:x.eventId}),0)}}
 
 /* ---- WHAT: 사진으로 물건·장소 알아보기 + 위치 ---- */
-let WH={busy:0,img:'',cur:null};
+let WH={busy:0,img:'',cur:null,mode:''};
+const WH_FAQ=['이게 뭐예요?','어떻게 사용해요?','켜고 끄는 법은?','고장 났을 때 확인할 점은?','어떻게 버려요? (분리배출)','여기 어디예요?','이 가게 이름·메뉴 알려줘','이 음식 이름과 칼로리는?','이 식물 키우는 법은?','가격대는 대략 얼마?'];
+function whatFaq(){const rec=LS.get('whRecent',[]);return [...new Set([...rec,...WH_FAQ])].slice(0,14)}
+ACT.whQ=d=>{const c=LS.get('whAsk','');const v=c===d.v?'':d.v;LS.set('whAsk',v);const i=$('#whAsk');if(i)i.value=v;document.querySelectorAll('[data-act=whQ]').forEach(x=>x.classList.toggle('on',x.dataset.v===v))};
 /* 사진 파일의 EXIF GPS 읽기 (JPEG만, 없으면 null) */
 async function exifGPS(file){try{const b=new DataView(await file.slice(0,262144).arrayBuffer());if(b.getUint16(0)!==0xFFD8)return null;let o=2;
   while(o<b.byteLength-4){const mk=b.getUint16(o);if(mk===0xFFE1&&b.getUint32(o+4)===0x45786966){const t=o+10,le=b.getUint16(t)===0x4949,g16=x=>b.getUint16(x,le),g32=x=>b.getUint32(x,le);
@@ -636,7 +671,7 @@ async function exifGPS(file){try{const b=new DataView(await file.slice(0,262144)
         if(tag===2||tag===4)r[tag]=[0,1,2].map(k=>g32(vo+k*8)/(g32(vo+k*8+4)||1)).reduce((a,v,k)=>a+v/Math.pow(60,k),0)}
       if(r[2]==null||r[4]==null)return null;return {lat:r[2]*(r[1]==='S'?-1:1),lon:r[4]*(r[3]==='W'?-1:1),src:'사진 위치정보(EXIF)'}}
     if((mk&0xFF00)!==0xFF00)break;o+=2+b.getUint16(o+2)}return null}catch(e){return null}}
-async function revGeo(lat,lon){try{const j=await (await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&accept-language=ko&zoom=18`)).json();return j.display_name||''}catch(e){return ''}}
+async function revGeo(lat,lon,full){try{const j=await (await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&accept-language=ko&zoom=18&addressdetails=1`)).json();if(full){const a=j.address||{};return {addr:j.display_name||'',area:[a.city||a.province||a.state,a.borough||a.county||a.city_district,a.suburb||a.quarter||a.neighbourhood||a.village||a.town].filter(Boolean).filter((v,i,A)=>A.indexOf(v)===i).join(' '),poi:j.name||''}}return j.display_name||''}catch(e){if(full)return {addr:'',area:'',poi:''};return ''}}
 const hereGPS=()=>new Promise((ok,no)=>{if(!navigator.geolocation)return no(new Error('이 기기는 위치 기능을 지원하지 않아요'));navigator.geolocation.getCurrentPosition(p=>ok({lat:p.coords.latitude,lon:p.coords.longitude,acc:Math.round(p.coords.accuracy),src:'현재 위치(GPS)'}),e=>no(new Error(e.code===1?'위치 권한이 꺼져 있어요. 브라우저 설정에서 위치 허용을 켜 주세요':'현재 위치를 찾지 못했어요')),{enableHighAccuracy:true,timeout:15000})});
 function locBlock(L){if(!L)return '';const q=`${L.lat.toFixed(6)},${L.lon.toFixed(6)}`;
   return `<div class="ws"><b>📍 위치 <span class="tag">${esc(L.src)}</span></b>${L.addr?`<div>${esc(L.addr)}</div>`:''}<div class="muted">${q}${L.acc?' · 오차 약 '+L.acc+'m':''}</div>
@@ -652,32 +687,51 @@ function whatResult(r){if(!r)return '';const a=r.ai||{},T=a.type||'';
     ${a.place&&(a.place.guess||a.place.clues)?`<div class="ws"><b>🏙 사진으로 추정한 장소</b><div>${esc(a.place.guess||'특정하기 어려움')}</div>${a.place.clues?`<div class="muted">근거: ${esc(a.place.clues)}</div>`:''}</div>`:''}`:''}
    ${locBlock(r.loc)}
    <p class="muted" style="margin:10px 0 0">AI 분석은 틀릴 수 있어요. 장소는 <b>GPS·사진 위치정보</b>가 더 정확하고, AI 추정은 참고만 하세요.${r.at?' · '+esc(r.at):''}</p>
+   ${r.id&&(r.ai||r.loc)?`<div class="savebar"><button class="p" data-act="whatFood" data-id="${r.id}" style="background:#b91c1c;border-color:#b91c1c">🍽 맛집으로 저장</button><button data-act="whatPlace" data-id="${r.id}">⭐ 장소로 저장</button></div>`:''}
    ${r.id?`<div class="row" style="margin-top:8px"><button class="x" data-act="whatDel" data-id="${r.id}" style="color:var(--bad)">🗑 삭제</button><span style="flex:1"></span><button class="s" data-act="whatMemo" data-id="${r.id}">메모로 보내기</button></div>`:''}</div>`}
 function whatView(){const H=LS.get('what',[]),cur=WH.cur||(sub.wid&&H.find(x=>x.id===sub.wid))||null;
   return `${dhero('memo','WHAT · 이게 뭐지?','사진 한 장으로<br>물건·장소 알아보기')}
   <div class="card"><h2>📷 무엇이든 찍어 보세요</h2><p class="muted" style="margin:0 0 8px">물건이면 <b>이름·사용 방법</b>, 장소면 <b>어떤 곳인지·위치</b>를 알려드려요.</p>
    <div class="grid2"><label class="btn p" style="margin:0">📷 촬영<input type="file" accept="image/*" capture="environment" id="whCam" class="hide"></label><label class="btn" style="margin:0">🖼 앨범<input type="file" accept="image/*" id="whGal" class="hide"></label></div>
    <label style="display:flex;gap:8px;align-items:center;color:var(--ink)"><input type="checkbox" id="whLoc" style="width:auto" ${LS.get('whLoc',true)?'checked':''}> 📍 위치도 함께 찾기 (사진 위치정보 → 없으면 현재 GPS)</label>
-   <input id="whAsk" placeholder="궁금한 점 (선택) 예: 이거 어떻게 켜요? / 여기 어디예요?" value="${esc(LS.get('whAsk',''))}" style="margin-top:6px">
+   <input id="whAsk" placeholder="궁금한 점 (선택) — 아래 질문을 눌러도 돼요" value="${esc(LS.get('whAsk',''))}" style="margin-top:6px">
+   <div class="faq">${whatFaq().map(q=>`<span class="chip ${LS.get('whAsk','')===q?'on':''}" data-act="whQ" data-v="${esc(q)}">${esc(q)}</span>`).join('')}</div>
+   <div class="savebar"><label class="btn p" style="margin:0;background:#b91c1c;border-color:#b91c1c">🍽 사진으로 맛집 등록<input type="file" accept="image/*" capture="environment" id="whFood" class="hide"></label><label class="btn" style="margin:0">🍽 앨범 사진으로 등록<input type="file" accept="image/*" id="whFoodG" class="hide"></label></div>
+   <p class="muted" style="margin:6px 0 0">간판·메뉴판·음식 사진 한 장 → 가게 이름·메뉴·위치를 채운 <b>맛집 등록 창</b>이 바로 열려요. 저장만 누르면 끝!</p>
    <button style="width:100%;margin-top:8px" data-act="whatHere">📍 사진 없이 지금 위치만 확인</button>
    ${CFG.url?'':'<div class="notice" style="margin-top:8px">AI 분석은 서버 연결 후 사용할 수 있어요 (설정). 위치 찾기는 지금도 돼요.</div>'}</div>
   ${WH.busy?`<div class="card">${WH.img?`<img class="thumb" src="${WH.img}">`:''}<p class="muted">🔍 분석 중이에요… (10~30초) 다른 메뉴에 다녀와도 결과는 여기 남아요.</p></div>`:whatResult(cur)}
   ${H.length?`<h3 style="margin:16px 0 6px">최근 기록 <span class="muted" style="font-weight:400">${H.length}</span></h3><div class="whist">${H.map(x=>`<button data-act="whatOpen" data-id="${x.id}">${x.img?`<img src="${x.img}" alt="">`:'<img alt="" src="img/haru.jpg">'}<span>${esc((x.ai&&x.ai.name)||x.loc&&x.loc.addr||'위치 기록')}</span></button>`).join('')}</div>`:''}`}
-async function whatRun(file){if(WH.busy)return;const wantLoc=$('#whLoc')?$('#whLoc').checked:true,ask=($('#whAsk')||{value:''}).value.trim();LS.set('whLoc',wantLoc);LS.set('whAsk',ask);
+async function whatRun(file,mode){if(WH.busy)return;WH.mode=mode||'';const wantLoc=mode==='food'?true:($('#whLoc')?$('#whLoc').checked:true);let ask=($('#whAsk')||{value:''}).value.trim();if(mode==='food')ask=ask||'이 가게 이름·메뉴 알려줘';LS.set('whLoc',$('#whLoc')?$('#whLoc').checked:true);LS.set('whAsk',ask);
+  if(ask&&!WH_FAQ.includes(ask)){const rc=LS.get('whRecent',[]).filter(x=>x!==ask);rc.unshift(ask);LS.set('whRecent',rc.slice(0,4))}
   const r={id:'w'+uid(),at:new Date().toLocaleString('ko-KR',{hour12:false}).slice(0,-3)};WH.cur=null;
   try{const im=await imgToB64(file,1024),th=await imgToB64(file,360);WH.busy=1;WH.img=im.url;r.img=th.url;if(tab==='more')render();
-    if(wantLoc){r.loc=await exifGPS(file);if(!r.loc)try{r.loc=await hereGPS()}catch(e){r.locErr=e.message}if(r.loc)r.loc.addr=await revGeo(r.loc.lat,r.loc.lon)}
+    if(wantLoc){r.loc=await exifGPS(file);if(!r.loc)try{r.loc=await hereGPS()}catch(e){r.locErr=e.message}if(r.loc)Object.assign(r.loc,await revGeo(r.loc.lat,r.loc.lon,1))}
     if(CFG.url){const near=r.loc&&r.loc.addr?`참고: 촬영 위치 근처 주소는 "${r.loc.addr}" 이야(${r.loc.src}). 장소 추정에 참고하되 사진 내용과 맞지 않으면 무시해.`:'';
       r.ai=await ai(`너는 사진 속 물건이나 장소를 알려주는 도우미야. 사진을 보고 물건인지 장소인지 판단해. ${near} 사용자 질문: ${ask||'이게 뭐야?'}
 물건이면: 정확한 이름(모르면 일반 명칭), 무엇에 쓰는지, 일반적인 사용 방법을 단계별로(3~7단계), 주의사항. 제품 모델을 확신할 수 없으면 일반적인 방법만 쓰고 확신도를 낮춰.
 장소면: 어떤 종류의 장소인지, 간판·랜드마크 등 보이는 단서로 추정되는 장소명(확실하지 않으면 '특정하기 어려움'), 방문 팁.
-모르는 것을 지어내지 마. 반드시 다음 JSON으로만 답해: {"type":"물건|장소|음식|기타","name":"이름","category":"분류","summary":"한두 문장 설명","usage":["1단계"],"tips":["팁"],"cautions":["주의"],"place":{"guess":"추정 장소명","clues":"판단 근거"},"confidence":"high|mid|low"}`,im.b64,'image/jpeg');
+음식점·카페 간판, 메뉴판, 음식 사진이면 shop에 가게 정보를 채워: 간판·메뉴판에 실제로 보이는 글자만 가게 이름으로 쓰고(안 보이면 빈칸), 보이는 메뉴와 가격, 음식 종류(한식·중식·일식·양식·카페 등). 음식만 보이면 name은 음식 이름.
+모르는 것을 지어내지 마. 반드시 다음 JSON으로만 답해: {"type":"물건|장소|음식|기타","name":"이름","category":"분류","summary":"한두 문장 설명","usage":["1단계"],"tips":["팁"],"cautions":["주의"],"place":{"guess":"추정 장소명","clues":"판단 근거"},"shop":{"isFood":true,"name":"간판에 보이는 가게 이름","menu":["메뉴 이름"],"price":"보이는 가격 정보","cuisine":"음식 종류"},"confidence":"high|mid|low"}`,im.b64,'image/jpeg');
       if(r.ai&&r.ai.raw){r.err='AI 응답을 해석하지 못했어요. 다시 시도해 주세요.';delete r.ai}}
     else r.err='AI 분석은 서버 연결 후 가능해요 (더보기 → 설정). 위치는 아래에 표시했어요.';
     if(r.locErr&&!r.loc)r.err=(r.err?r.err+' / ':'')+r.locErr;
   }catch(e){r.err=e.message}
-  WH.busy=0;WH.img='';const H=LS.get('what',[]);H.unshift(r);LS.set('what',H.slice(0,30));sub.wid=r.id;WH.cur=r;toast('🔍 WHAT 분석 완료');if(tab==='more')render()}
-ACT.whatHere=async()=>{toast('📍 위치 찾는 중…');try{const L=await hereGPS();L.addr=await revGeo(L.lat,L.lon);const r={id:'w'+uid(),at:new Date().toLocaleString('ko-KR',{hour12:false}).slice(0,-3),loc:L};const H=LS.get('what',[]);H.unshift(r);LS.set('what',H.slice(0,30));sub.wid=r.id;WH.cur=r;render()}catch(e){toast(e.message,4000)}};
+  WH.busy=0;WH.img='';const H=LS.get('what',[]);H.unshift(r);LS.set('what',H.slice(0,30));sub.wid=r.id;WH.cur=r;toast('🔍 WHAT 분석 완료');if(tab==='more')render();
+  if(WH.mode==='food'){WH.mode='';setTimeout(()=>ACT.whatFood({id:r.id}),300)}}
+ACT.whatHere=async()=>{toast('📍 위치 찾는 중…');try{const L=await hereGPS();Object.assign(L,await revGeo(L.lat,L.lon,1));const r={id:'w'+uid(),at:new Date().toLocaleString('ko-KR',{hour12:false}).slice(0,-3),loc:L};const H=LS.get('what',[]);H.unshift(r);LS.set('what',H.slice(0,30));sub.wid=r.id;WH.cur=r;render()}catch(e){toast(e.message,4000)}};
+function shopOf(r){const a=r.ai||{},sh=a.shop||{},L=r.loc||{};
+  const menu=(sh.menu||[]).filter(Boolean),food=a.type==='음식'?a.name:'';
+  return {이름:sh.name||(a.type==='장소'&&a.place&&a.place.guess&&!/어려움/.test(a.place.guess)?a.place.guess:'')||L.poi||'',
+    지역:L.area||'',메뉴:[...new Set([food,...menu].filter(Boolean))].slice(0,5).join(', '),
+    가격대:'',방문:'가봄',
+    메모:[sh.cuisine&&'종류: '+sh.cuisine,sh.price&&'가격: '+sh.price,a.summary,L.addr&&'주소: '+L.addr,L.lat!=null&&`좌표: ${(+L.lat).toFixed(5)},${(+L.lon).toFixed(5)}`,'(WHAT 사진으로 등록)'].filter(Boolean).join('\n')}}
+ACT.whatFood=d=>{const r=LS.get('what',[]).find(x=>x.id===d.id);if(!r)return;const pre=shopOf(r);
+  if(!pre.이름)toast('가게 이름을 사진에서 찾지 못했어요. 이름만 입력해 주세요',3500);
+  form('맛집',pre,{title:'🍽 사진으로 맛집 등록',after:o=>{if(r.img){const P=LS.get('fphoto',{});P[o.id]=r.img;LS.set('fphoto',P)}toast('🍽 맛집에 등록했어요!');sub.more='맛집';render()}});
+  setTimeout(()=>{const n=document.querySelector('#dlg [name=이름]');if(n&&!n.value)n.focus()},50)};
+ACT.whatPlace=d=>{const r=LS.get('what',[]).find(x=>x.id===d.id);if(!r)return;const a=r.ai||{},L=r.loc||{};
+  form('장소',{이름:(a.type==='장소'&&a.place&&a.place.guess&&!/어려움/.test(a.place.guess)?a.place.guess:'')||L.poi||a.name||'',주소:L.addr||(L.lat!=null?`${(+L.lat).toFixed(6)},${(+L.lon).toFixed(6)}`:''),종류:'자주'},{title:'⭐ 장소로 저장 (교통 길찾기에 사용)',after:()=>toast('⭐ 자주 가는 곳에 저장했어요')})};
 ACT.whatOpen=d=>{sub.wid=d.id;WH.cur=null;render();scrollTo(0,0)};
 ACT.whatDel=d=>{if(!confirm('이 기록을 삭제할까요?'))return;LS.set('what',LS.get('what',[]).filter(x=>x.id!==d.id));if(sub.wid===d.id)sub.wid='';WH.cur=null;toast('삭제했어요');render()};
 ACT.whatMemo=d=>{const r=LS.get('what',[]).find(x=>x.id===d.id);if(!r)return;const a=r.ai||{};
@@ -1117,7 +1171,7 @@ V.more=()=>{
     L.sort((a,b)=>String(b.평점||'').length-String(a.평점||'').length);
     const stars=v=>{const n=String(v||'').length;return '★'.repeat(n)+'☆'.repeat(5-n)};
     const THEMES=[['가족모임','M8 6a2 2 0 1 0 0-.01M16 6a2 2 0 1 0 0-.01M5 21v-6a3 3 0 0 1 6 0v6M13 21v-6a3 3 0 0 1 6 0v6'],['데이트','M12 20s-7-4.5-7-10a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 5.5-7 10-7 10z'],['친구 모임','M8 8a3 3 0 1 0 0-.01M16 8a3 3 0 1 0 0-.01M3 20c0-3 2-5 5-5s5 2 5 5M11 20c0-3 2-5 5-5s5 2 5 5'],['비오는 날','M3 12a9 8 0 0 1 18 0zM12 12v7a2 2 0 0 1-4 0'],['드라이브','M4 18l3-9h10l3 9zM4 18v2h4v-2M16 18v2h4v-2'],['치맥','M6 8h9v11H6zM15 10h3a2 2 0 0 1 0 5h-3M8 5c0-1 2-1 2-2M12 5c0-1 2-1 2-2'],['디저트','M12 4a5 5 0 1 1 0 10 5 5 0 0 1 0-10zM12 14v7'],['건강식','M5 19c0-9 5-14 15-14 0 10-5 15-14 15zM5 19l8-8'],['TV맛집','M4 8h16v11H4zM9 4l3 4 3-4'],['돼지고기','M5 12a7 6 0 0 1 14 0v2a7 6 0 0 1-14 0zM10 13h4'],['소고기','M4 8l3 2h10l3-2M7 10v6a5 4 0 0 0 10 0v-6M10 15h4'],['닭요리','M14 4a3 3 0 0 1 3 3v2l3 1-3 1v3a6 6 0 0 1-12 0c0-4 3-6 5-6V6a3 3 0 0 1 4-2z'],['해산물','M3 12c4-6 12-6 16 0-4 6-12 6-16 0zM19 12l3-3v6zM8 11h.01'],['뷔페','M3 17h18M5 17a7 7 0 0 1 14 0M12 8V6'],['가성비','M4 7h15v12H4zM4 7l12-3v3M15 13h4'],['무한리필','M7 9a3 3 0 1 0 0 6c4 0 6-6 10-6a3 3 0 1 1 0 6c-4 0-6-6-10-6z']];
-    const tf=sub.ft||'';if(tf)L=L.filter(x=>String(x.테마||'').split(',').map(t=>t.trim()).includes(tf));
+    const FPH=LS.get('fphoto',{});const tf=sub.ft||'';if(tf)L=L.filter(x=>String(x.테마||'').split(',').map(t=>t.trim()).includes(tf));
     const used=[...new Set(DB.맛집.flatMap(x=>String(x.테마||'').split(',').map(t=>t.trim()).filter(Boolean)))];
     const rg=LS.get('fregion','');const mq=n=>encodeURIComponent((rg?rg+' ':'')+n+' 맛집');
     const STAR='M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z';
@@ -1130,7 +1184,7 @@ V.more=()=>{
     <div class="card"><h2>🎲 내 목록에서 랜덤 추천</h2><button class="p" data-act="pick" style="width:100%">추천 받기</button><div id="pickOut"></div></div>
     <div class="chips">${['전체','가보고싶음','가봄'].map(x=>`<span class="chip ${f===x?'on':''}" data-act="chip" data-k="mf" data-v="${x}">${x}</span>`).join('')}</div>
     ${used.length?`<div class="chips"><span class="muted" style="align-self:center">테마</span>${['',...used].map(x=>`<span class="chip ${tf===x?'on':''}" data-act="chip" data-k="ft" data-v="${esc(x)}">${x?'★ '+esc(x):'전체'}</span>`).join('')}</div>`:''}
-    <div class="pgrid">${L.length?L.map(x=>{const im=REST[[...String(x.이름)].reduce((a,c)=>a+c.charCodeAt(0),0)%3];return `<div class="pcard" data-act="detail" data-id="${x.id}"><img src="${im}" ${x.메뉴?`data-dish="${esc(String(x.메뉴).split(/[,\s]/)[0])}"`:''} alt=""><div class="pb"><div class="t">${esc(x.이름)}</div><div class="d">📍 ${esc(x.지역||'-')}${x.메뉴?'\n'+esc(x.메뉴):''}</div>${x.테마?String(x.테마).split(',').filter(t=>t.trim()).map(t=>`<span class="tag">★ ${esc(t.trim())}</span>`).join(''):''}<div class="st">${stars(x.평점)} <span>${esc(x.가격대||'')}</span></div></div></div>`}).join(''):'<div class="card empty" style="grid-column:1/-1">맛집을 추가해 보세요</div>'}</div><button class="fab" data-act="add" data-s="맛집">＋</button>`;
+    <div class="pgrid">${L.length?L.map(x=>{const im=REST[[...String(x.이름)].reduce((a,c)=>a+c.charCodeAt(0),0)%3],ph=FPH[x.id];return `<div class="pcard" data-act="detail" data-id="${x.id}"><img src="${ph||im}" ${!ph&&x.메뉴?`data-dish="${esc(String(x.메뉴).split(/[,\s]/)[0])}"`:''} alt=""><div class="pb"><div class="t">${esc(x.이름)}</div><div class="d">📍 ${esc(x.지역||'-')}${x.메뉴?'\n'+esc(x.메뉴):''}</div>${x.테마?String(x.테마).split(',').filter(t=>t.trim()).map(t=>`<span class="tag">★ ${esc(t.trim())}</span>`).join(''):''}<div class="st">${stars(x.평점)} <span>${esc(x.가격대||'')}</span></div></div></div>`}).join(''):'<div class="card empty" style="grid-column:1/-1">맛집을 추가해 보세요</div>'}</div><button class="fab" data-act="add" data-s="맛집">＋</button>`;
   }else if(m==='WHAT'){h+=whatView();
   }else if(m==='교통'){
     const P=DB.장소;const opts=P.map(x=>`<option value="${esc(x.주소||x.이름)}">${esc(x.이름)}</option>`).join('');
@@ -1168,6 +1222,8 @@ V.more=()=>{
 };
 AFTER.more=()=>{
   const wc=$('#whCam'),wg=$('#whGal');if(wc)wc.onchange=e=>whatRun(e.target.files[0]);if(wg)wg.onchange=e=>whatRun(e.target.files[0]);
+  ['#whFood','#whFoodG'].forEach(k=>{const f=$(k);if(f)f.onchange=e=>whatRun(e.target.files[0],'food')});
+  const wa=$('#whAsk');if(wa)wa.oninput=()=>{LS.set('whAsk',wa.value);document.querySelectorAll('[data-act=whQ]').forEach(x=>x.classList.toggle('on',x.dataset.v===wa.value))};
   const mn=$('#mnew');if(mn){mn.ontoggle=()=>{sub.mopen=mn.open?1:0;LS.set('sub',sub)};const c=$('#nmC');autoH(c);
     const keep=()=>LS.set('memoDraft',{t:$('#nmT').value,c:c.value,g:$('#nmG').value});c.oninput=()=>{autoH(c);keep()};$('#nmT').oninput=keep;$('#nmG').oninput=keep}
   let last={id:'',t:0};document.querySelectorAll('[data-memo]').forEach(li=>{
@@ -1245,11 +1301,12 @@ function memoPopup(id,edit){const x=DB.메모.find(m=>m.id===id);if(!x)return;co
   if(q('#mpSave'))q('#mpSave').onclick=()=>{put('메모',Object.assign({},x,{제목:q('#mpT').value.trim()||'(제목 없음)',내용:q('#mpC').value,태그:q('#mpG').value.trim(),고정:q('#mpP').checked}));toast('저장했어요');render();memoPopup(id,0)}}
 ACT.detail=d=>{const x=DB.맛집.find(r=>r.id===d.id);if(!x)return;const dl=$('#dlg');
   const rows=[['업체명',x.이름],['지역',x.지역],['추천 메뉴',x.메뉴],['테마',x.테마],['평점',x.평점],['가격대',x.가격대],['방문',x.방문],['메모',x.메모]].filter(r=>r[1]);
-  dl.innerHTML=`<div class="dhead">${x.메뉴?dishImg(String(x.메뉴).split(/[,\s]/)[0]):phImg('store')}<h3>${esc(x.이름)}</h3></div><div style="padding:6px 18px 4px">${rows.map(([k,v])=>`<div class="drow"><span>${k}</span><b style="white-space:pre-wrap">${esc(v)}</b></div>`).join('')}</div><div class="row" style="padding:12px 18px 18px"><a class="btn" target="_blank" rel="noopener" href="https://map.naver.com/p/search/${encodeURIComponent((x.지역||'')+' '+x.이름)}">지도</a><button class="x" id="dDel" style="color:var(--bad)">🗑 삭제</button><span style="flex:1"></span><button id="dClose">닫기</button><button class="p" id="dEdit">수정</button></div>`;
+  const ph=LS.get('fphoto',{})[x.id];
+  dl.innerHTML=`<div class="dhead">${ph?`<img src="${ph}" alt="">`:x.메뉴?dishImg(String(x.메뉴).split(/[,\s]/)[0]):phImg('store')}<h3>${esc(x.이름)}</h3></div><div style="padding:6px 18px 4px">${rows.map(([k,v])=>`<div class="drow"><span>${k}</span><b style="white-space:pre-wrap">${esc(v)}</b></div>`).join('')}</div><div class="row" style="padding:12px 18px 18px"><a class="btn" target="_blank" rel="noopener" href="https://map.naver.com/p/search/${encodeURIComponent((x.지역||'')+' '+x.이름)}">지도</a><button class="x" id="dDel" style="color:var(--bad)">🗑 삭제</button><span style="flex:1"></span><button id="dClose">닫기</button><button class="p" id="dEdit">수정</button></div>`;
   dl.showModal();fillImgs(dl);fillPhotos(dl);
   $('#dClose').onclick=()=>{dl.returnValue='';dl.close()};
   $('#dEdit').onclick=()=>{dl.returnValue='';dl.close();setTimeout(()=>form('맛집',x),0)};
-  $('#dDel').onclick=()=>{if(!confirm(`‘${x.이름}’을(를) 삭제할까요?`))return;dl.returnValue='';dl.close();del('맛집',x.id);toast('삭제했어요');render()};
+  $('#dDel').onclick=()=>{if(!confirm(`‘${x.이름}’을(를) 삭제할까요?`))return;dl.returnValue='';dl.close();del('맛집',x.id);const P=LS.get('fphoto',{});delete P[x.id];LS.set('fphoto',P);toast('삭제했어요');render()};
 };
 ACT.tv=()=>{const dl=$('#dlg');const S=['테이스티로드','식신로드','수요미식회','생생정보통','VJ특공대','생활의달인','맛있는TV','올리브쇼'];
   dl.innerHTML=`<div style="padding:18px"><h3>TV맛집</h3><p class="muted" style="margin:0 0 6px">TV에 나온 맛집을 방송 프로그램별로 지도에서 검색해요.</p>${S.map(n=>`<a class="drow" target="_blank" rel="noopener" href="https://map.naver.com/p/search/${encodeURIComponent(n+' 맛집')}" style="text-decoration:none;color:var(--ink)"><span style="color:var(--ink)">${n}</span><b style="flex:0">›</b></a>`).join('')}<div class="row" style="margin-top:12px"><span style="flex:1"></span><button class="p" id="tvClose">닫기</button></div></div>`;
