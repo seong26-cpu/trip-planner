@@ -144,10 +144,33 @@ ol.num li::before{content:counter(n);position:absolute;left:0;top:8px;width:26px
 .chk input{width:22px;height:22px;flex:0 0 auto;accent-color:var(--brand)}.chk.on span{text-decoration:line-through;color:var(--sub)}
 .prog{height:10px;border-radius:99px;background:var(--line);overflow:hidden}.prog i{display:block;height:100%;background:var(--brand);border-radius:99px}
 .ed-day{border:1px solid var(--line);border-radius:14px;padding:10px;margin:10px 0}
-.ed-it{display:grid;grid-template-columns:1fr 92px auto;gap:4px;align-items:center;margin:4px 0}.ed-it input{padding:8px}.ed-it .ops{display:flex}
+.ed-it{border-top:1px dashed var(--line);padding:8px 0 4px}.ed-it:first-of-type{border-top:0}.ed-it .r1{display:flex;gap:4px;align-items:center}.ed-it .r1 input{flex:1;padding:8px;font-weight:600}.ed-it .ops{display:flex}
+.ed-it .r2{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:6px;font-size:12px;color:var(--sub)}
+.stp{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--bg)}
+.stp button{border:0;border-radius:0;padding:6px 10px;background:none;font-size:16px;color:var(--ink)}.stp input{width:44px;border:0;border-radius:0;text-align:center;padding:6px 0;background:none;font-weight:700;font-size:15px}
+.ed-it select{width:auto;padding:6px 8px}.ed-it .note{flex:1;min-width:90px;padding:6px 8px;font-size:13px}
 .ed-it .ops button{padding:4px 6px;border:0;background:none;color:var(--sub)}
 .dsel{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.dsel span{text-align:center;padding:8px 0;border-radius:10px;border:1px solid var(--line);cursor:pointer;font-weight:700}.dsel span.on{background:var(--brand);color:var(--onbrand);border-color:var(--brand)}
 .plist .item .b{cursor:pointer}
+.mcal{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.mcal .h{text-align:center;font-size:12px;color:var(--sub);padding:4px 0;font-weight:700}.mcal .h:first-child{color:#dc2626}.mcal .h:last-child{color:#2563eb}
+.mcal button{min-height:76px;padding:4px 3px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:2px;font-size:11px;overflow:hidden}
+.mcal button .dn{font-size:13px;font-weight:700;text-align:left}.mcal button.out{opacity:.35}.mcal button.td{border:2px solid var(--brand)}.mcal button.sun .dn{color:#dc2626}.mcal button.sat .dn{color:#2563eb}
+.mcal .ev{display:block;border-radius:4px;padding:1px 3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left;font-size:10px;line-height:1.35}
+.ev.pub{background:#dbeafe;color:#1d4ed8}.ev.pri{background:#fce7f3;color:#be185d}.ev.unk{background:var(--line);color:var(--sub)}.ev.mt{box-shadow:inset 3px 0 0 #ea580c}
+.mcal .more{font-size:10px;color:var(--sub);text-align:left}
+.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--sub);margin:6px 0}.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+@media (prefers-color-scheme:dark){.ev.pub{background:#172554;color:#93c5fd}.ev.pri{background:#3b0a24;color:#f9a8d4}}
+.mnew{background:var(--card);border:1px solid var(--line);border-radius:var(--r);margin:10px 0;overflow:hidden}
+.mnew summary{list-style:none;cursor:pointer;padding:14px;font-weight:800;display:flex;align-items:center;gap:8px}.mnew summary::-webkit-details-marker{display:none}
+.mnew summary .ar{margin-left:auto;transition:transform .2s;color:var(--sub)}.mnew[open] summary .ar{transform:rotate(180deg)}.mnew .in{padding:0 14px 14px}
+.mtl{list-style:none;margin:0;padding:0}.mtl li{display:flex;align-items:center;gap:10px;padding:13px 4px;border-top:1px solid var(--line);cursor:pointer;user-select:none;-webkit-user-select:none}.mtl li:first-child{border-top:0}
+.mtl li .t{flex:1;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mtl li.tap{background:var(--brand2)}
+dialog.full{width:min(720px,100vw);max-width:100vw;height:100dvh;max-height:100dvh;margin:0 auto;border-radius:0;overflow-y:auto}dialog.full .bar{position:sticky;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:10px 0 calc(10px + env(safe-area-inset-bottom));margin-top:10px}dialog.full .body{white-space:pre-wrap;word-break:break-word;font-size:16px;line-height:1.7;margin:10px 0}
+textarea.auto{overflow:hidden;resize:none;min-height:120px}
+.wres .big3{font-size:22px;font-weight:800;margin:6px 0 2px}.wres .ws{margin-top:12px}.wres .ws b{display:block;margin-bottom:4px}
+.whist{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.whist button{padding:0;border-radius:12px;overflow:hidden;flex-direction:column;align-items:stretch;gap:0;font-size:11px}
+.whist img{width:100%;height:84px;object-fit:cover;display:block}.whist span{padding:4px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left}
 .gbtn{width:100%;background:#fff;color:#1f1f1f;border:1px solid #dadce0;font-weight:600;gap:10px}.gbtn svg{width:18px;height:18px}
 /* ===== 골든아워 마을 테마 (samsy.ninja 풍 · 따뜻한 실사 사진) ===== */
 header{background:rgba(255,243,230,.92);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
@@ -230,6 +253,7 @@ dialog{border-radius:24px}
 <dialog id="dlg"></dialog>
 
 <script src="ex.js"></script>
+<script src="ex2.js"></script>
 <script src="recipes.js"></script>
 <script>
 /* ===================== 기본 ===================== */
@@ -550,7 +574,7 @@ ACT.qm=()=>{const v=$('#qm').value.trim();if(!v)return;put('메모',{제목:v.sl
 const KIND_RE=/^\s*\[(공적|사적)\]\s*/;
 function kindOf(x){if(x.구분==='공적'||x.구분==='사적')return x.구분;const m=String(x.제목||'').match(KIND_RE);return m?m[1]:'미분류'}
 function kindTag(g){return g==='공적'?'<span class="tag pub">💼 공적</span>':g==='사적'?'<span class="tag pri">🏠 사적</span>':'<span class="tag unk">미분류</span>'}
-function calRows(){return CAL.filter(x=>!DB.일정.some(y=>y['캘린더ID']===x.eventId)).map(x=>{const m=String(x.title||'').match(KIND_RE);return {제목:String(x.title||'').replace(KIND_RE,''),구분:m?m[1]:'',날짜:x.date,시작:x.start,장소:x.location,종류:'캘린더',_cal:1}})}
+function calRows(){return CAL.filter(x=>!DB.일정.some(y=>y['캘린더ID']===x.eventId)).map(x=>{const m=String(x.title||'').match(KIND_RE);return {제목:String(x.title||'').replace(KIND_RE,''),구분:m?m[1]:'',날짜:x.date,시작:x.start,장소:x.location,종류:'캘린더',_cal:1,eventId:x.eventId}})}
 function planList(rows,mode,t){
   if(mode==='약속')rows=rows.filter(x=>x.종류==='약속');
   rows=mode==='지난'?rows.filter(x=>x.날짜<t).sort((a,b)=>b.날짜.localeCompare(a.날짜)):rows.filter(x=>x.날짜>=t).sort((a,b)=>(a.날짜+(a.시작||'')).localeCompare(b.날짜+(b.시작||'')));
@@ -562,22 +586,103 @@ function planCards(rows,t,cls){
 }
 V.plan=()=>{
   const t=today(),mode=sub.plan||'다가오는',view=sub.pk||'전체';
-  const all=planList([...DB.일정,...calRows()],mode,t);
-  const by={공적:[],사적:[],미분류:[]};all.forEach(x=>by[kindOf(x)].push(x));
-  const wk=addDays(t,6),cnt=k=>DB.일정.concat(calRows()).filter(x=>kindOf(x)===k&&x.날짜>=t&&x.날짜<=wk).length;
-  const sec=(k,icon,col,cls)=>`<div class="sech"><span class="bar" style="background:${col}"></span>${icon} ${k} 일정 <span class="muted" style="font-weight:400">${by[k].length}건</span></div>${by[k].length?planCards(by[k],t,cls):`<div class="card empty ${cls}">${k} 일정이 없어요</div>`}`;
-  let body;
-  if(view==='공적')body=sec('공적','💼','#2563eb','pub');
-  else if(view==='사적')body=sec('사적','🏠','#db2777','pri');
-  else body=sec('공적','💼','#2563eb','pub')+sec('사적','🏠','#db2777','pri')+(by.미분류.length?`<div class="sech"><span class="bar" style="background:var(--line)"></span>미분류 <span class="muted" style="font-weight:400">눌러서 공적/사적 지정</span></div>`+planCards(by.미분류,t,'unk'):'');
   const pre=mode==='약속'?esc(JSON.stringify({종류:'약속'})):'';
+  const wk=addDays(t,6),cnt=k=>DB.일정.concat(calRows()).filter(x=>kindOf(x)===k&&x.날짜>=t&&x.날짜<=wk).length;
   return `${mode==='약속'?dhero('meet','DISTRICT 07 · CAFÉ','약속,<br>누구와 어디서 만날까'):dhero('plan','DISTRICT 06 · PLAZA','일정 광장<br>공적 · 사적 한눈에')}<div class="seg" style="margin:4px 0 8px">${[['전체','전체'],['공적','💼 공적'],['사적','🏠 사적']].map(([k,l])=>`<span class="${view===k?'on':''}" style="flex:1;text-align:center;padding:9px 0;font-size:14px" data-act="chip" data-k="pk" data-v="${k}">${l}</span>`).join('')}</div>
   <div class="sum3"><div><b style="color:#2563eb">${cnt('공적')}</b><span>이번 주 공적</span></div><div><b style="color:#db2777">${cnt('사적')}</b><span>이번 주 사적</span></div><div><b>${cnt('미분류')}</b><span>미분류</span></div></div>
-  ${chips('plan',['다가오는','약속','지난'])}
+  <div class="chips">${[['다가오는','📅 전체 일정'],['약속','☕ 약속만']].map(([k,l])=>`<span class="chip ${(mode==='약속'?'약속':'다가오는')===k?'on':''}" data-act="chip" data-k="plan" data-v="${k}">${l}</span>`).join('')}</div>
   <div class="addrow">${view!=='사적'?`<button class="b-pub" data-act="add" data-s="일정" data-kind="공적" ${pre?`data-pre="${pre}"`:''}>＋ 공적 ${mode==='약속'?'약속':'일정'}</button>`:''}${view!=='공적'?`<button class="b-pri" data-act="add" data-s="일정" data-kind="사적" ${pre?`data-pre="${pre}"`:''}>＋ 사적 ${mode==='약속'?'약속':'일정'}</button>`:''}</div>
-  ${body}
-  <p class="muted">구글 캘린더에는 제목 앞에 [공적]/[사적]이 붙어 등록돼요. 캘린더에서 직접 만든 일정도 제목을 [공적]/[사적]으로 시작하면 자동 분류돼요.</p>`;
+  ${monthCal(view,mode)}
+  <p class="muted">날짜를 누르면 그날 일정 팝업 → 추가 · 일정을 누르면 수정 · 삭제. 구글 캘린더에는 제목 앞에 [공적]/[사적]이 붙어 등록되고, 캘린더에서 만든 일정도 [공적]/[사적]으로 시작하면 자동 분류돼요.</p>`;
 };
+
+function calItems(view,mode){let L=[...DB.일정,...calRows()];if(mode==='약속')L=L.filter(x=>x.종류==='약속');if(view!=='전체')L=L.filter(x=>kindOf(x)===view);return L}
+function monthCal(view,mode){
+  const t=today(),ym=sub.cm||t.slice(0,7),[Y,M]=ym.split('-').map(Number),first=new Date(Y,M-1,1),start=addDays(ym+'-01',-first.getDay());
+  const L=calItems(view,mode),by={};L.forEach(x=>(by[x.날짜]=by[x.날짜]||[]).push(x));for(const k in by)by[k].sort((a,b)=>(a.시작||'').localeCompare(b.시작||''));
+  const cls=x=>({공적:'pub',사적:'pri'}[kindOf(x)]||'unk')+(x.종류==='약속'?' mt':'');
+  const cells=[...Array(42)].map((_,i)=>{const d=addDays(start,i),E=by[d]||[],dw=i%7;
+    return `<button class="${d.slice(0,7)!==ym?'out':''} ${d===t?'td':''} ${dw===0?'sun':dw===6?'sat':''}" data-act="calDay" data-d="${d}" aria-label="${dname(d)} 일정 ${E.length}건"><span class="dn">${+d.slice(8)}</span>${E.slice(0,2).map(x=>`<span class="ev ${cls(x)}">${x.시작?x.시작.slice(0,5)+' ':''}${esc(x.제목)}</span>`).join('')}${E.length>2?`<span class="more">+${E.length-2}</span>`:''}</button>`}).join('');
+  const mv=n=>{const d=new Date(Y,M-1+n,1);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')};
+  return `<div class="card"><h2>${Y}년 ${M}월<span class="sp"></span><button class="s" data-act="chip" data-k="cm" data-v="${mv(-1)}" aria-label="이전 달">‹</button><button class="s" data-act="chip" data-k="cm" data-v="${t.slice(0,7)}">오늘</button><button class="s" data-act="chip" data-k="cm" data-v="${mv(1)}" aria-label="다음 달">›</button></h2>
+   <div class="legend"><span><i style="background:#2563eb"></i>공적</span><span><i style="background:#db2777"></i>사적</span><span><i style="background:#ea580c"></i>약속</span><span><i style="background:var(--line)"></i>미분류·캘린더</span></div>
+   <div class="mcal">${'일월화수목금토'.split('').map(w=>`<div class="h">${w}</div>`).join('')}${cells}</div></div>`;
+}
+ACT.calDay=d=>{const ds=d.d,view=sub.pk||'전체',mode=sub.plan||'다가오는',E=calItems('전체',mode).filter(x=>x.날짜===ds).sort((a,b)=>(a.시작||'').localeCompare(b.시작||'')),dl=$('#dlg'),ap=mode==='약속';
+  dl.innerHTML=`<div style="padding:18px"><h3>📅 ${dname(ds)}${ds===today()?' <span class="tag">오늘</span>':''}</h3>
+   ${E.length?E.map((x,i)=>`<div class="item" data-i="${i}" style="cursor:pointer"><div class="muted" style="width:46px">${x.시작||'종일'}</div><div class="b"><div class="t">${esc(x.제목)}</div><div class="d">${esc([x.장소,x.상대].filter(Boolean).join(' · '))}</div></div>${kindTag(kindOf(x))}${x.종류==='약속'?'<span class="tag w">약속</span>':''}${x._cal?'<span class="tag">캘린더</span>':''}</div>`).join(''):'<div class="empty">이 날 일정이 없어요</div>'}
+   <div class="addrow">${view!=='사적'?`<button class="b-pub" data-k="공적">＋ 공적 ${ap?'약속':'일정'}</button>`:''}${view!=='공적'?`<button class="b-pri" data-k="사적">＋ 사적 ${ap?'약속':'일정'}</button>`:''}</div>
+   <div class="row" style="margin-top:8px"><span style="flex:1"></span><button class="p" id="cdClose">닫기</button></div></div>`;
+  dl.showModal();const close=()=>{dl.returnValue='';dl.close()};dl.querySelector('#cdClose').onclick=close;
+  dl.querySelectorAll('.addrow button').forEach(b=>b.onclick=()=>{close();setTimeout(()=>form('일정',{날짜:ds,종류:ap?'약속':'일정'},{kind:b.dataset.k}),0)});
+  dl.querySelectorAll('[data-i]').forEach(r=>r.onclick=()=>{const x=E[+r.dataset.i];close();setTimeout(()=>x._cal?calPopup(x):form('일정',x),0)})};
+function calPopup(x){const dl=$('#dlg');
+  dl.innerHTML=`<div style="padding:18px"><h3>${esc(x.제목)}</h3><p class="muted" style="margin:0">구글 캘린더에서 가져온 일정이에요.</p>
+   <div class="drow"><span>날짜</span><b>${dname(x.날짜)} ${esc(x.시작||'종일')}</b></div>${x.장소?`<div class="drow"><span>장소</span><b>${esc(x.장소)}</b></div>`:''}<div class="drow"><span>구분</span><b>${kindTag(kindOf(x))}</b></div>
+   <div class="row" style="margin-top:14px"><button class="x" id="cpDel" style="color:var(--bad)">🗑 삭제</button><button id="cpImp">앱 일정으로 가져와 수정</button><span style="flex:1"></span><button class="p" id="cpClose">닫기</button></div></div>`;
+  dl.showModal();const close=()=>{dl.returnValue='';dl.close()};$('#cpClose').onclick=close;
+  $('#cpDel').onclick=async()=>{if(!confirm('구글 캘린더에서 이 일정을 삭제할까요?'))return;close();try{await api('calDelete',{eventId:x.eventId});CAL=CAL.filter(c=>c.eventId!==x.eventId);LS.set('cal',CAL);toast('🗑 삭제했어요');render()}catch(e){toast('삭제 실패: '+e.message,4000)}};
+  $('#cpImp').onclick=()=>{close();setTimeout(()=>form('일정',{구분:kindOf(x)==='미분류'?'':kindOf(x),종류:'일정',제목:x.제목,날짜:x.날짜,시작:x.시작||'',장소:x.장소||'',캘린더ID:x.eventId}),0)}}
+
+/* ---- WHAT: 사진으로 물건·장소 알아보기 + 위치 ---- */
+let WH={busy:0,img:'',cur:null};
+/* 사진 파일의 EXIF GPS 읽기 (JPEG만, 없으면 null) */
+async function exifGPS(file){try{const b=new DataView(await file.slice(0,262144).arrayBuffer());if(b.getUint16(0)!==0xFFD8)return null;let o=2;
+  while(o<b.byteLength-4){const mk=b.getUint16(o);if(mk===0xFFE1&&b.getUint32(o+4)===0x45786966){const t=o+10,le=b.getUint16(t)===0x4949,g16=x=>b.getUint16(x,le),g32=x=>b.getUint32(x,le);
+      const ifd=(off,tag)=>{const n=g16(t+off);for(let i=0;i<n;i++){const e=t+off+2+i*12;if(g16(e)===tag)return g32(e+8)}return 0};
+      const gp=ifd(g32(t+4),0x8825);if(!gp)return null;const n=g16(t+gp),r={};
+      for(let i=0;i<n;i++){const e=t+gp+2+i*12,tag=g16(e),vo=t+g32(e+8);
+        if(tag===1||tag===3)r[tag]=String.fromCharCode(b.getUint8(e+8));
+        if(tag===2||tag===4)r[tag]=[0,1,2].map(k=>g32(vo+k*8)/(g32(vo+k*8+4)||1)).reduce((a,v,k)=>a+v/Math.pow(60,k),0)}
+      if(r[2]==null||r[4]==null)return null;return {lat:r[2]*(r[1]==='S'?-1:1),lon:r[4]*(r[3]==='W'?-1:1),src:'사진 위치정보(EXIF)'}}
+    if((mk&0xFF00)!==0xFF00)break;o+=2+b.getUint16(o+2)}return null}catch(e){return null}}
+async function revGeo(lat,lon){try{const j=await (await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&accept-language=ko&zoom=18`)).json();return j.display_name||''}catch(e){return ''}}
+const hereGPS=()=>new Promise((ok,no)=>{if(!navigator.geolocation)return no(new Error('이 기기는 위치 기능을 지원하지 않아요'));navigator.geolocation.getCurrentPosition(p=>ok({lat:p.coords.latitude,lon:p.coords.longitude,acc:Math.round(p.coords.accuracy),src:'현재 위치(GPS)'}),e=>no(new Error(e.code===1?'위치 권한이 꺼져 있어요. 브라우저 설정에서 위치 허용을 켜 주세요':'현재 위치를 찾지 못했어요')),{enableHighAccuracy:true,timeout:15000})});
+function locBlock(L){if(!L)return '';const q=`${L.lat.toFixed(6)},${L.lon.toFixed(6)}`;
+  return `<div class="ws"><b>📍 위치 <span class="tag">${esc(L.src)}</span></b>${L.addr?`<div>${esc(L.addr)}</div>`:''}<div class="muted">${q}${L.acc?' · 오차 약 '+L.acc+'m':''}</div>
+   <div class="grid3" style="margin-top:6px"><a class="btn s" target="_blank" rel="noopener" href="https://map.naver.com/p/search/${encodeURIComponent(L.addr||q)}">네이버</a><a class="btn s" target="_blank" rel="noopener" href="https://map.kakao.com/link/map/${encodeURIComponent('여기')},${L.lat},${L.lon}">카카오</a><a class="btn s" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${q}">구글</a></div></div>`}
+function whatResult(r){if(!r)return '';const a=r.ai||{},T=a.type||'';
+  return `<div class="card wres">${r.img?`<img class="thumb" src="${r.img}" alt="">`:''}
+   ${r.err?`<div class="notice">${esc(r.err)}</div>`:''}
+   ${a.name?`<div class="row" style="margin-top:8px"><span class="tag">${esc(T||'분석')}</span>${a.confidence?`<span class="tag ${a.confidence==='low'?'w':''}">확신도 ${({high:'높음',mid:'보통',low:'낮음'})[a.confidence]||esc(a.confidence)}</span>`:''}</div><div class="big3">${esc(a.name)}</div>${a.category?`<div class="muted">${esc(a.category)}</div>`:''}
+    ${a.summary?`<div class="ws">${esc(a.summary)}</div>`:''}
+    ${(a.usage||[]).length?`<div class="ws"><b>🛠 사용 방법</b><ol class="num">${a.usage.map(x=>`<li>${esc(x)}</li>`).join('')}</ol></div>`:''}
+    ${(a.tips||[]).length?`<div class="ws"><b>💡 팁</b>${a.tips.map(x=>`<div class="d">· ${esc(x)}</div>`).join('')}</div>`:''}
+    ${(a.cautions||[]).length?`<div class="notice ws">⚠️ ${a.cautions.map(esc).join('<br>⚠️ ')}</div>`:''}
+    ${a.place&&(a.place.guess||a.place.clues)?`<div class="ws"><b>🏙 사진으로 추정한 장소</b><div>${esc(a.place.guess||'특정하기 어려움')}</div>${a.place.clues?`<div class="muted">근거: ${esc(a.place.clues)}</div>`:''}</div>`:''}`:''}
+   ${locBlock(r.loc)}
+   <p class="muted" style="margin:10px 0 0">AI 분석은 틀릴 수 있어요. 장소는 <b>GPS·사진 위치정보</b>가 더 정확하고, AI 추정은 참고만 하세요.${r.at?' · '+esc(r.at):''}</p>
+   ${r.id?`<div class="row" style="margin-top:8px"><button class="x" data-act="whatDel" data-id="${r.id}" style="color:var(--bad)">🗑 삭제</button><span style="flex:1"></span><button class="s" data-act="whatMemo" data-id="${r.id}">메모로 보내기</button></div>`:''}</div>`}
+function whatView(){const H=LS.get('what',[]),cur=WH.cur||(sub.wid&&H.find(x=>x.id===sub.wid))||null;
+  return `${dhero('memo','WHAT · 이게 뭐지?','사진 한 장으로<br>물건·장소 알아보기')}
+  <div class="card"><h2>📷 무엇이든 찍어 보세요</h2><p class="muted" style="margin:0 0 8px">물건이면 <b>이름·사용 방법</b>, 장소면 <b>어떤 곳인지·위치</b>를 알려드려요.</p>
+   <div class="grid2"><label class="btn p" style="margin:0">📷 촬영<input type="file" accept="image/*" capture="environment" id="whCam" class="hide"></label><label class="btn" style="margin:0">🖼 앨범<input type="file" accept="image/*" id="whGal" class="hide"></label></div>
+   <label style="display:flex;gap:8px;align-items:center;color:var(--ink)"><input type="checkbox" id="whLoc" style="width:auto" ${LS.get('whLoc',true)?'checked':''}> 📍 위치도 함께 찾기 (사진 위치정보 → 없으면 현재 GPS)</label>
+   <input id="whAsk" placeholder="궁금한 점 (선택) 예: 이거 어떻게 켜요? / 여기 어디예요?" value="${esc(LS.get('whAsk',''))}" style="margin-top:6px">
+   <button style="width:100%;margin-top:8px" data-act="whatHere">📍 사진 없이 지금 위치만 확인</button>
+   ${CFG.url?'':'<div class="notice" style="margin-top:8px">AI 분석은 서버 연결 후 사용할 수 있어요 (설정). 위치 찾기는 지금도 돼요.</div>'}</div>
+  ${WH.busy?`<div class="card">${WH.img?`<img class="thumb" src="${WH.img}">`:''}<p class="muted">🔍 분석 중이에요… (10~30초) 다른 메뉴에 다녀와도 결과는 여기 남아요.</p></div>`:whatResult(cur)}
+  ${H.length?`<h3 style="margin:16px 0 6px">최근 기록 <span class="muted" style="font-weight:400">${H.length}</span></h3><div class="whist">${H.map(x=>`<button data-act="whatOpen" data-id="${x.id}">${x.img?`<img src="${x.img}" alt="">`:'<img alt="" src="img/haru.jpg">'}<span>${esc((x.ai&&x.ai.name)||x.loc&&x.loc.addr||'위치 기록')}</span></button>`).join('')}</div>`:''}`}
+async function whatRun(file){if(WH.busy)return;const wantLoc=$('#whLoc')?$('#whLoc').checked:true,ask=($('#whAsk')||{value:''}).value.trim();LS.set('whLoc',wantLoc);LS.set('whAsk',ask);
+  const r={id:'w'+uid(),at:new Date().toLocaleString('ko-KR',{hour12:false}).slice(0,-3)};WH.cur=null;
+  try{const im=await imgToB64(file,1024),th=await imgToB64(file,360);WH.busy=1;WH.img=im.url;r.img=th.url;if(tab==='more')render();
+    if(wantLoc){r.loc=await exifGPS(file);if(!r.loc)try{r.loc=await hereGPS()}catch(e){r.locErr=e.message}if(r.loc)r.loc.addr=await revGeo(r.loc.lat,r.loc.lon)}
+    if(CFG.url){const near=r.loc&&r.loc.addr?`참고: 촬영 위치 근처 주소는 "${r.loc.addr}" 이야(${r.loc.src}). 장소 추정에 참고하되 사진 내용과 맞지 않으면 무시해.`:'';
+      r.ai=await ai(`너는 사진 속 물건이나 장소를 알려주는 도우미야. 사진을 보고 물건인지 장소인지 판단해. ${near} 사용자 질문: ${ask||'이게 뭐야?'}
+물건이면: 정확한 이름(모르면 일반 명칭), 무엇에 쓰는지, 일반적인 사용 방법을 단계별로(3~7단계), 주의사항. 제품 모델을 확신할 수 없으면 일반적인 방법만 쓰고 확신도를 낮춰.
+장소면: 어떤 종류의 장소인지, 간판·랜드마크 등 보이는 단서로 추정되는 장소명(확실하지 않으면 '특정하기 어려움'), 방문 팁.
+모르는 것을 지어내지 마. 반드시 다음 JSON으로만 답해: {"type":"물건|장소|음식|기타","name":"이름","category":"분류","summary":"한두 문장 설명","usage":["1단계"],"tips":["팁"],"cautions":["주의"],"place":{"guess":"추정 장소명","clues":"판단 근거"},"confidence":"high|mid|low"}`,im.b64,'image/jpeg');
+      if(r.ai&&r.ai.raw){r.err='AI 응답을 해석하지 못했어요. 다시 시도해 주세요.';delete r.ai}}
+    else r.err='AI 분석은 서버 연결 후 가능해요 (더보기 → 설정). 위치는 아래에 표시했어요.';
+    if(r.locErr&&!r.loc)r.err=(r.err?r.err+' / ':'')+r.locErr;
+  }catch(e){r.err=e.message}
+  WH.busy=0;WH.img='';const H=LS.get('what',[]);H.unshift(r);LS.set('what',H.slice(0,30));sub.wid=r.id;WH.cur=r;toast('🔍 WHAT 분석 완료');if(tab==='more')render()}
+ACT.whatHere=async()=>{toast('📍 위치 찾는 중…');try{const L=await hereGPS();L.addr=await revGeo(L.lat,L.lon);const r={id:'w'+uid(),at:new Date().toLocaleString('ko-KR',{hour12:false}).slice(0,-3),loc:L};const H=LS.get('what',[]);H.unshift(r);LS.set('what',H.slice(0,30));sub.wid=r.id;WH.cur=r;render()}catch(e){toast(e.message,4000)}};
+ACT.whatOpen=d=>{sub.wid=d.id;WH.cur=null;render();scrollTo(0,0)};
+ACT.whatDel=d=>{if(!confirm('이 기록을 삭제할까요?'))return;LS.set('what',LS.get('what',[]).filter(x=>x.id!==d.id));if(sub.wid===d.id)sub.wid='';WH.cur=null;toast('삭제했어요');render()};
+ACT.whatMemo=d=>{const r=LS.get('what',[]).find(x=>x.id===d.id);if(!r)return;const a=r.ai||{};
+  const body=[a.summary,(a.usage||[]).length?'사용 방법:\n'+a.usage.map((x,i)=>(i+1)+'. '+x).join('\n'):'',(a.cautions||[]).length?'주의: '+a.cautions.join(' / '):'',a.place&&a.place.guess?'추정 장소: '+a.place.guess:'',r.loc?'위치: '+(r.loc.addr||'')+' ('+r.loc.lat.toFixed(5)+','+r.loc.lon.toFixed(5)+')':''].filter(Boolean).join('\n\n');
+  put('메모',{제목:'WHAT: '+(a.name||r.loc&&r.loc.addr||'기록'),내용:body,태그:'WHAT',고정:false});toast('메모로 보냈어요')};
 
 /* ---- 요리 ---- */
 const FOOD=['img/food-jeyuk.svg','img/food-stew.svg','img/food-rice.svg','img/food-egg.svg'];
@@ -700,10 +805,12 @@ ACT.recipe=d=>{
    ${o.tip?`<div class="notice">💡 ${esc(o.tip)}</div>`:''}
    <p class="muted">${esc(o.from)} · 사진: 위키백과(없으면 일러스트)</p>
    <div class="grid2"><a class="btn" target="_blank" rel="noopener" href="${q10(o.name)}">📸 사진 레시피</a><a class="btn" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=${encodeURIComponent(o.name+' 레시피')}">▶ 영상 보기</a></div>
-   <div class="row" style="margin-top:10px">${o.id?'':`<button id="rSave">레시피 저장</button>`}<button id="rShop">부족 재료 → 메모</button><span style="flex:1"></span><button class="p" id="rClose">닫기</button></div></div>`;
+   <div class="row" style="margin-top:10px">${o.id?`<button id="rDel" style="color:var(--bad)">🗑 삭제</button><button id="rEd">수정</button>`:`<button id="rSave">레시피 저장</button>`}<button id="rShop">부족 재료 → 메모</button><span style="flex:1"></span><button class="p" id="rClose">닫기</button></div></div>`;
   dl.showModal();fillImgs(dl);
   $('#rClose').onclick=()=>dl.close();
   const sv=$('#rSave');if(sv)sv.onclick=()=>{put('레시피',{이름:o.name,재료:o.need.map(n=>n.name+(n.amount?' '+n.amount:'')).join(', ')+(o.sea?'\n양념: '+o.sea:''),조리법:o.steps.map((s,i)=>(i+1)+'. '+s).join('\n'),칼로리:String(o.kcal||''),시간:String(o.min||''),출처:o.ai?'AI 추천':'직접'});toast('레시피 저장');sv.disabled=true};
+  if($('#rDel'))$('#rDel').onclick=()=>{if(!confirm('이 레시피를 삭제할까요?'))return;dl.close();del('레시피',o.id);toast('삭제했어요');render()};
+  if($('#rEd'))$('#rEd').onclick=()=>{dl.close();setTimeout(()=>form('레시피',DB.레시피.find(y=>y.id===o.id)),0)};
   $('#rShop').onclick=()=>{const miss=o.need.filter(n=>!n.opt&&!hasIng(have,n.name)).map(n=>n.name);if(!miss.length)return toast('부족한 재료가 없어요');put('메모',{제목:'장보기: '+o.name,내용:miss.join('\n'),태그:'장보기',고정:false});toast('메모에 장보기 목록을 만들었어요')};
 };
 ACT.saveIng=()=>{const r=LS.get('lastScan',{});let n=0;(r.ingredients||[]).forEach(x=>{if(!DB.식재료.some(y=>y.이름===x.name)){put('식재료',{이름:x.name,수량:x.amount||'',보관:'냉장',유통기한:''});n++}});toast(n+'개 재료를 저장했어요')};
@@ -764,11 +871,13 @@ V.fit=()=>{
     h+=`<div class="card"><h2>🥗 저칼로리 메뉴 아이디어</h2>${LOWCAL.map(x=>`<span class="chip" style="display:inline-block;margin:3px">${x}</span>`).join('')}<p class="muted">일반적으로 칼로리가 낮은 편인 메뉴 예시예요 (양·조리법에 따라 달라짐).</p></div>
     <div class="card"><h2>🤖 내 재료로 저칼로리 식단 추천</h2><p class="muted">내 냉장고 재료를 활용해 하루 식단을 짜 드려요.</p><button class="p" style="width:100%" data-act="aiMeal">추천 받기</button><div id="mealPlan"></div></div>`;
   }else if(m==='운동 사전'){
-    const pt=sub.exp||'전체',q=(sub.exq||'').trim();
-    const L=EXDB.filter(x=>(pt==='전체'||x.p===pt)&&(!q||(x.n+x.m+x.eq).includes(q)));
+    const pt=sub.exp||'전체',q=(sub.exq||'').trim(),eg=sub.exeq||'전체',lv=sub.exlv||'전체';
+    const L=EXDB.filter(x=>(pt==='전체'||x.p===pt)&&(eg==='전체'||eqGroup(x.eq)===eg)&&(lv==='전체'||x.lv===lv)&&(!q||(x.n+x.m+x.eq+x.p).includes(q)));
     h+=`<div class="hero" style="margin-top:4px"><b>📖 운동 사전 ${EXDB.length}종</b><p style="margin:4px 0 0">부위를 고르고 운동을 누르면 시작·끝 동작 사진과 단계별 방법이 나와요.</p></div>
     <input id="exq" placeholder="🔍 운동 이름·근육·도구 검색 (예: 덤벨, 허벅지)" value="${esc(sub.exq||'')}">
     <div class="chips" style="margin-top:8px">${EXPARTS.map(x=>`<span class="chip ${pt===x?'on':''}" data-act="chip" data-k="exp" data-v="${x}">${x} <span class="muted">${x==='전체'?EXDB.length:EXDB.filter(e=>e.p===x).length}</span></span>`).join('')}</div>
+    <div class="chips"><span class="muted" style="align-self:center;font-size:12px">장비</span>${EXEQ.map(x=>`<span class="chip ${eg===x?'on':''}" data-act="chip" data-k="exeq" data-v="${x}">${x}</span>`).join('')}</div>
+    <div class="chips"><span class="muted" style="align-self:center;font-size:12px">난이도</span>${['전체','초급','중급','상급'].map(x=>`<span class="chip ${lv===x?'on':''}" data-act="chip" data-k="exlv" data-v="${x}">${x}</span>`).join('')}<span class="muted" style="align-self:center;font-size:12px;margin-left:auto">${L.length}개</span></div>
     <div class="exgrid">${L.map(x=>`<button class="excard" data-act="ex" data-id="${x.id}"><img src="img/ex/${x.id}_0.jpg" alt="${esc(x.n)}" loading="lazy"><div><b>${esc(x.n)}</b><span>${x.p} · ${esc(x.eq)} · ${x.lv}</span></div></button>`).join('')||'<div class="card empty" style="grid-column:1/-1">검색 결과가 없어요</div>'}</div>
     <p class="muted">사진·동작 설명 출처: <a target="_blank" rel="noopener" href="https://github.com/yuhonas/free-exercise-db">free-exercise-db</a>(퍼블릭 도메인) — 한국어로 요약. 통증이 있으면 중단하고 전문가와 상의하세요.</p>`;
   }else if(m==='1RM'){
@@ -796,7 +905,7 @@ ACT.ex=d=>{const x=EXDB.find(e=>e.id===d.id);if(!x)return;const dl=$('#dlg');
    <p class="muted">출처: free-exercise-db (퍼블릭 도메인) 원문을 한국어로 요약</p>
    <div class="row" style="margin-top:8px"><a class="btn" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=${encodeURIComponent(x.n+' 자세')}">▶ 영상</a><span style="flex:1"></span><button id="exClose">닫기</button><button class="p" id="exLog">기록하기</button></div></div>`;
   dl.showModal();$('#exClose').onclick=()=>dl.close();
-  $('#exLog').onclick=()=>{dl.close();setTimeout(()=>form('운동',{날짜:today(),종류:x.n,부위:x.p}),0)}};
+  $('#exLog').onclick=()=>{dl.close();setTimeout(()=>form('운동',{날짜:today(),종류:x.n,부위:partToLog(x.p)}),0)}};
 /* ===== 운동 계획: 저장 · 스케줄 · 편집 ===== */
 const DOW='일월화수목금토',WEEK=['월','화','수','목','금','토','일'];
 const dowOf=ds=>DOW[new Date(ds+'T00:00').getDay()];
@@ -835,7 +944,9 @@ function scheduleView(plan){
    <p class="muted" style="margin:4px 0 0">✓ 완료 · ✕ 놓침 · ● 오늘 — 날짜를 누르면 운동 보기·완료·미루기·그날만 수정</p></div>
   ${todayWoCard(t)}
   <div class="card"><h2>⏰ 알림 · 캘린더</h2><div class="row"><input id="woTime" type="time" value="${esc(plan.time||'')}" style="flex:1;width:auto"><button data-act="woTimeSave">시간 저장</button></div>
-   <button style="width:100%;margin-top:8px" data-act="woCal" ${CFG.url?'':'disabled'}>📆 앞으로 4주 운동을 구글 캘린더에 등록</button><p class="muted" style="margin:6px 0 0">${CFG.url?'캘린더 앱 알림으로 운동 시간을 알려줘요. 다시 누르면 이전 등록을 지우고 새로 등록해요.':'서버 연결 후 사용할 수 있어요 (더보기 → 설정).'}</p></div>`;
+   <button style="width:100%;margin-top:8px" data-act="woCal" ${CFG.url?'':'disabled'}>📆 앞으로 4주 운동을 구글 캘린더에 등록</button><p class="muted" style="margin:6px 0 0">${CFG.url?'캘린더 앱 알림으로 운동 시간을 알려줘요. 다시 누르면 이전 등록을 지우고 새로 등록해요.':'서버 연결 후 사용할 수 있어요 (더보기 → 설정).'}</p>
+   ${calList(plan).length?`<button style="width:100%;margin-top:8px;color:var(--bad)" data-act="woCalDel">🗑 캘린더에 등록한 운동 ${calList(plan).length}개 전체 삭제</button>`:''}</div>
+  <div class="card"><h2>⏹ 스케줄 관리</h2><p class="muted" style="margin:0 0 8px">스케줄을 멈추면 달력에서 운동이 사라져요. 계획은 ‘내 계획’에 남아서 언제든 다시 적용할 수 있어요.</p><button style="width:100%;color:var(--bad)" data-act="planStop">⏹ 스케줄 중지 (계획 적용 해제)</button></div>`;
 }
 function todayWoCard(t){
   const plan=LS.get('plan',null),s=sessionFor(t),done=doneOn(t),chk=(LS.get('woChk',{})[t])||{};
@@ -861,7 +972,7 @@ ACT.woDay=d=>{const ds=d.d,s=sessionFor(ds),t=today(),dl=$('#dlg');
   dl.innerHTML=`<div style="padding:18px"><h3>${dname(ds)} ${s?esc(s.title):'휴식'}</h3>
    ${s?s.items.map(it=>{const e=exFind(it);return `<div class="drow"><b>${esc(it)}</b>${e?`<button class="s" data-x="${e.id}">방법</button>`:''}</div>`}).join(''):'<p class="muted">계획상 쉬는 날이에요.</p>'}
    ${doneOn(ds)?'<p><span class="tag">✓ 완료 기록 있음</span></p>':''}
-   <div class="grid2" style="margin-top:12px">${s&&ds<=t&&!doneOn(ds)?'<button class="p" id="wDone">완료 기록</button>':''}${s?'<button id="wMove">다음 날로 미루기</button>':''}${s?'<button id="wSkip">이 날 쉬기</button>':''}<button id="wEdit">${s?'이 날만 수정':'＋ 이 날 운동 추가'}</button>${LS.get('woOv',{})[ds]!==undefined?'<button id="wReset">원래 계획으로</button>':''}</div>
+   <div class="grid2" style="margin-top:12px">${s&&ds<=t&&!doneOn(ds)?'<button class="p" id="wDone">완료 기록</button>':''}${s?'<button id="wMove">다음 날로 미루기</button>':''}${s?'<button id="wSkip">이 날 쉬기</button>':''}<button id="wEdit">${s?'이 날만 수정':'＋ 이 날 운동 추가'}</button>${LS.get('woOv',{})[ds]!==undefined?'<button id="wReset">원래 계획으로</button>':''}${doneOn(ds)?'<button id="wUndo" style="color:var(--bad)">🗑 완료 기록 삭제</button>':''}${calList(LS.get('plan',null)).some(x=>x.d===ds)?'<button id="wCalDel" style="color:var(--bad)">🗑 이 날 캘린더 일정 삭제</button>':''}</div>
    <div class="row" style="margin-top:12px"><span style="flex:1"></span><button class="p" id="wClose">닫기</button></div></div>`;
   dl.showModal();const q=x=>dl.querySelector(x),close=()=>{dl.returnValue='';dl.close()};
   q('#wClose').onclick=close;dl.querySelectorAll('[data-x]').forEach(b=>b.onclick=()=>{close();setTimeout(()=>ACT.ex({id:b.dataset.x}),0)});
@@ -870,16 +981,26 @@ ACT.woDay=d=>{const ds=d.d,s=sessionFor(ds),t=today(),dl=$('#dlg');
   if(q('#wMove'))q('#wMove').onclick=()=>{const nx=addDays(ds,1);if(sessionFor(nx)&&!confirm('다음 날에도 운동이 있어요. 그 날 운동을 덮어쓸까요?'))return;ov[nx]={title:s.title,items:s.items};ov[ds]='skip';close();setOv();toast('다음 날로 옮겼어요')};
   if(q('#wSkip'))q('#wSkip').onclick=()=>{ov[ds]='skip';close();setOv();toast('이 날은 쉬어요')};
   if(q('#wReset'))q('#wReset').onclick=()=>{delete ov[ds];close();setOv()};
+  if(q('#wUndo'))q('#wUndo').onclick=()=>{const L=DB.운동.filter(x=>x.날짜===ds);if(!confirm(`${dname(ds)} 운동 기록 ${L.length}건을 삭제할까요?`))return;L.forEach(x=>del('운동',x.id));close();toast('기록을 삭제했어요');render()};
+  if(q('#wCalDel'))q('#wCalDel').onclick=async()=>{const p=LS.get('plan',null),L=calList(p),mine=L.filter(x=>x.d===ds);if(!confirm('구글 캘린더에서 이 날 운동 일정을 삭제할까요?'))return;close();await calDelMany(mine);savePlanCal(p,L.filter(x=>x.d!==ds));toast('🗑 캘린더에서 삭제했어요');render()};
   q('#wEdit').onclick=()=>{close();setTimeout(()=>ACT.woExtra({d:ds}),0)}};
+const calList=p=>(p&&p.calIds||[]).map(x=>typeof x==='string'?{d:'',id:x}:x);
+async function calDelMany(list){let n=0;for(const x of list){try{await api('calDelete',{eventId:x.id});n++}catch(e){}}return n}
+function savePlanCal(p,ids){p.calIds=ids;savePlans(LS.get('plans',[]).map(x=>x.id===p.id?Object.assign(x,{calIds:ids}):x),p)}
+ACT.woCalDel=async()=>{const p=LS.get('plan',null),L=calList(p);if(!L.length)return toast('등록된 캘린더 운동이 없어요');if(!confirm(`구글 캘린더에 등록한 운동 ${L.length}개를 모두 삭제할까요?`))return;
+  toast('캘린더에서 삭제 중…',3000);const n=await calDelMany(L);savePlanCal(p,[]);toast(`🗑 캘린더 운동 ${n}개를 삭제했어요`);render()};
+ACT.planStop=async()=>{const p=LS.get('plan',null);if(!p)return;if(!confirm(`‘${p.name}’ 스케줄을 중지할까요?\n(계획은 ‘내 계획’에 남고, 운동 기록도 그대로예요)`))return;
+  const L=calList(p);if(L.length&&CFG.url&&confirm(`구글 캘린더에 등록한 운동 ${L.length}개도 함께 삭제할까요?`)){toast('캘린더에서 삭제 중…',3000);await calDelMany(L);p.calIds=[];savePlans(LS.get('plans',[]).map(x=>x.id===p.id?Object.assign(x,{calIds:[]}):x))}
+  savePlans(undefined,null);LS.set('woOv',{});toast('⏹ 스케줄을 중지했어요');render()};
 ACT.woExtra=d=>{const ds=d.d,s=sessionFor(ds)||{title:'추가 운동',items:[]};
   openEditor({id:'__day',name:dname(ds)+' 운동',days:[{day:dowOf(ds),title:s.title,items:s.items.slice()}]},{single:ds})};
 ACT.woTimeSave=()=>{const p=LS.get('plan',null);if(!p)return;p.time=$('#woTime').value;const lib=LS.get('plans',[]).map(x=>x.id===p.id?Object.assign(x,{time:p.time}):x);savePlans(lib,p);toast('운동 시간 저장')};
 ACT.woCal=async()=>{const p=LS.get('plan',null);if(!p||!CFG.url)return;const tm=p.time||'19:00';if(!confirm(`앞으로 4주 운동을 ${tm}에 구글 캘린더에 등록할까요?`))return;
-  toast('캘린더 등록 중… (잠시 걸려요)',4000);for(const id of (p.calIds||[]))try{await api('calDelete',{eventId:id})}catch(e){}
+  toast('캘린더 등록 중… (잠시 걸려요)',4000);await calDelMany(calList(p));
   const ids=[],t=today(),[h,mi]=tm.split(':').map(Number),end=String(Math.min(23,h+1)).padStart(2,'0')+':'+String(mi).padStart(2,'0');
   for(let i=0;i<28;i++){const ds=addDays(t,i),s=sessionFor(ds);if(!s)continue;
-    try{ids.push(await api('calSave',{ev:{title:'[사적] 🏋️ '+s.title,date:ds,start:tm,end,location:'',description:s.items.join('\n')+'\n(나의 하루 운동 계획: '+p.name+')'}}))}catch(e){toast('일부 실패: '+e.message,4000);break}}
-  p.calIds=ids;savePlans(LS.get('plans',[]).map(x=>x.id===p.id?Object.assign(x,{calIds:ids}):x),p);toast(`📆 ${ids.length}개 운동 일정을 캘린더에 등록했어요`,3500)};
+    try{ids.push({d:ds,id:await api('calSave',{ev:{title:'[사적] 🏋️ '+s.title,date:ds,start:tm,end,location:'',description:s.items.join('\n')+'\n(나의 하루 운동 계획: '+p.name+')'}})})}catch(e){toast('일부 실패: '+e.message,4000);break}}
+  savePlanCal(p,ids);render();toast(`📆 ${ids.length}개 운동 일정을 캘린더에 등록했어요`,3500)};
 /* 계획 미리보기 → 저장/적용 */
 function previewPlan(pl,opts={}){const dl=$('#dlg');
   dl.innerHTML=`<div style="padding:18px"><h3>${esc(pl.name)}</h3><p class="muted" style="margin:0 0 6px">${esc(pl.src||'')}${pl.tip?' · 💡 '+esc(pl.tip):''}</p>
@@ -902,22 +1023,35 @@ ACT.usePlan=d=>{const x=LS.get('plans',[]).find(p=>p.id===d.id);if(!x)return;con
 ACT.editPlan=d=>{const x=LS.get('plans',[]).find(p=>p.id===d.id)||LS.get('plan',null);if(!x)return;openEditor(JSON.parse(JSON.stringify(x)),{})};
 ACT.newPlan=()=>openEditor({name:'나의 계획',src:'직접 만들기',days:[{day:'월',title:'운동 A',items:[]},{day:'수',title:'운동 B',items:[]},{day:'금',title:'운동 C',items:[]}]},{});
 /* 편집기: 요일 · 제목 · 운동(추가/삭제/순서) · 세트 */
-const splitIt=it=>{const m=String(it).match(/^(.*?)\s+((?:\d+\s*[×x*]\s*\S+|\d+\s*(?:분|초|회|km)).*)$/);return m?[m[1],m[2]]:[String(it),'']};
+/* 운동 항목: 문자열 "이름 3×10초 (메모)" ↔ {n,s,r,u,note} */
+function parseIt(it){it=String(it||'').trim();if(!it)return {n:'',s:3,r:10,u:'회',note:''};let m=it.match(/^(.*?)\s+(\d+)\s*[×xX*]\s*(\d+)\s*(회|초|분)?\s*(.*)$/);
+  if(m)return {n:m[1].trim(),s:+m[2],r:+m[3],u:m[4]||'회',note:m[5].replace(/^\(|\)$/g,'').trim()};
+  m=it.match(/^(.*?)\s+(\d+)\s*(회|초|분)\s*(.*)$/);if(m)return {n:m[1].trim(),s:1,r:+m[2],u:m[3],note:m[4].replace(/^\(|\)$/g,'').trim()};
+  return {n:it,s:0,r:0,u:'회',note:''}}
+function fmtIt(o){const n=(o.n||'').trim();if(!n)return '';let x=n;
+  if(o.r>0)x+=' '+(o.s>1||o.u==='회'?(o.s||1)+'×'+o.r+(o.u==='회'?'':o.u):o.r+o.u);
+  if(o.note)x+=' ('+o.note+')';return x}
 function openEditor(ED,opt){const dl=$('#dlg'),single=opt.single;
   const draw=()=>{ED.days.sort((a,b)=>WEEK.indexOf(a.day)-WEEK.indexOf(b.day));
    dl.innerHTML=`<form method="dialog" style="padding:16px"><h3>${single?'✏️ '+esc(dname(single))+' 운동 수정':'✏️ 계획 편집'}</h3>
     ${single?'<p class="muted" style="margin:0">이 날짜에만 적용돼요. 원래 계획은 그대로예요.</p>':`<label>계획 이름</label><input data-f="name" value="${esc(ED.name)}">
     <label>운동 요일 (눌러서 추가/빼기)</label><div class="dsel">${WEEK.map(w=>`<span class="${ED.days.some(d=>d.day===w)?'on':''}" data-day="${w}">${w}</span>`).join('')}</div>`}
     ${ED.days.map((d,di)=>`<div class="ed-day"><div class="row" style="flex-wrap:nowrap">${single?'':`<span class="tag" style="font-size:14px">${d.day}</span>`}<input data-t="${di}" value="${esc(d.title)}" placeholder="제목 (예: 하체)" style="flex:1"></div>
-     ${d.items.map((it,ii)=>{const [n,r]=splitIt(it);return `<div class="ed-it"><input data-n="${di}.${ii}" value="${esc(n)}" list="exl2" placeholder="운동 이름"><input data-r="${di}.${ii}" value="${esc(r)}" placeholder="3×10"><div class="ops"><button type="button" data-up="${di}.${ii}" aria-label="위로">▲</button><button type="button" data-dn="${di}.${ii}" aria-label="아래로">▼</button><button type="button" data-rm="${di}.${ii}" aria-label="삭제" style="color:var(--bad)">✕</button></div></div>`}).join('')||'<div class="muted" style="padding:6px 0">아직 운동이 없어요</div>'}
+     ${d.items.map((it,ii)=>{const o=parseIt(it),k=di+'.'+ii,stp=(f,v,lab)=>`<span>${lab}</span><span class="stp"><button type="button" data-st="${k}|${f}|-1" aria-label="${lab} 줄이기">−</button><input type="number" inputmode="numeric" min="0" max="999" data-sv="${k}|${f}" value="${v||''}" placeholder="0"><button type="button" data-st="${k}|${f}|1" aria-label="${lab} 늘리기">＋</button></span>`;
+       return `<div class="ed-it"><div class="r1"><input data-n="${k}" value="${esc(o.n)}" list="exl2" placeholder="운동 이름"><div class="ops"><button type="button" data-up="${k}" aria-label="위로">▲</button><button type="button" data-dn="${k}" aria-label="아래로">▼</button><button type="button" data-rm="${k}" aria-label="삭제" style="color:var(--bad)">✕</button></div></div>
+       <div class="r2">${stp('s',o.s,'세트')}${stp('r',o.r,'횟수')}<select data-u="${k}" aria-label="단위">${['회','초','분'].map(u=>`<option ${o.u===u?'selected':''}>${u}</option>`).join('')}</select><input class="note" data-note="${k}" value="${esc(o.note)}" placeholder="메모 (예: 각 다리, 20kg)"></div></div>`}).join('')||'<div class="muted" style="padding:6px 0">아직 운동이 없어요</div>'}
      <div class="grid2" style="margin-top:6px"><button type="button" class="s" data-add="${di}">＋ 운동 추가</button><button type="button" class="s" data-pick="${di}">📖 사전에서 고르기</button></div></div>`).join('')}
     <datalist id="exl2">${EXDB.map(x=>`<option value="${esc(x.n)}">`).join('')}</datalist>
     <div class="row" style="margin-top:14px"><span style="flex:1"></span><button value="cancel">취소</button><button value="ok" class="p">저장</button></div></form>`;
    const all=s=>dl.querySelectorAll(s),ix=v=>v.split('.').map(Number);
    all('[data-f=name]').forEach(i=>i.oninput=()=>ED.name=i.value);
    all('[data-t]').forEach(i=>i.oninput=()=>ED.days[+i.dataset.t].title=i.value);
-   const setIt=(di,ii)=>{const n=dl.querySelector(`[data-n="${di}.${ii}"]`).value.trim(),r=dl.querySelector(`[data-r="${di}.${ii}"]`).value.trim();ED.days[di].items[ii]=(n+' '+r).trim()};
-   all('[data-n],[data-r]').forEach(i=>i.oninput=()=>{const[a,b]=ix(i.dataset.n||i.dataset.r);setIt(a,b)});
+   const g=(sel)=>dl.querySelector(sel);
+   const setIt=k=>{const[a,b]=ix(k);ED.days[a].items[b]=fmtIt({n:g(`[data-n="${k}"]`).value,s:+g(`[data-sv="${k}|s"]`).value||0,r:+g(`[data-sv="${k}|r"]`).value||0,u:g(`[data-u="${k}"]`).value,note:g(`[data-note="${k}"]`).value.trim()})||g(`[data-n="${k}"]`).value};
+   all('[data-n],[data-note]').forEach(i=>i.oninput=()=>setIt(i.dataset.n||i.dataset.note));
+   all('[data-u]').forEach(i=>i.onchange=()=>setIt(i.dataset.u));
+   all('[data-sv]').forEach(i=>i.oninput=()=>{if(+i.value<0)i.value=0;setIt(i.dataset.sv.split('|')[0])});
+   all('[data-st]').forEach(b=>b.onclick=()=>{const[k,f,dv]=b.dataset.st.split('|'),inp=g(`[data-sv="${k}|${f}"]`),u=g(`[data-u="${k}"]`).value,step=f==='r'&&u!=='회'?(u==='초'?5:1):1;inp.value=Math.max(0,(+inp.value||0)+step*(+dv));setIt(k)});
    all('[data-rm]').forEach(b=>b.onclick=()=>{const[a,c]=ix(b.dataset.rm);ED.days[a].items.splice(c,1);draw()});
    all('[data-up],[data-dn]').forEach(b=>b.onclick=()=>{const up=!!b.dataset.up,[a,c]=ix(b.dataset.up||b.dataset.dn),L=ED.days[a].items,j=up?c-1:c+1;if(j<0||j>=L.length)return;[L[c],L[j]]=[L[j],L[c]];draw()});
    all('[data-add]').forEach(b=>b.onclick=()=>{ED.days[+b.dataset.add].items.push('');draw();const L=dl.querySelectorAll(`[data-n^="${b.dataset.add}."]`);L[L.length-1].focus()});
@@ -961,14 +1095,21 @@ ACT.aiMeal=async()=>{const out=$('#mealPlan');out.innerHTML='<p class="muted">�
 
 /* ---- 더보기 (메모·맛집·교통·설정) ---- */
 V.more=()=>{
-  const m=sub.more||'메모';let h=chips('more',['메모','맛집','교통','설정']);
+  const m=sub.more||'메모';let h=chips('more',['메모','맛집','교통','WHAT','설정']);
   if(m==='메모'){
     const q=(sub.mq||'').toLowerCase();const ms=sub.ms||'최근 수정순';
     const L=DB.메모.filter(x=>!q||(x.제목+x.내용+x.태그).toLowerCase().includes(q)).sort(ms==='제목순'?((a,b)=>String(a.제목).localeCompare(String(b.제목),'ko')):((a,b)=>String(b.수정||'').localeCompare(String(a.수정||''))));
     const COL=['#fde68a','#bfdbfe','#fbcfe8','#bbf7d0'];
-    h+=`${dhero('memo','DISTRICT 04 · LIBRARY','메모 서재<br>온라인 메모장')}<input id="mq" placeholder="🔍 메모 검색" value="${esc(sub.mq||'')}">
+    const nd=LS.get('memoDraft',{});
+    h+=`${dhero('memo','DISTRICT 04 · LIBRARY','메모 서재<br>온라인 메모장')}
+    <details class="mnew" id="mnew" ${sub.mopen?'open':''}><summary>＋ 새 메모 쓰기<span class="ar">▾</span></summary><div class="in">
+     <input id="nmT" placeholder="제목" value="${esc(nd.t||'')}"><textarea id="nmC" class="auto" placeholder="내용을 입력하세요" style="margin-top:8px">${esc(nd.c||'')}</textarea>
+     <div class="row" style="margin-top:8px;flex-wrap:nowrap"><input id="nmG" placeholder="태그 (예: 업무, 주식)" value="${esc(nd.g||'')}" style="flex:1"><label style="margin:0;display:flex;gap:6px;align-items:center;color:var(--ink);white-space:nowrap"><input type="checkbox" id="nmP" style="width:auto"> 📌 고정</label></div>
+     <div class="row" style="margin-top:10px"><button class="x" data-act="nmClear">지우기</button><span style="flex:1"></span><button class="p" data-act="nmSave">저장</button></div></div></details>
+    <input id="mq" placeholder="🔍 메모 검색" value="${esc(sub.mq||'')}">
     <div class="row" style="justify-content:space-between;margin-top:14px"><b>저장된 노트 <span class="muted">${L.length}</span></b><div class="seg">${['제목순','최근 수정순'].map(x=>`<span class="${ms===x?'on':''}" data-act="msort" data-v="${x}">${x}</span>`).join('')}</div></div>
-    <div class="card">${L.length?L.map((x,i)=>`<div class="item" data-ed="메모|${x.id}"><div class="sq" style="background:${COL[i%4]}"></div><div class="b"><div class="t">${x.고정===true||x.고정==='TRUE'?'📌 ':''}${esc(x.제목)}</div><div class="d">${esc((x.내용||'').slice(0,120))}</div>${x.태그?String(x.태그).split(',').map(t=>`<span class="tag">${esc(t.trim())}</span>`).join(''):''}</div></div>`).join(''):'<div class="empty">메모가 없어요</div>'}</div><button class="fab" data-act="add" data-s="메모">＋</button>`;
+    <div class="card"><ul class="mtl">${L.length?L.map((x,i)=>`<li data-memo="${x.id}"><span class="sq" style="width:14px;height:14px;border-radius:4px;background:${COL[i%4]}"></span><span class="t">${x.고정===true||x.고정==='TRUE'||x.고정==='true'?'📌 ':''}${esc(x.제목)}</span><span class="muted" style="font-size:12px">${esc(String(x.수정||'').slice(5,10))}</span></li>`).join(''):'<li class="empty" style="cursor:default">메모가 없어요</li>'}</ul></div>
+    <p class="muted" style="text-align:center">메모를 <b>두 번 탭</b>(PC는 더블클릭)하면 전체 내용이 열려요</p>`;
   }else if(m==='맛집'){
     const q=(sub.fq||'').toLowerCase();const f=sub.mf||'전체';let L=DB.맛집.slice();
     if(f!=='전체')L=L.filter(x=>x.방문===f);
@@ -990,6 +1131,7 @@ V.more=()=>{
     <div class="chips">${['전체','가보고싶음','가봄'].map(x=>`<span class="chip ${f===x?'on':''}" data-act="chip" data-k="mf" data-v="${x}">${x}</span>`).join('')}</div>
     ${used.length?`<div class="chips"><span class="muted" style="align-self:center">테마</span>${['',...used].map(x=>`<span class="chip ${tf===x?'on':''}" data-act="chip" data-k="ft" data-v="${esc(x)}">${x?'★ '+esc(x):'전체'}</span>`).join('')}</div>`:''}
     <div class="pgrid">${L.length?L.map(x=>{const im=REST[[...String(x.이름)].reduce((a,c)=>a+c.charCodeAt(0),0)%3];return `<div class="pcard" data-act="detail" data-id="${x.id}"><img src="${im}" ${x.메뉴?`data-dish="${esc(String(x.메뉴).split(/[,\s]/)[0])}"`:''} alt=""><div class="pb"><div class="t">${esc(x.이름)}</div><div class="d">📍 ${esc(x.지역||'-')}${x.메뉴?'\n'+esc(x.메뉴):''}</div>${x.테마?String(x.테마).split(',').filter(t=>t.trim()).map(t=>`<span class="tag">★ ${esc(t.trim())}</span>`).join(''):''}<div class="st">${stars(x.평점)} <span>${esc(x.가격대||'')}</span></div></div></div>`}).join(''):'<div class="card empty" style="grid-column:1/-1">맛집을 추가해 보세요</div>'}</div><button class="fab" data-act="add" data-s="맛집">＋</button>`;
+  }else if(m==='WHAT'){h+=whatView();
   }else if(m==='교통'){
     const P=DB.장소;const opts=P.map(x=>`<option value="${esc(x.주소||x.이름)}">${esc(x.이름)}</option>`).join('');
     h+=`${dhero('transit','DISTRICT 05 · STATION','정류장<br>어디로 갈까요?')}<div class="card"><h2>🚇 길찾기</h2><label>출발</label><input id="from" list="pl" placeholder="장소명 또는 주소 (비우면 현재 위치)"><label>도착</label><input id="to" list="pl" placeholder="장소명 또는 주소"><datalist id="pl">${opts}</datalist>
@@ -1024,7 +1166,15 @@ V.more=()=>{
   }
   return h;
 };
-AFTER.more=()=>{const fr=$('#freg');if(fr)fr.onchange=()=>{LS.set('fregion',fr.value.trim());render()};const fq=$('#fq');if(fq){fq.oninput=()=>{sub.fq=fq.value;const p=fq.selectionStart;render();const n=$('#fq');n.focus();n.setSelectionRange(p,p)}}
+AFTER.more=()=>{
+  const wc=$('#whCam'),wg=$('#whGal');if(wc)wc.onchange=e=>whatRun(e.target.files[0]);if(wg)wg.onchange=e=>whatRun(e.target.files[0]);
+  const mn=$('#mnew');if(mn){mn.ontoggle=()=>{sub.mopen=mn.open?1:0;LS.set('sub',sub)};const c=$('#nmC');autoH(c);
+    const keep=()=>LS.set('memoDraft',{t:$('#nmT').value,c:c.value,g:$('#nmG').value});c.oninput=()=>{autoH(c);keep()};$('#nmT').oninput=keep;$('#nmG').oninput=keep}
+  let last={id:'',t:0};document.querySelectorAll('[data-memo]').forEach(li=>{
+    li.ondblclick=e=>{e.preventDefault();memoPopup(li.dataset.memo,0)};
+    li.onclick=()=>{const now=Date.now(),id=li.dataset.memo;if(last.id===id&&now-last.t<450){last={id:'',t:0};memoPopup(id,0);return}
+      last={id,t:now};li.classList.add('tap');setTimeout(()=>li.classList.remove('tap'),450)}});
+const fr=$('#freg');if(fr)fr.onchange=()=>{LS.set('fregion',fr.value.trim());render()};const fq=$('#fq');if(fq){fq.oninput=()=>{sub.fq=fq.value;const p=fq.selectionStart;render();const n=$('#fq');n.focus();n.setSelectionRange(p,p)}}
   const q=$('#mq');if(q){q.oninput=()=>{sub.mq=q.value;const p=q.selectionStart;render();const n=$('#mq');n.focus();n.setSelectionRange(p,p)}}
   const im=$('#impIn');if(im)im.onchange=async e=>{try{const d=JSON.parse(await e.target.files[0].text());if(!confirm('가져온 데이터를 추가할까요? (같은 id는 덮어씀)'))return;for(const k in SHEETS)(d[k]||[]).forEach(r=>put(k,r));toast('가져오기 완료');render()}catch(er){toast('파일을 읽지 못했어요')}}};
 function allThemes(){return [...new Set([...THM.map(t=>t.n),'가족모임','데이트','친구 모임','회식','혼밥','비오는 날','드라이브','건강식','가성비'])]}
@@ -1072,12 +1222,34 @@ ACT.install=async()=>{if(!window.__bip)return;window.__bip.prompt();try{await wi
 ACT.exp=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(DB,null,1)],{type:'application/json'}));a.download='나의하루_백업_'+today()+'.json';a.click()};
 
 ACT.msort=d=>{sub.ms=d.v;render()};
+const autoH=t=>{t.style.height='auto';t.style.height=(t.scrollHeight+4)+'px'};
+ACT.nmClear=()=>{LS.set('memoDraft',{});['#nmT','#nmC','#nmG'].forEach(x=>$(x).value='');$('#nmP').checked=false};
+ACT.nmSave=()=>{const t=$('#nmT').value.trim(),c=$('#nmC').value;if(!t&&!c.trim())return toast('제목이나 내용을 입력해 주세요');
+  put('메모',{제목:t||c.trim().split('\n')[0].slice(0,30),내용:c,태그:$('#nmG').value.trim(),고정:$('#nmP').checked});LS.set('memoDraft',{});sub.mopen=0;toast('메모 저장');render()};
+function memoPopup(id,edit){const x=DB.메모.find(m=>m.id===id);if(!x)return;const dl=$('#dlg');dl.classList.add('full');
+  const pin=x.고정===true||x.고정==='TRUE'||x.고정==='true';
+  dl.innerHTML=edit?`<div style="padding:18px"><h3>✏️ 메모 수정</h3><input id="mpT" value="${esc(x.제목)}" placeholder="제목"><textarea id="mpC" class="auto" style="margin-top:8px">${esc(x.내용||'')}</textarea>
+    <div class="row" style="margin-top:8px;flex-wrap:nowrap"><input id="mpG" value="${esc(x.태그||'')}" placeholder="태그" style="flex:1"><label style="margin:0;display:flex;gap:6px;align-items:center;color:var(--ink);white-space:nowrap"><input type="checkbox" id="mpP" style="width:auto" ${pin?'checked':''}> 📌 고정</label></div>
+    <div class="row bar"><button class="x" id="mpDel" style="color:var(--bad)">🗑 삭제</button><span style="flex:1"></span><button id="mpCancel">취소</button><button class="p" id="mpSave">저장</button></div></div>`
+   :`<div style="padding:18px"><h3 style="font-size:20px">${pin?'📌 ':''}${esc(x.제목)}</h3><div class="muted">${esc(x.수정||x.생성||'')}</div>${x.태그?`<div style="margin-top:6px">${String(x.태그).split(',').map(t=>`<span class="tag">${esc(t.trim())}</span>`).join('')}</div>`:''}
+    <div class="body">${esc(x.내용||'')||'<span class="muted">(내용 없음)</span>'}</div>
+    <div class="row bar"><button class="x" id="mpDel" style="color:var(--bad)">🗑 삭제</button><button id="mpCopy">복사</button><span style="flex:1"></span><button id="mpClose">닫기</button><button class="p" id="mpEdit">✏️ 수정</button></div></div>`;
+  if(!dl.open)dl.showModal();dl.onclose=()=>dl.classList.remove('full');
+  const q=s=>dl.querySelector(s),close=()=>{dl.returnValue='';dl.close()};
+  if(q('#mpC')){autoH(q('#mpC'));q('#mpC').oninput=e=>autoH(e.target)}
+  q('#mpDel').onclick=()=>{if(!confirm(`‘${x.제목}’ 메모를 삭제할까요?`))return;close();del('메모',x.id);toast('삭제했어요');render()};
+  if(q('#mpClose'))q('#mpClose').onclick=close;
+  if(q('#mpEdit'))q('#mpEdit').onclick=()=>memoPopup(id,1);
+  if(q('#mpCopy'))q('#mpCopy').onclick=async()=>{try{await navigator.clipboard.writeText((x.제목?x.제목+'\n':'')+(x.내용||''));toast('복사했어요')}catch(e){toast('복사하지 못했어요')}};
+  if(q('#mpCancel'))q('#mpCancel').onclick=()=>memoPopup(id,0);
+  if(q('#mpSave'))q('#mpSave').onclick=()=>{put('메모',Object.assign({},x,{제목:q('#mpT').value.trim()||'(제목 없음)',내용:q('#mpC').value,태그:q('#mpG').value.trim(),고정:q('#mpP').checked}));toast('저장했어요');render();memoPopup(id,0)}}
 ACT.detail=d=>{const x=DB.맛집.find(r=>r.id===d.id);if(!x)return;const dl=$('#dlg');
   const rows=[['업체명',x.이름],['지역',x.지역],['추천 메뉴',x.메뉴],['테마',x.테마],['평점',x.평점],['가격대',x.가격대],['방문',x.방문],['메모',x.메모]].filter(r=>r[1]);
-  dl.innerHTML=`<div class="dhead">${x.메뉴?dishImg(String(x.메뉴).split(/[,\s]/)[0]):phImg('store')}<h3>${esc(x.이름)}</h3></div><div style="padding:6px 18px 4px">${rows.map(([k,v])=>`<div class="drow"><span>${k}</span><b style="white-space:pre-wrap">${esc(v)}</b></div>`).join('')}</div><div class="row" style="padding:12px 18px 18px"><a class="btn" target="_blank" rel="noopener" href="https://map.naver.com/p/search/${encodeURIComponent((x.지역||'')+' '+x.이름)}">지도</a><span style="flex:1"></span><button id="dClose">닫기</button><button class="p" id="dEdit">수정</button></div>`;
+  dl.innerHTML=`<div class="dhead">${x.메뉴?dishImg(String(x.메뉴).split(/[,\s]/)[0]):phImg('store')}<h3>${esc(x.이름)}</h3></div><div style="padding:6px 18px 4px">${rows.map(([k,v])=>`<div class="drow"><span>${k}</span><b style="white-space:pre-wrap">${esc(v)}</b></div>`).join('')}</div><div class="row" style="padding:12px 18px 18px"><a class="btn" target="_blank" rel="noopener" href="https://map.naver.com/p/search/${encodeURIComponent((x.지역||'')+' '+x.이름)}">지도</a><button class="x" id="dDel" style="color:var(--bad)">🗑 삭제</button><span style="flex:1"></span><button id="dClose">닫기</button><button class="p" id="dEdit">수정</button></div>`;
   dl.showModal();fillImgs(dl);fillPhotos(dl);
   $('#dClose').onclick=()=>{dl.returnValue='';dl.close()};
   $('#dEdit').onclick=()=>{dl.returnValue='';dl.close();setTimeout(()=>form('맛집',x),0)};
+  $('#dDel').onclick=()=>{if(!confirm(`‘${x.이름}’을(를) 삭제할까요?`))return;dl.returnValue='';dl.close();del('맛집',x.id);toast('삭제했어요');render()};
 };
 ACT.tv=()=>{const dl=$('#dlg');const S=['테이스티로드','식신로드','수요미식회','생생정보통','VJ특공대','생활의달인','맛있는TV','올리브쇼'];
   dl.innerHTML=`<div style="padding:18px"><h3>TV맛집</h3><p class="muted" style="margin:0 0 6px">TV에 나온 맛집을 방송 프로그램별로 지도에서 검색해요.</p>${S.map(n=>`<a class="drow" target="_blank" rel="noopener" href="https://map.naver.com/p/search/${encodeURIComponent(n+' 맛집')}" style="text-decoration:none;color:var(--ink)"><span style="color:var(--ink)">${n}</span><b style="flex:0">›</b></a>`).join('')}<div class="row" style="margin-top:12px"><span style="flex:1"></span><button class="p" id="tvClose">닫기</button></div></div>`;
