@@ -88,6 +88,10 @@ function listAll_() {
 function upsert_(name, row) {
   var sh = sheet_(name);
   var h = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0];
+  // 앱에 새 항목(예: 일정 '구분', 맛집 '테마')이 생기면 시트 맨 오른쪽에 열을 자동 추가
+  Object.keys(row).forEach(function (k) {
+    if (k.charAt(0) !== '_' && h.indexOf(k) < 0) { sh.getRange(1, h.length + 1).setValue(k); h.push(k); }
+  });
   var now = Utilities.formatDate(new Date(), 'Asia/Seoul', 'yyyy-MM-dd HH:mm');
   if (!row.id) row.id = Utilities.getUuid().slice(0, 8);
   row['수정'] = now;

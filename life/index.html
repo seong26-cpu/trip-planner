@@ -109,6 +109,32 @@ nav.tabs button svg{width:24px;height:24px}
 .cell span,.cell small{display:block;font-size:12px;color:var(--sub)}.cell b{font-size:18px;color:var(--brand)}
 .pill{font-size:12px;color:var(--sub);border:1px solid var(--line);border-radius:99px;padding:3px 10px;background:var(--card);cursor:pointer;white-space:nowrap}#acct:empty{display:none}#acct.go{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:700}
 .hero{background:linear-gradient(135deg,var(--brand2),var(--card));border:1px solid var(--line);border-radius:var(--r);padding:16px;margin:10px 0}.hero b{font-size:16px}.hero p{margin:6px 0 12px;color:var(--sub);font-size:13px}
+.exgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0}
+.excard{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer;text-align:left;padding:0;display:block;color:var(--ink)}
+.excard img{display:block;width:100%;height:104px;object-fit:cover;background:#ddd}.excard div{padding:8px 10px 10px}.excard b{display:block;font-size:14px;line-height:1.3}.excard span{font-size:11px;color:var(--sub)}
+.flip{position:relative;width:100%;aspect-ratio:3/2;border-radius:14px;overflow:hidden;background:#ddd}
+.flip img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.flip img.b{animation:flip 2.4s steps(1) infinite}
+@keyframes flip{0%{opacity:0}50%{opacity:1}}
+.flip i{position:absolute;left:8px;bottom:8px;background:rgba(0,0,0,.6);color:#fff;font-style:normal;font-size:11px;padding:2px 8px;border-radius:99px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}.pair figure{margin:0;font-size:11px;color:var(--sub);text-align:center}.pair img{width:100%;border-radius:10px;display:block}
+ol.num{padding-left:0;list-style:none;counter-reset:n;margin:8px 0}ol.num li{counter-increment:n;position:relative;padding:8px 0 8px 36px;border-top:1px solid var(--line)}ol.num li:first-child{border-top:0}
+ol.num li::before{content:counter(n);position:absolute;left:0;top:8px;width:26px;height:26px;border-radius:50%;background:var(--brand);color:var(--onbrand);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center}
+.dimg{width:100%;height:170px;object-fit:cover;display:block;background:var(--brand2)}
+.rcp{display:flex;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line);cursor:pointer}.rcp:first-child{border-top:0}
+.rcp img{width:68px;height:68px;border-radius:12px;object-fit:cover;flex:0 0 auto;background:var(--brand2)}
+.ok{color:#15803d}.no{color:var(--bad)}
+.tile.my{background:var(--brand2);color:var(--brand)}.tile.add{color:var(--sub);border:0}
+.kind{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:6px 0}
+.kind label{margin:0;display:flex;align-items:center;justify-content:center;gap:6px;min-height:46px;border-radius:12px;border:2px solid var(--line);font-weight:700;color:var(--sub);cursor:pointer;font-size:15px}
+.kind input{display:none}.kind label.on.pub{border-color:#2563eb;background:#eff6ff;color:#1d4ed8}.kind label.on.pri{border-color:#db2777;background:#fdf2f8;color:#be185d}
+.tag.pub{background:#dbeafe;color:#1d4ed8}.tag.pri{background:#fce7f3;color:#be185d}.tag.unk{background:var(--line);color:var(--sub)}
+.sech{display:flex;align-items:center;gap:8px;margin:18px 0 4px;font-size:17px;font-weight:800}.sech .bar{width:6px;height:20px;border-radius:3px}
+.card.pub{border-left:5px solid #2563eb}.card.pri{border-left:5px solid #db2777}.card.unk{border-left:5px solid var(--line)}
+.addrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin:8px 0}.addrow button{min-height:48px;font-weight:700}
+.b-pub{background:#2563eb!important;border-color:#2563eb!important;color:#fff!important}.b-pri{background:#db2777!important;border-color:#db2777!important;color:#fff!important}
+.sum3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0}.sum3 div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}.sum3 b{display:block;font-size:20px}.sum3 span{font-size:12px;color:var(--sub)}
+@media (prefers-color-scheme:dark){.kind label.on.pub{background:#172554;color:#93c5fd}.kind label.on.pri{background:#3b0a24;color:#f9a8d4}.tag.pub{background:#172554;color:#93c5fd}.tag.pri{background:#3b0a24;color:#f9a8d4}}
 .gbtn{width:100%;background:#fff;color:#1f1f1f;border:1px solid #dadce0;font-weight:600;gap:10px}.gbtn svg{width:18px;height:18px}
 </style>
 </head>
@@ -118,11 +144,13 @@ nav.tabs button svg{width:24px;height:24px}
 <nav class="tabs" id="tabs"></nav>
 <dialog id="dlg"></dialog>
 
+<script src="ex.js"></script>
+<script src="recipes.js"></script>
 <script>
 /* ===================== 기본 ===================== */
 const TABS=[['home','M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z','홈'],['plan','M4 6h16v14H4zM4 10h16M8 3v4M16 3v4','일정'],['cook','M3 11h18a9 7 0 0 1-18 0zM8 7c0-2 2-2 2-4M13 7c0-2 2-2 2-4','요리'],['fit','M6 7v10M3 9v6M18 7v10M21 9v6M6 12h12','운동'],['more','M4 6h16M4 12h16M4 18h16','더보기']];
 const svgI=d=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
-const SHEETS={메모:['제목','내용','태그','고정'],일정:['종류','제목','날짜','시작','종료','장소','상대','메모','캘린더ID'],맛집:['이름','지역','메뉴','평점','가격대','방문','메모'],장소:['이름','주소','종류'],식재료:['이름','수량','보관','유통기한'],레시피:['이름','재료','조리법','칼로리','시간','출처'],운동:['날짜','종류','부위','세트시간','칼로리','메모'],식단:['날짜','끼니','음식','칼로리','메모']};
+const SHEETS={메모:['제목','내용','태그','고정'],일정:['구분','종류','제목','날짜','시작','종료','장소','상대','메모','캘린더ID'],맛집:['이름','지역','메뉴','테마','평점','가격대','방문','메모'],장소:['이름','주소','종류'],식재료:['이름','수량','보관','유통기한'],레시피:['이름','재료','조리법','칼로리','시간','출처'],운동:['날짜','종류','부위','세트시간','칼로리','메모'],식단:['날짜','끼니','음식','칼로리','메모']};
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
@@ -137,7 +165,9 @@ let DB=LS.get('db',{});for(const k in SHEETS)DB[k]=DB[k]||[];
 let Q=LS.get('queue',[]);
 let CFG=LS.get('cfg',{url:'',kcal:'',hasAI:false,sheetUrl:''});
 let CAL=LS.get('cal',[]);
-let tab=location.hash.slice(1)||'home', sub={};
+let tab=location.hash.slice(1)||'home', sub=LS.get('sub',{}), SCR={};
+let CK=LS.get('cook',{q:'',fridge:null,sel:[],busy:{}});CK.busy={};const saveCK=()=>LS.set('cook',CK);
+let THM=LS.get('themes',[]),THM_AT=LS.get('themesAt',0);
 let DEL=LS.get('del',{});
 const saveLocal=()=>{LS.set('db',DB);LS.set('queue',Q);LS.set('del',DEL);CLOUD.dirty()};
 
@@ -171,12 +201,13 @@ const CLOUD={auth:null,db:null,user:null,ready:false,failed:false,t:null,busy:fa
   },
   async logout(){if(this.auth&&confirm('로그아웃할까요? (이 기기 데이터는 그대로 남아요)')){await this.auth.signOut();render()}},
   ref(){return this.db.collection('users').doc(this.user.uid).collection('life').doc('state')},
-  cfgOut(){return {url:CFG.url||'',kcal:CFG.kcal||'',hasAI:!!CFG.hasAI,sheetUrl:CFG.sheetUrl||'',plan:LS.get('plan',null),at:CFG.at||0}},
+  cfgOut(){return {url:CFG.url||'',kcal:CFG.kcal||'',hasAI:!!CFG.hasAI,sheetUrl:CFG.sheetUrl||'',plan:LS.get('plan',null),at:CFG.at||0,themes:THM,themesAt:THM_AT}},
   async pull(){
     if(!this.user)return;this.busy=true;setSync('☁︎ 불러오는 중…');
     try{
       const snap=await this.ref().get();const r=snap.exists?snap.data():{};
       const rc=r.cfg||{};
+      if((rc.themesAt||0)>THM_AT){THM=rc.themes||[];THM_AT=rc.themesAt;LS.set('themes',THM);LS.set('themesAt',THM_AT)}else if(THM_AT>(rc.themesAt||0))await this.saveCfg(true);
       if(rc.url&&(!CFG.url||(rc.at||0)>(CFG.at||0))){
         const changed=rc.url!==CFG.url;
         Object.assign(CFG,{url:rc.url,kcal:rc.kcal||CFG.kcal,hasAI:!!rc.hasAI,sheetUrl:rc.sheetUrl||CFG.sheetUrl,at:rc.at||Date.now()});
@@ -277,27 +308,30 @@ function imgToB64(file,max=1024){return new Promise((ok,no)=>{const r=new FileRe
 /* ===================== 공통 폼 ===================== */
 const FIELD={
   메모:{제목:{},내용:{t:'area'},태그:{ph:'예: 업무, 주식'},고정:{t:'check',l:'홈에 고정'}},
-  일정:{종류:{t:'sel',o:['일정','약속']},제목:{},날짜:{t:'date'},시작:{t:'time'},종료:{t:'time'},장소:{},상대:{ph:'약속 상대'},메모:{t:'area'}},
-  맛집:{이름:{},지역:{ph:'예: 인천 송도'},메뉴:{ph:'추천 메뉴'},평점:{t:'sel',o:['','★','★★','★★★','★★★★','★★★★★']},가격대:{t:'sel',o:['','~1만','1~2만','2~4만','4만~']},방문:{t:'sel',o:['가보고싶음','가봄']},메모:{t:'area'}},
+  일정:{구분:{t:'kind'},제목:{},종류:{t:'sel',o:['일정','약속']},날짜:{t:'date'},시작:{t:'time'},종료:{t:'time'},장소:{},상대:{ph:'함께하는 사람'},메모:{t:'area'}},
+  맛집:{이름:{},지역:{ph:'예: 인천 송도'},메뉴:{ph:'추천 메뉴'},테마:{ph:'예: 데이트, 회식 (쉼표로 여러 개)',dl:'thl'},평점:{t:'sel',o:['','★','★★','★★★','★★★★','★★★★★']},가격대:{t:'sel',o:['','~1만','1~2만','2~4만','4만~']},방문:{t:'sel',o:['가보고싶음','가봄']},메모:{t:'area'}},
   장소:{이름:{ph:'예: 집, 회사'},주소:{ph:'도로명 주소 또는 장소명'},종류:{t:'sel',o:['자주','집','회사']}},
   식재료:{이름:{},수량:{},보관:{t:'sel',o:['냉장','냉동','실온']},유통기한:{t:'date'}},
   레시피:{이름:{},재료:{t:'area'},조리법:{t:'area'},칼로리:{ph:'1인분 kcal (추정)'},시간:{ph:'분'},출처:{t:'sel',o:['직접','AI 추천']}},
-  운동:{날짜:{t:'date'},종류:{ph:'예: 스쿼트, 걷기'},부위:{t:'sel',o:['전신','하체','가슴','등','어깨','팔','복근','유산소','스트레칭']},세트시간:{ph:'예: 3세트×12회 / 30분'},칼로리:{ph:'소모 kcal (선택)'},메모:{}},
+  운동:{날짜:{t:'date'},종류:{ph:'예: 스쿼트, 걷기',dl:'exl'},부위:{t:'sel',o:['전신','하체','가슴','등','어깨','팔','복근','유산소','스트레칭']},세트시간:{ph:'예: 3세트×12회 / 30분'},칼로리:{ph:'소모 kcal (선택)'},메모:{}},
   식단:{날짜:{t:'date'},끼니:{t:'sel',o:['아침','점심','저녁','간식']},음식:{},칼로리:{ph:'kcal'},메모:{}}
 };
 function form(sheet,row={},opt={}){
   const f=FIELD[sheet];const d=$('#dlg');
   let h=`<form method="dialog"><h3>${esc(opt.title||(row.id?sheet+' 수정':sheet+' 추가'))}</h3>`;
   for(const k in f){const c=f[k],v=row[k]??c.def??'';
+    if(c.t==='kind'){const kv=v||opt.kind||'사적';h+=`<label>구분</label><div class="kind"><label class="pub ${kv==='공적'?'on':''}"><input type="radio" name="${k}" value="공적" ${kv==='공적'?'checked':''}>💼 공적 일정</label><label class="pri ${kv==='사적'?'on':''}"><input type="radio" name="${k}" value="사적" ${kv==='사적'?'checked':''}>🏠 사적 일정</label></div>`;continue}
     if(c.t==='check'){h+=`<label style="display:flex;gap:8px;align-items:center;color:var(--ink)"><input type="checkbox" name="${k}" style="width:auto" ${v===true||v==='TRUE'||v==='true'?'checked':''}> ${c.l}</label>`;continue}
     h+=`<label>${k}</label>`;
     if(c.t==='area')h+=`<textarea name="${k}">${esc(v)}</textarea>`;
     else if(c.t==='sel')h+=`<select name="${k}">${c.o.map(o=>`<option ${o===String(v)?'selected':''}>${o}</option>`).join('')}</select>`;
-    else h+=`<input name="${k}" type="${c.t||'text'}" value="${esc(v)}" placeholder="${esc(c.ph||'')}">`;
+    else h+=`<input name="${k}" type="${c.t||'text'}" value="${esc(v)}" placeholder="${esc(c.ph||'')}" ${c.dl?`list="${c.dl}"`:''}>`;
   }
   if(sheet==='일정')h+=`<label style="display:flex;gap:8px;align-items:center;color:var(--ink)"><input type="checkbox" name="_cal" style="width:auto" ${CFG.url&&(!row.id||row['캘린더ID'])?'checked':''} ${CFG.url?'':'disabled'}> 구글 캘린더에도 등록 ${CFG.url?'':'(서버 연결 후 가능)'}</label>`;
   h+=`<div class="row" style="margin-top:14px">${row.id?'<button value="del" class="x" style="color:var(--bad)">삭제</button>':''}<span style="flex:1"></span><button value="cancel">취소</button><button value="ok" class="p">저장</button></div></form>`;
+  h+=`<datalist id="exl">${(window.EXDB||[]).map(x=>`<option value="${esc(x.n)}">`).join('')}</datalist><datalist id="thl">${allThemes().map(x=>`<option value="${esc(x)}">`).join('')}</datalist>`;
   d.innerHTML=h;d.showModal();
+  if(f.구분){const kd=d.querySelector('.kind'),ph={공적:'참석자·거래처',사적:'함께하는 사람'};const sync=()=>{const v=d.querySelector('[name=구분]:checked').value;kd.querySelectorAll('label').forEach(l=>l.classList.toggle('on',l.querySelector('input').checked));d.querySelector('h3').textContent=(row.id?'':'')+(v==='공적'?'💼 공적 일정':'🏠 사적 일정')+(row.id?' 수정':' 추가');d.querySelector('[name=상대]').placeholder=ph[v]};kd.onchange=sync;sync()}
   if(!row.id&&f.날짜&&!row.날짜)d.querySelector('[name=날짜]').value=today();
   d.onclose=async()=>{
     const fm=d.querySelector('form');if(!fm)return;
@@ -305,11 +339,11 @@ function form(sheet,row={},opt={}){
       if(sheet==='일정'&&row['캘린더ID']&&CFG.url)api('calDelete',{eventId:row['캘린더ID']}).catch(()=>{});
       del(sheet,row.id);toast('삭제했어요');render();return}
     if(d.returnValue!=='ok')return;
-    const o=Object.assign({},row);for(const k in f){const el=fm.elements[k];o[k]=f[k].t==='check'?el.checked:el.value.trim()}
+    const o=Object.assign({},row);for(const k in f){const el=fm.elements[k];o[k]=f[k].t==='check'?el.checked:f[k].t==='kind'?(fm.querySelector(`[name=${k}]:checked`)||{}).value||'사적':el.value.trim()}
     const first=Object.keys(f).find(k=>!f[k].t||f[k].t==='text');
     if(first&&!o[first]&&sheet!=='운동'){toast(first+'을(를) 입력해 주세요');return}
     if(sheet==='일정'&&fm.elements._cal.checked){
-      try{toast('캘린더 등록 중…');o['캘린더ID']=await api('calSave',{ev:{eventId:o['캘린더ID'],title:(o.종류==='약속'?'[약속] ':'')+o.제목+(o.상대?' - '+o.상대:''),date:o.날짜,start:o.시작,end:o.종료,location:o.장소,description:o.메모}});toast('구글 캘린더에 등록했어요')}
+      try{toast('캘린더 등록 중…');o['캘린더ID']=await api('calSave',{ev:{eventId:o['캘린더ID'],title:'['+o.구분+'] '+(o.종류==='약속'?'[약속] ':'')+o.제목+(o.상대?' - '+o.상대:''),date:o.날짜,start:o.시작,end:o.종료,location:o.장소,description:o.메모}});toast('구글 캘린더에 등록했어요')}
       catch(e){toast('캘린더 등록 실패: '+e.message+' (앱에는 저장됨)',4000)}
     }
     put(sheet,o);opt.after&&opt.after(o);render();
@@ -324,31 +358,34 @@ function render(){
   const tp=tab==='fit'?'fit':tab==='cook'?'cook':tab==='more'?({맛집:'food',메모:'memo'}[sub.more||'메모']||''):'';
   if(tp)document.documentElement.dataset.topic=tp;else document.documentElement.removeAttribute('data-topic');
   paintAcct();
+  LS.set('sub',sub);
   $('#app').innerHTML=V[tab]();
-  document.querySelectorAll('[data-act]').forEach(b=>b.onclick=e=>{e.stopPropagation();ACT[b.dataset.act](b.dataset)});
+  document.querySelectorAll('#app [data-act],header [data-act]').forEach(b=>b.onclick=e=>{e.stopPropagation();if(b.tagName==='A'&&b.getAttribute('href')==='#')e.preventDefault();ACT[b.dataset.act](b.dataset)});
   document.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>{const[s,id]=b.dataset.ed.split('|');form(s,DB[s].find(x=>x.id===id))});
   AFTER[tab]&&AFTER[tab]();
 }
-$('#tabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;tab=b.dataset.t;location.hash=tab;scrollTo(0,0);render()};
+$('#tabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;SCR[tab]=scrollY;tab=b.dataset.t;location.hash=tab;render();scrollTo(0,SCR[tab]||0)};
 $('#sync').onclick=()=>sync(true);
 const ACT={},AFTER={};
 const chips=(key,list)=>`<div class="chips">${list.map(x=>`<span class="chip ${ (sub[key]||list[0])===x?'on':''}" data-act="chip" data-k="${key}" data-v="${x}">${x}</span>`).join('')}</div>`;
-ACT.chip=d=>{sub[d.k]=d.v;render()};
-ACT.add=d=>form(d.s,d.pre?JSON.parse(d.pre):{});
+ACT.chip=d=>{const y=scrollY;sub[d.k]=d.v;render();scrollTo(0,Math.min(y,scrollY+0))};
+ACT.add=d=>form(d.s,d.pre?JSON.parse(d.pre):{},d.kind?{kind:d.kind}:{});
 
 /* ---- 홈 ---- */
 V.home=()=>{
   const t=today();
-  const ev=[...DB.일정.filter(x=>x.날짜===t).map(x=>({t:x.제목,s:x.시작,k:x.종류,id:x.id,cid:x['캘린더ID']})),
-    ...CAL.filter(x=>x.date===t&&!DB.일정.some(y=>y['캘린더ID']===x.eventId)).map(x=>({t:x.title,s:x.start,k:'캘린더'}))].sort((a,b)=>(a.s||'').localeCompare(b.s||''));
+  const ev=[...DB.일정.filter(x=>x.날짜===t).map(x=>({t:x.제목,s:x.시작,k:x.종류,g:kindOf(x),id:x.id,cid:x['캘린더ID']})),
+    ...calRows().filter(x=>x.날짜===t).map(x=>({t:x.제목,s:x.시작,k:'캘린더',g:kindOf(x)}))].sort((a,b)=>(a.s||'').localeCompare(b.s||''));
+  const nPub=ev.filter(x=>x.g==='공적').length,nPri=ev.filter(x=>x.g==='사적').length;
   const kc=DB.식단.filter(x=>x.날짜===t).reduce((a,x)=>a+num(x.칼로리),0);
   const burn=DB.운동.filter(x=>x.날짜===t).reduce((a,x)=>a+num(x.칼로리),0);
   const exp=DB.식재료.filter(x=>x.유통기한&&x.유통기한<=addDays(t,3)).sort((a,b)=>a.유통기한.localeCompare(b.유통기한));
   const pins=DB.메모.filter(x=>x.고정===true||x.고정==='TRUE'||x.고정==='true');
   const plan=LS.get('plan',null);const todayPlan=plan&&plan.days?plan.days.find(d=>d.day==='일월화수목금토'[new Date().getDay()]):null;
   return `${loginCard()}${CLOUD.user&&!CFG.url?`<div class="notice">☁︎ 로그인 완료 — 메모·일정·운동·맛집 등은 <b>모든 기기에서 자동 동기화</b>돼요. AI 사진 인식·구글 캘린더까지 쓰려면 <a href="#" data-act="go" data-t="more" data-s="설정">서버 주소를 한 번만 연결</a>하세요 (1분, 평생 1번).</div>`:''}
-  <div class="card"><h2>${dname(t)} 일정<span class="sp"></span><button class="s" data-act="add" data-s="일정">＋</button></h2>
-   ${ev.length?ev.map(x=>`<div class="item" ${x.id?`data-ed="일정|${x.id}"`:''}><div class="muted" style="width:46px">${x.s||'종일'}</div><div class="b"><div class="t">${esc(x.t)}</div></div><span class="tag ${x.k==='약속'?'w':''}">${x.k}</span></div>`).join(''):'<div class="empty">오늘 일정이 없어요</div>'}</div>
+  <div class="card"><h2>${dname(t)} 일정<span class="sp"></span><span class="tag pub">💼 ${nPub}</span><span class="tag pri">🏠 ${nPri}</span></h2>
+   ${ev.length?ev.map(x=>`<div class="item" ${x.id?`data-ed="일정|${x.id}"`:''}><div class="muted" style="width:46px">${x.s||'종일'}</div><div class="b"><div class="t">${esc(x.t)}</div></div>${kindTag(x.g)}${x.k==='약속'?'<span class="tag w">약속</span>':''}</div>`).join(''):'<div class="empty">오늘 일정이 없어요</div>'}
+   <div class="addrow"><button class="b-pub" data-act="add" data-s="일정" data-kind="공적">＋ 공적 일정</button><button class="b-pri" data-act="add" data-s="일정" data-kind="사적">＋ 사적 일정</button></div></div>
   <div class="grid2">
    <div class="card" data-act="go" data-t="fit"><div class="muted">오늘 섭취</div><div class="big">${kc.toLocaleString()}<small style="font-size:14px"> kcal</small></div><div class="muted">${CFG.kcal?'목표 '+CFG.kcal+' kcal':'목표 미설정'}</div></div>
    <div class="card" data-act="go" data-t="fit"><div class="muted">오늘 운동</div><div class="big">${DB.운동.filter(x=>x.날짜===t).length}<small style="font-size:14px"> 건</small></div><div class="muted">${burn?'소모 '+burn+' kcal':todayPlan?esc(todayPlan.title):'기록 없음'}</div></div>
@@ -362,34 +399,88 @@ V.home=()=>{
 ACT.go=d=>{tab=d.t;if(d.s)sub.more=d.s;location.hash=tab;render();scrollTo(0,0)};
 ACT.qm=()=>{const v=$('#qm').value.trim();if(!v)return;put('메모',{제목:v.slice(0,30),내용:v,태그:'빠른메모',고정:false});toast('메모 저장');render()};
 
-/* ---- 일정 ---- */
+/* ---- 일정 (공적 · 사적 분리) ---- */
+const KIND_RE=/^\s*\[(공적|사적)\]\s*/;
+function kindOf(x){if(x.구분==='공적'||x.구분==='사적')return x.구분;const m=String(x.제목||'').match(KIND_RE);return m?m[1]:'미분류'}
+function kindTag(g){return g==='공적'?'<span class="tag pub">💼 공적</span>':g==='사적'?'<span class="tag pri">🏠 사적</span>':'<span class="tag unk">미분류</span>'}
+function calRows(){return CAL.filter(x=>!DB.일정.some(y=>y['캘린더ID']===x.eventId)).map(x=>{const m=String(x.title||'').match(KIND_RE);return {제목:String(x.title||'').replace(KIND_RE,''),구분:m?m[1]:'',날짜:x.date,시작:x.start,장소:x.location,종류:'캘린더',_cal:1}})}
+function planList(rows,mode,t){
+  if(mode==='약속')rows=rows.filter(x=>x.종류==='약속');
+  rows=mode==='지난'?rows.filter(x=>x.날짜<t).sort((a,b)=>b.날짜.localeCompare(a.날짜)):rows.filter(x=>x.날짜>=t).sort((a,b)=>(a.날짜+(a.시작||'')).localeCompare(b.날짜+(b.시작||'')));
+  return rows;
+}
+function planCards(rows,t,cls){
+  const g={};rows.forEach(x=>(g[x.날짜]=g[x.날짜]||[]).push(x));
+  return Object.keys(g).slice(0,60).map(dt=>`<div class="card ${cls}"><h2>${dname(dt)}${dt===t?' <span class="tag">오늘</span>':''}</h2>${g[dt].map(x=>`<div class="item" ${x._cal?'':`data-ed="일정|${x.id}"`}><div class="muted" style="width:46px">${x.시작||'종일'}</div><div class="b"><div class="t">${esc(x.제목)}</div><div class="d">${esc([x.장소,x.상대&&(kindOf(x)==='공적'?'참석: ':'with ')+x.상대].filter(Boolean).join(' · '))}</div></div>${x.종류==='약속'?'<span class="tag w">약속</span>':''}${x._cal?'<span class="tag">캘린더</span>':x['캘린더ID']?'<span class="tag">☁︎</span>':''}</div>`).join('')}</div>`).join('');
+}
 V.plan=()=>{
-  const t=today(),mode=sub.plan||'다가오는';
-  let mine=DB.일정.slice();
-  if(mode==='약속')mine=mine.filter(x=>x.종류==='약속');
-  const cal=mode==='약속'?[]:CAL.filter(x=>!DB.일정.some(y=>y['캘린더ID']===x.eventId)).map(x=>({제목:x.title,날짜:x.date,시작:x.start,장소:x.location,종류:'캘린더',_cal:1}));
-  let all=[...mine,...cal];
-  all=mode==='지난'?all.filter(x=>x.날짜<t).sort((a,b)=>b.날짜.localeCompare(a.날짜)):all.filter(x=>x.날짜>=t).sort((a,b)=>(a.날짜+(a.시작||'')).localeCompare(b.날짜+(b.시작||'')));
-  const g={};all.forEach(x=>(g[x.날짜]=g[x.날짜]||[]).push(x));
-  return `${chips('plan',['다가오는','약속','지난'])}
-  ${Object.keys(g).length?Object.keys(g).slice(0,60).map(dt=>`<div class="card"><h2>${dname(dt)}${dt===t?' <span class="tag">오늘</span>':''}</h2>${g[dt].map(x=>`<div class="item" ${x._cal?'':`data-ed="일정|${x.id}"`}><div class="muted" style="width:46px">${x.시작||'종일'}</div><div class="b"><div class="t">${esc(x.제목)}</div><div class="d">${esc([x.장소,x.상대&&'with '+x.상대].filter(Boolean).join(' · '))}</div></div><span class="tag ${x.종류==='약속'?'w':''}">${x.종류}${x['캘린더ID']?' ☁︎':''}</span></div>`).join('')}</div>`).join(''):'<div class="card empty">일정이 없어요. ＋ 버튼으로 추가하세요.</div>'}
-  <p class="muted">☁︎ = 구글 캘린더에도 등록됨 · '캘린더' 표시는 구글 캘린더에서 가져온 일정</p>
-  <button class="fab" data-act="add" data-s="일정">＋</button>`;
+  const t=today(),mode=sub.plan||'다가오는',view=sub.pk||'전체';
+  const all=planList([...DB.일정,...calRows()],mode,t);
+  const by={공적:[],사적:[],미분류:[]};all.forEach(x=>by[kindOf(x)].push(x));
+  const wk=addDays(t,6),cnt=k=>DB.일정.concat(calRows()).filter(x=>kindOf(x)===k&&x.날짜>=t&&x.날짜<=wk).length;
+  const sec=(k,icon,col,cls)=>`<div class="sech"><span class="bar" style="background:${col}"></span>${icon} ${k} 일정 <span class="muted" style="font-weight:400">${by[k].length}건</span></div>${by[k].length?planCards(by[k],t,cls):`<div class="card empty ${cls}">${k} 일정이 없어요</div>`}`;
+  let body;
+  if(view==='공적')body=sec('공적','💼','#2563eb','pub');
+  else if(view==='사적')body=sec('사적','🏠','#db2777','pri');
+  else body=sec('공적','💼','#2563eb','pub')+sec('사적','🏠','#db2777','pri')+(by.미분류.length?`<div class="sech"><span class="bar" style="background:var(--line)"></span>미분류 <span class="muted" style="font-weight:400">눌러서 공적/사적 지정</span></div>`+planCards(by.미분류,t,'unk'):'');
+  return `<div class="seg" style="margin:4px 0 8px">${[['전체','전체'],['공적','💼 공적'],['사적','🏠 사적']].map(([k,l])=>`<span class="${view===k?'on':''}" style="flex:1;text-align:center;padding:9px 0;font-size:14px" data-act="chip" data-k="pk" data-v="${k}">${l}</span>`).join('')}</div>
+  <div class="sum3"><div><b style="color:#2563eb">${cnt('공적')}</b><span>이번 주 공적</span></div><div><b style="color:#db2777">${cnt('사적')}</b><span>이번 주 사적</span></div><div><b>${cnt('미분류')}</b><span>미분류</span></div></div>
+  ${chips('plan',['다가오는','약속','지난'])}
+  <div class="addrow">${view!=='사적'?`<button class="b-pub" data-act="add" data-s="일정" data-kind="공적">＋ 공적 일정</button>`:''}${view!=='공적'?`<button class="b-pri" data-act="add" data-s="일정" data-kind="사적">＋ 사적 일정</button>`:''}</div>
+  ${body}
+  <p class="muted">구글 캘린더에는 제목 앞에 [공적]/[사적]이 붙어 등록돼요. 캘린더에서 직접 만든 일정도 제목을 [공적]/[사적]으로 시작하면 자동 분류돼요.</p>`;
 };
 
 /* ---- 요리 ---- */
 const FOOD=['img/food-jeyuk.svg','img/food-stew.svg','img/food-rice.svg','img/food-egg.svg'];
 const REST=['img/rest-grill.svg','img/rest-noodle.svg','img/rest-sushi.svg'];
 const q10=q=>'https://www.10000recipe.com/recipe/list.html?q='+encodeURIComponent(q);
+const fb=n=>FOOD[[...String(n)].reduce((a,c)=>a+c.charCodeAt(0),0)%4];
+/* 요리 사진: 위키백과 대표 이미지(무료 공개 API) → 없으면 일러스트. 결과는 기기에 저장 */
+const DIMG=LS.get('dimg',{});
+async function wikiImg(name){
+  const key=String(name).trim();if(key in DIMG)return DIMG[key];
+  const api=q=>fetch('https://ko.wikipedia.org/w/api.php?action=query&format=json&origin=*&prop=pageimages&piprop=thumbnail&pithumbsize=480&redirects=1&'+q).then(r=>r.json());
+  let u='';
+  try{
+    let j=await api('titles='+encodeURIComponent(key));let pg=Object.values((j.query||{}).pages||{})[0]||{};u=(pg.thumbnail||{}).source||'';
+    if(!u){j=await api('generator=search&gsrlimit=1&gsrsearch='+encodeURIComponent(key));pg=Object.values((j.query||{}).pages||{})[0]||{};
+      const tt=String(pg.title||'');if(tt&&(key.includes(tt)||tt.includes(key)))u=(pg.thumbnail||{}).source||''}
+  }catch(e){return ''}
+  DIMG[key]=u;LS.set('dimg',DIMG);return u;
+}
+function fillImgs(root=document){root.querySelectorAll('img[data-dish]').forEach(async im=>{const u=await wikiImg(im.dataset.dish);if(u&&im.isConnected){im.src=u;im.title='사진: 위키백과'}})}
+const dishImg=(n,cls='')=>`<img ${cls?`class="${cls}"`:''} src="${fb(n)}" data-dish="${esc(n)}" alt="${esc(n)}" loading="lazy">`;
+const myIng=()=>DB.식재료.map(x=>String(x.이름).trim()).filter(Boolean);
+const hasIng=(list,w)=>list.some(x=>x.includes(w)||w.includes(x));
+function matchRecipes(have){
+  return RECIPES.map(r=>{const okM=r.main.filter(w=>hasIng(have,w)),okO=r.opt.filter(w=>hasIng(have,w));
+    return {r,okM,okO,miss:r.main.filter(w=>!hasIng(have,w)),score:okM.length*3+okO.length-(r.main.length-okM.length)*4}})
+   .filter(x=>x.okM.length||x.okO.length>=2).sort((a,b)=>b.score-a.score);
+}
 function cookHome(){
-  const cats=[['밑반찬','#ffe9d6','#9a3412'],['메인반찬','#fee2e2','#991b1b'],['국/탕','#fef3c7','#854d0e'],['찌개','#ffedd5','#9a3412'],['면/만두','#fef9c3','#713f12'],['밥/죽','#ecfccb','#3f6212'],['간식','#fce7f3','#9d174d'],['디저트','#e0e7ff','#3730a3']];
-  const best=[['제육볶음','메인반찬'],['두부찌개','찌개'],['김치볶음밥','밥/죽'],['계란말이','밑반찬']];
-  return `<div class="row" style="flex-wrap:nowrap"><input id="rq" placeholder="요리 이름이나 재료를 검색해요" style="flex:1"><button class="p" data-act="rsearch">검색</button></div>
-  <div class="chips" style="margin-top:8px">${best.map(b=>`<a class="chip" target="_blank" rel="noopener" href="${q10(b[0])}"># ${b[0]}</a>`).join('')}</div>
-  <div class="card" style="padding:0;overflow:hidden"><img class="banner" style="border-radius:0;margin:0" src="img/food-banner.svg" alt=""><div style="padding:12px 14px"><span class="tag">오늘의 추천</span><div style="font-weight:700;margin-top:4px">인기 요리 모아보기</div></div></div>
-  <h3 style="margin:16px 0 4px">레시피 분류</h3><div class="cats">${cats.map(c=>`<a target="_blank" rel="noopener" href="${q10(c[0])}"><i style="background:${c[1]};color:${c[2]}">${c[0].charAt(0)}</i>${c[0]}</a>`).join('')}</div>
-  <h3 style="margin:16px 0 4px">베스트 레시피 <span class="muted" style="font-weight:400">샘플 · 누르면 검색</span></h3>
-  <div class="card">${best.map((b,i)=>`<a class="item" target="_blank" rel="noopener" href="${q10(b[0])}" style="text-decoration:none;color:inherit;align-items:center"><div class="rk">${i+1}</div><img class="th" src="${FOOD[i]}" alt=""><div class="b"><div class="t">${b[0]}</div><span class="tag">${b[1]}</span></div></a>`).join('')}</div>`;
+  const cats=[['밑반찬','#ffe9d6','#9a3412'],['메인반찬','#fee2e2','#991b1b'],['국/탕','#fef3c7','#854d0e'],['찌개','#ffedd5','#9a3412'],['면/만두','#fef9c3','#713f12'],['밥/죽','#ecfccb','#3f6212'],['간식','#fce7f3','#9d174d'],['샐러드','#e0e7ff','#3730a3']];
+  const q=(CK.q||'').trim(),cat=sub.ccat||'';
+  let res=[];
+  if(q||cat){res=RECIPES.filter(r=>(!cat||r.c===cat)&&(!q||(r.n+r.main.join()+r.opt.join()).includes(q))).map(r=>({n:r.n,sub:r.c+' · '+r.min+'분',k:'b|'+r.n}));
+    if(q)DB.레시피.filter(x=>(x.이름+x.재료).includes(q)).forEach(x=>res.push({n:x.이름,sub:'내 레시피 · '+(x.출처||''),k:'s|'+x.id}))}
+  return `<div class="row" style="flex-wrap:nowrap"><input id="rq" placeholder="요리 이름이나 재료로 검색 (예: 계란)" value="${esc(CK.q||'')}" style="flex:1"><button class="p" data-act="rsearch">검색</button></div>
+  <div class="chips" style="margin-top:8px">${['계란','두부','김치','돼지고기','감자'].map(b=>`<span class="chip ${q===b?'on':''}" data-act="rq" data-v="${b}"># ${b}</span>`).join('')}</div>
+  ${q||cat?`<div class="card"><h2>검색 결과 ${res.length}개<span class="sp"></span><button class="x" data-act="rclear">✕ 지우기</button></h2>
+   ${res.length?res.map(x=>`<div class="rcp" data-act="recipe" data-k="${esc(x.k)}">${dishImg(x.n)}<div class="b"><div class="t">${esc(x.n)}</div><div class="muted">${esc(x.sub)}</div></div><span class="muted">›</span></div>`).join(''):'<div class="empty">앱 안에서 찾지 못했어요</div>'}
+   ${q?`<a class="btn" style="width:100%;margin-top:8px" target="_blank" rel="noopener" href="${q10(q)}">📸 만개의레시피에서 '${esc(q)}' 사진 레시피 보기</a>`:''}</div>`:''}
+  <h3 style="margin:16px 0 4px">레시피 분류</h3><div class="cats">${cats.map(c=>`<a href="#" data-act="ccat" data-v="${c[0]}"><i style="background:${c[1]};color:${c[2]};${cat===c[0]?'outline:3px solid var(--brand)':''}">${c[0].charAt(0)}</i>${c[0]}</a>`).join('')}</div>
+  <h3 style="margin:16px 0 4px">기본 가정식 ${RECIPES.length}가지 <span class="muted" style="font-weight:400">누르면 사진·만드는 법</span></h3>
+  <div class="card">${RECIPES.slice(0,8).map((r,i)=>`<div class="rcp" data-act="recipe" data-k="b|${esc(r.n)}"><div class="rk">${i+1}</div>${dishImg(r.n)}<div class="b"><div class="t">${esc(r.n)}</div><span class="tag">${r.c}</span> <span class="muted">${r.min}분</span></div></div>`).join('')}
+   <button class="s" data-act="ccat" data-v="__all" style="width:100%;margin-top:8px">전체 보기</button></div>`;
+}
+function dishCard(d,i,src){return `<div class="rcp" data-act="recipe" data-k="${src}|${i}">${dishImg(d.name)}<div class="b"><div class="t">${esc(d.name)} ${d.lowcal?'<span class="tag">저칼로리</span>':''}</div><div class="muted">${esc(d.why||'')}</div><div class="muted">⏱ ${esc(d.minutes||'?')}분 · 약 ${esc(d.kcal||'?')}kcal(추정)${d.missing&&d.missing.length?' · <span class="no">+'+d.missing.length+'개 필요</span>':''}</div></div><span class="muted">›</span></div>`}
+function aiResult(r,src){
+  if(!r)return '';if(r.raw)return `<div class="notice">AI 응답을 해석하지 못했어요. 다시 시도해 주세요.</div>`;
+  const I=r.ingredients||[],D=r.dishes||[];
+  return `${src==='scan'?`<h3 style="margin:14px 0 6px">찾은 재료 ${I.length}개</h3><div>${I.map(x=>`<span class="tag ${x.confidence==='low'?'w':''}">${esc(x.name)}${x.confidence==='low'?'?':''}</span>`).join(' ')}</div>${I.length?`<button class="s" data-act="saveIng" style="margin-top:8px">＋ 내 냉장고에 저장</button>`:''}`:''}
+  <h3 style="margin:14px 0 6px">🤖 AI 추천 요리 ${D.length}개 <span class="muted" style="font-weight:400">누르면 자세히</span></h3>${D.map((d,i)=>dishCard(d,i,src)).join('')}
+  <p class="muted">${r._at?'추천 시각 '+esc(r._at)+' · ':''}다른 메뉴에 다녀와도 결과가 유지돼요.</p>`;
 }
 V.cook=()=>{
   const m=sub.cook||'추천';
@@ -398,46 +489,81 @@ V.cook=()=>{
   else if(m==='사진으로 찾기'){
     const r=LS.get('lastScan',null);
     h+=`<div class="card"><h2>📷 재료 사진 → 요리 추천</h2>
-    <p class="muted">냉장고 안이나 재료를 찍으면 AI가 재료를 알아보고, 만들 수 있는 요리를 알려줘요.</p>
+    <p class="muted">냉장고 안이나 재료를 찍으면 AI가 재료를 알아보고, 만들 수 있는 요리와 단계별 조리법·사진을 보여줘요.</p>
     <div class="grid2"><label class="btn p" style="margin:0">📷 촬영<input type="file" accept="image/*" capture="environment" id="camIn" class="hide"></label><label class="btn" style="margin:0">🖼 앨범<input type="file" accept="image/*" id="galIn" class="hide"></label></div>
     <label>원하는 조건 (선택)</label><input id="cookCond" placeholder="예: 저칼로리, 15분 이내, 1인분" value="${esc(LS.get('cookCond',''))}">
-    <div id="scanOut">${r?scanHtml(r):''}</div></div>
-    <p class="muted">※ AI 인식은 틀릴 수 있어요. 칼로리는 '추정치'입니다. 알레르기 재료는 직접 확인하세요.</p>`;
+    <div id="scanOut">${CK.busy.scan?`${CK.scanImg?`<img class="thumb" src="${CK.scanImg}">`:''}<p class="muted">🔍 AI가 사진을 보고 있어요… (10~30초) 다른 메뉴에 다녀와도 결과는 여기 남아요.</p>`:r?(r._img?`<img class="thumb" src="${r._img}">`:'')+aiResult(r,'scan')+`<button class="x" data-act="clrScan" style="margin-top:6px">결과 지우기</button>`:''}</div></div>
+    <p class="muted">※ AI 인식은 틀릴 수 있어요. 칼로리는 '추정치'입니다. 알레르기 재료는 직접 확인하세요. 요리 사진은 위키백과에서 자동으로 찾아요(없으면 일러스트).</p>`;
   }else if(m==='내 냉장고'){
     const L=DB.식재료.slice().sort((a,b)=>(a.유통기한||'9').localeCompare(b.유통기한||'9'));
-    h+=`<div class="card"><h2>내 식재료 <span class="sp"></span><button class="s" data-act="add" data-s="식재료">＋</button></h2>
-    ${L.length?L.map(x=>`<div class="item" data-ed="식재료|${x.id}"><div class="b"><div class="t">${esc(x.이름)} <span class="muted">${esc(x.수량||'')}</span></div><div class="d">${esc(x.보관||'')}${x.유통기한?' · ~'+x.유통기한:''}</div></div>${x.유통기한&&x.유통기한<=addDays(today(),3)?'<span class="tag w">임박</span>':''}</div>`).join(''):'<div class="empty">등록된 재료가 없어요. 사진 인식 결과에서 바로 저장할 수도 있어요.</div>'}
-    ${L.length?`<button class="p" data-act="fridgeAI" style="width:100%;margin-top:10px">🤖 이 재료로 만들 요리 추천</button>`:''}</div><div id="scanOut"></div>`;
+    const have=myIng(),quick=COMMON_ING.filter(x=>!hasIng(have,x)),mt=matchRecipes(have);
+    h+=`<div class="card"><h2>🧊 내 냉장고 <span class="muted">${L.length}개</span><span class="sp"></span><button class="s" data-act="add" data-s="식재료">＋ 직접</button></h2>
+    ${L.length?L.map(x=>`<div class="item" data-ed="식재료|${x.id}"><div class="b"><div class="t">${esc(x.이름)} <span class="muted">${esc(x.수량||'')}</span></div><div class="d">${esc(x.보관||'')}${x.유통기한?' · ~'+x.유통기한:''}</div></div>${x.유통기한&&x.유통기한<=addDays(today(),3)?'<span class="tag w">임박</span>':''}</div>`).join(''):'<div class="empty">아래 버튼을 눌러 재료를 한 번에 담아 보세요</div>'}
+    <label>자주 쓰는 재료 — 누르면 바로 추가</label><div style="display:flex;flex-wrap:wrap;gap:6px">${quick.map(x=>`<span class="chip" data-act="qing" data-v="${x}">＋ ${x}</span>`).join('')}</div></div>
+    <div class="card"><h2>🍳 지금 바로 만들 수 있는 요리 <span class="muted">${mt.length}개</span></h2><p class="muted" style="margin:0 0 4px">AI 없이 앱에 들어 있는 기본 레시피와 내 재료를 비교했어요.</p>
+    ${mt.length?mt.slice(0,10).map(x=>`<div class="rcp" data-act="recipe" data-k="b|${esc(x.r.n)}">${dishImg(x.r.n)}<div class="b"><div class="t">${esc(x.r.n)} ${x.miss.length?'':'<span class="tag">재료 충분</span>'}</div><div class="muted"><span class="ok">있음: ${esc([...x.okM,...x.okO].join(', '))}</span>${x.miss.length?` · <span class="no">필요: ${esc(x.miss.join(', '))}</span>`:''}</div></div><span class="muted">›</span></div>`).join(''):'<div class="empty">재료를 추가하면 만들 수 있는 요리가 여기에 나와요</div>'}</div>
+    <div class="card"><h2>🤖 AI 맞춤 추천</h2>${L.length?`<p class="muted" style="margin:0 0 8px">유통기한이 가까운 재료를 우선 쓰는 요리를 단계별 조리법과 함께 추천해요.</p><button class="p" data-act="fridgeAI" style="width:100%" ${CK.busy.fridge?'disabled':''}>${CK.busy.fridge?'🤖 추천 만드는 중… (다른 메뉴 다녀와도 돼요)':'🤖 이 재료로 만들 요리 추천'}</button>`:'<div class="empty">재료를 먼저 담아 주세요</div>'}
+    <div id="fridgeOut">${CK.fridge?aiResult(CK.fridge,'fridge')+`<button class="x" data-act="clrFridge">결과 지우기</button>`:''}</div></div>`;
   }else{
     const L=DB.레시피.slice().reverse();
     h+=`<div class="card"><h2>저장한 레시피<span class="sp"></span><button class="s" data-act="add" data-s="레시피">＋</button></h2>
-    ${L.length?L.map((x,i)=>`<div class="item" data-ed="레시피|${x.id}"><img class="th" src="${FOOD[i%4]}" alt=""><div class="b"><div class="t">${esc(x.이름)}</div><div class="d">${esc([x.시간&&x.시간+'분',x.칼로리&&x.칼로리+' kcal(추정)',x.출처].filter(Boolean).join(' · '))}</div></div></div>`).join(''):'<div class="empty">아직 레시피가 없어요</div>'}</div>`;
+    ${L.length?L.map(x=>`<div class="rcp" data-act="recipe" data-k="s|${x.id}">${dishImg(x.이름)}<div class="b"><div class="t">${esc(x.이름)}</div><div class="muted">${esc([x.시간&&x.시간+'분',x.칼로리&&x.칼로리+' kcal(추정)',x.출처].filter(Boolean).join(' · '))}</div></div><span class="muted">›</span></div>`).join(''):'<div class="empty">아직 레시피가 없어요</div>'}</div>`;
   }
   return h;
 };
-const RECIPE_JSON=`{"ingredients":[{"name":"재료명(한국어)","amount":"보이는 양 추정","confidence":"high|mid|low"}],"dishes":[{"name":"요리명","why":"추천 이유 한 줄","use":["사용 재료"],"missing":["추가로 필요한 재료"],"steps":["1단계","2단계"],"minutes":15,"kcal":350,"lowcal":true}]}`;
+const RECIPE_JSON=`{"ingredients":[{"name":"재료명(한국어)","amount":"보이는 양 추정","confidence":"high|mid|low"}],"dishes":[{"name":"요리명(정확한 한국 요리 이름)","why":"추천 이유 한 줄","use":["사용 재료"],"missing":["추가로 필요한 재료"],"need":[{"name":"재료","amount":"2인분 기준 분량"}],"steps":["1단계: 불 세기·시간 포함 구체적으로","..."],"tip":"맛있게 만드는 팁 한 줄","minutes":15,"kcal":350,"lowcal":true}]}`;
+const RULE='각 요리의 steps는 5~8단계로, 손질→조리→마무리 순서와 불 세기·시간을 구체적으로 적어. need에는 양념 포함 재료와 분량을 적어.';
+const stamp=()=>new Date().toTimeString().slice(0,5);
 AFTER.cook=()=>{
-  const go=async f=>{if(!f)return;const out=$('#scanOut');const cond=$('#cookCond').value.trim();LS.set('cookCond',cond);
-    try{const im=await imgToB64(f);out.innerHTML=`<img class="thumb" src="${im.url}"><p class="muted">🔍 AI가 사진을 보고 있어요… (10~30초)</p>`;
-      const r=await ai(`너는 요리 도우미야. 이 사진에 보이는 식재료를 찾아내고, 그 재료로 만들 수 있는 한국 가정식 요리 3~5개를 추천해. 사진에서 확실하지 않은 재료는 confidence를 low로 표시해. 조건: ${cond||'없음'}. kcal는 1인분 대략 추정치. 반드시 다음 JSON 형식으로만 답해: ${RECIPE_JSON}`,im.b64,'image/jpeg');
-      r._img=im.url;LS.set('lastScan',r);out.innerHTML=`<img class="thumb" src="${im.url}">`+scanHtml(r);bindScan();
-    }catch(e){out.innerHTML=`<div class="notice">${esc(e.message)}</div>`}};
-  const c=$('#camIn'),g=$('#galIn');if(c)c.onchange=e=>go(e.target.files[0]);if(g)g.onchange=e=>go(e.target.files[0]);bindScan();
+  const go=async f=>{if(!f||CK.busy.scan)return;const cond=($('#cookCond')||{value:''}).value.trim();LS.set('cookCond',cond);
+    try{const im=await imgToB64(f);CK.busy.scan=1;CK.scanImg=im.url;if(tab==='cook')render();
+      const r=await ai(`너는 요리 도우미야. 이 사진에 보이는 식재료를 찾아내고, 그 재료로 만들 수 있는 한국 가정식 요리 3~5개를 추천해. 사진에서 확실하지 않은 재료는 confidence를 low로 표시해. 조건: ${cond||'없음'}. kcal는 1인분 대략 추정치. ${RULE} 반드시 다음 JSON 형식으로만 답해: ${RECIPE_JSON}`,im.b64,'image/jpeg');
+      r._img=im.url;r._at=stamp();LS.set('lastScan',r);toast('📷 사진 분석 완료!')}
+    catch(e){toast(e.message,4000)}
+    CK.busy.scan=0;CK.scanImg='';if(tab==='cook')render()};
+  const c=$('#camIn'),g=$('#galIn');if(c)c.onchange=e=>go(e.target.files[0]);if(g)g.onchange=e=>go(e.target.files[0]);
+  const cc=$('#cookCond');if(cc)cc.oninput=()=>LS.set('cookCond',cc.value);
+  const rq=$('#rq');if(rq){rq.oninput=()=>{CK.q=rq.value;saveCK()};rq.onkeydown=e=>{if(e.key==='Enter')ACT.rsearch()}}
+  fillImgs();
 };
-function scanHtml(r){
-  const I=r.ingredients||[],D=r.dishes||[];
-  if(r.raw)return `<div class="notice">AI 응답을 해석하지 못했어요. 다시 시도해 주세요.</div>`;
-  return `<h3 style="margin:14px 0 6px">찾은 재료 ${I.length}개</h3><div>${I.map(x=>`<span class="tag ${x.confidence==='low'?'w':''}">${esc(x.name)}${x.confidence==='low'?'?':''}</span>`).join(' ')}</div>
-  ${I.length?`<button class="s" data-act="saveIng" style="margin-top:8px">＋ 내 냉장고에 저장</button>`:''}
-  <h3 style="margin:14px 0 6px">추천 요리</h3>${D.map((d,i)=>`<div class="item"><div class="b"><div class="t">${esc(d.name)} ${d.lowcal?'<span class="tag">저칼로리</span>':''}</div><div class="d">${esc(d.why||'')}\n⏱ ${esc(d.minutes||'?')}분 · 약 ${esc(d.kcal||'?')} kcal(추정)${d.missing&&d.missing.length?'\n필요: '+esc(d.missing.join(', ')):''}</div><details><summary class="muted">만드는 법</summary><ol>${(d.steps||[]).map(s=>`<li>${esc(s)}</li>`).join('')}</ol></details></div><button class="s" data-act="saveRec" data-i="${i}">저장</button></div>`).join('')}`;
-}
-function bindScan(){document.querySelectorAll('#scanOut [data-act]').forEach(b=>b.onclick=()=>ACT[b.dataset.act](b.dataset))}
+ACT.rsearch=()=>{const v=$('#rq').value.trim();CK.q=v;saveCK();if(!v)return toast('검색어를 입력해 주세요');render()};
+ACT.rq=d=>{CK.q=CK.q===d.v?'':d.v;saveCK();render()};
+ACT.rclear=()=>{CK.q='';sub.ccat='';saveCK();render()};
+ACT.ccat=d=>{if(d.v==='__all')return ACT.showAll();sub.ccat=sub.ccat===d.v?'':d.v;render()};
+ACT.showAll=()=>{const dl=$('#dlg');dl.innerHTML=`<div style="padding:18px"><h3>기본 가정식 ${RECIPES.length}가지</h3>${RECIPES.map(r=>`<div class="rcp" data-k="b|${esc(r.n)}">${dishImg(r.n)}<div class="b"><div class="t">${esc(r.n)}</div><span class="tag">${r.c}</span> <span class="muted">${r.min}분 · 주재료 ${esc(r.main.join(', '))}</span></div></div>`).join('')}<div class="row" style="margin-top:12px"><span style="flex:1"></span><button class="p" id="aClose">닫기</button></div></div>`;
+  dl.showModal();fillImgs(dl);$('#aClose').onclick=()=>dl.close();dl.querySelectorAll('.rcp').forEach(b=>b.onclick=()=>{dl.close();setTimeout(()=>ACT.recipe({k:b.dataset.k}),0)})};
+ACT.qing=d=>{put('식재료',{이름:d.v,수량:'',보관:'냉장',유통기한:''});toast(d.v+' 추가');const y=scrollY;render();scrollTo(0,y)};
+ACT.clrScan=()=>{LS.set('lastScan',null);render()};
+ACT.clrFridge=()=>{CK.fridge=null;saveCK();render()};
+/* 레시피 상세 (사진 · 재료 있음/없음 · 단계별 조리법) */
+ACT.recipe=d=>{
+  const [src,key]=String(d.k).split('|');const have=myIng();let o;
+  if(src==='b'){const r=RECIPES.find(x=>x.n===key);if(!r)return;o={name:r.n,min:r.min,cat:r.c,need:[...r.main.map(n=>({name:n})),...r.opt.map(n=>({name:n,opt:1}))],sea:r.sea,steps:r.st,from:'기본 가정식 예시(2인분 기준) · 간은 취향껏'}}
+  else if(src==='s'){const x=DB.레시피.find(y=>y.id===key);if(!x)return;o={name:x.이름,min:x.시간,kcal:x.칼로리,need:String(x.재료||'').split(/[,\n]/).map(s=>s.trim()).filter(Boolean).map(n=>({name:n})),steps:String(x.조리법||'').split('\n').map(s=>s.replace(/^\d+[.)]\s*/,'').trim()).filter(Boolean),from:'내 레시피 · '+(x.출처||''),id:x.id}}
+  else{const r=src==='scan'?LS.get('lastScan',{}):CK.fridge||{};const x=(r.dishes||[])[+key];if(!x)return;
+    o={name:x.name,min:x.minutes,kcal:x.kcal,need:(x.need&&x.need.length?x.need:[...(x.use||[]),...(x.missing||[])].map(n=>({name:n}))),steps:x.steps||[],tip:x.tip,from:'AI 추천 (칼로리·분량은 추정)',ai:{src,i:+key}}}
+  const rows=o.need.map(n=>{const ok=hasIng(have,String(n.name).replace(/\s*\(.*\)/,''));return `<div class="drow"><span class="${ok?'ok':n.opt?'':'no'}" style="flex:0 0 22px">${ok?'✓':n.opt?'·':'✕'}</span><b style="${n.opt&&!ok?'font-weight:400;color:var(--sub)':''}">${esc(n.name)}${n.opt?' <small class="muted">(선택)</small>':''}</b><span style="flex:0 0 auto;text-align:right">${esc(n.amount||'')}</span></div>`}).join('');
+  const dl=$('#dlg');
+  dl.innerHTML=`${dishImg(o.name,'dimg')}<div style="padding:14px 18px 18px"><h3 style="font-size:20px">${esc(o.name)}</h3>
+   <div class="row" style="margin:4px 0 8px">${o.cat?`<span class="tag">${esc(o.cat)}</span>`:''}${o.min?`<span class="tag">⏱ ${esc(o.min)}분</span>`:''}${o.kcal?`<span class="tag w">약 ${esc(o.kcal)}kcal(추정)</span>`:''}</div>
+   <b>재료</b> <span class="muted">✓ 내 냉장고에 있음 · ✕ 필요</span>${rows||'<div class="muted">재료 정보 없음</div>'}
+   ${o.sea?`<div class="drow"><span>양념</span><b style="font-weight:500">${esc(o.sea)}</b></div>`:''}
+   <h3 style="margin:16px 0 0">만드는 법</h3><ol class="num">${o.steps.map(t=>`<li>${esc(t)}</li>`).join('')||'<li>조리법 정보 없음</li>'}</ol>
+   ${o.tip?`<div class="notice">💡 ${esc(o.tip)}</div>`:''}
+   <p class="muted">${esc(o.from)} · 사진: 위키백과(없으면 일러스트)</p>
+   <div class="grid2"><a class="btn" target="_blank" rel="noopener" href="${q10(o.name)}">📸 사진 레시피</a><a class="btn" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=${encodeURIComponent(o.name+' 레시피')}">▶ 영상 보기</a></div>
+   <div class="row" style="margin-top:10px">${o.id?'':`<button id="rSave">레시피 저장</button>`}<button id="rShop">부족 재료 → 메모</button><span style="flex:1"></span><button class="p" id="rClose">닫기</button></div></div>`;
+  dl.showModal();fillImgs(dl);
+  $('#rClose').onclick=()=>dl.close();
+  const sv=$('#rSave');if(sv)sv.onclick=()=>{put('레시피',{이름:o.name,재료:o.need.map(n=>n.name+(n.amount?' '+n.amount:'')).join(', ')+(o.sea?'\n양념: '+o.sea:''),조리법:o.steps.map((s,i)=>(i+1)+'. '+s).join('\n'),칼로리:String(o.kcal||''),시간:String(o.min||''),출처:o.ai?'AI 추천':'직접'});toast('레시피 저장');sv.disabled=true};
+  $('#rShop').onclick=()=>{const miss=o.need.filter(n=>!n.opt&&!hasIng(have,n.name)).map(n=>n.name);if(!miss.length)return toast('부족한 재료가 없어요');put('메모',{제목:'장보기: '+o.name,내용:miss.join('\n'),태그:'장보기',고정:false});toast('메모에 장보기 목록을 만들었어요')};
+};
 ACT.saveIng=()=>{const r=LS.get('lastScan',{});let n=0;(r.ingredients||[]).forEach(x=>{if(!DB.식재료.some(y=>y.이름===x.name)){put('식재료',{이름:x.name,수량:x.amount||'',보관:'냉장',유통기한:''});n++}});toast(n+'개 재료를 저장했어요')};
-ACT.saveRec=d=>{const r=LS.get('lastScan',{});const x=(r.dishes||[])[+d.i];if(!x)return;put('레시피',{이름:x.name,재료:[...(x.use||[]),...(x.missing||[])].join(', '),조리법:(x.steps||[]).map((s,i)=>(i+1)+'. '+s).join('\n'),칼로리:String(x.kcal||''),시간:String(x.minutes||''),출처:'AI 추천'});toast('레시피 저장')};
-ACT.fridgeAI=async()=>{const out=$('#scanOut');out.innerHTML='<div class="card muted">🤖 추천을 만들고 있어요…</div>';
+ACT.fridgeAI=async()=>{if(CK.busy.fridge)return;CK.busy.fridge=1;render();
   try{const list=DB.식재료.map(x=>x.이름+(x.유통기한?'(유통기한 '+x.유통기한+')':'')).join(', ');
-    const r=await ai(`너는 요리 도우미야. 보유 재료: ${list}. 유통기한이 가까운 재료를 우선 쓰는 한국 가정식 3~5개를 추천해. ingredients에는 보유 재료를 그대로 넣어. kcal는 1인분 대략 추정치. 반드시 다음 JSON 형식으로만 답해: ${RECIPE_JSON}`);
-    LS.set('lastScan',r);out.innerHTML='<div class="card">'+scanHtml(r)+'</div>';bindScan()}catch(e){out.innerHTML=`<div class="notice">${esc(e.message)}</div>`}};
+    const r=await ai(`너는 요리 도우미야. 보유 재료: ${list}. 유통기한이 가까운 재료를 우선 쓰는 한국 가정식 3~5개를 추천해. ingredients에는 보유 재료를 그대로 넣어. kcal는 1인분 대략 추정치. ${RULE} 반드시 다음 JSON 형식으로만 답해: ${RECIPE_JSON}`);
+    r._at=stamp();CK.fridge=r;saveCK();toast('🤖 냉장고 추천 완료!')}catch(e){toast(e.message,4000)}
+  CK.busy.fridge=0;if(tab==='cook')render()};
 
 /* ---- 헬스 ---- */
 const PLANS={
@@ -462,7 +588,7 @@ function rmBind(){
 }
 V.fit=()=>{
   const m=sub.fit||'오늘',t=today();
-  let h=chips('fit',['오늘','운동 계획','식단','기록','1RM']);
+  let h=chips('fit',['오늘','운동 사전','운동 계획','식단','기록','1RM']);
   if(m==='오늘'){h+=heroFit();
     const plan=LS.get('plan',null);const tp=plan&&plan.days?plan.days.find(d=>d.day==='일월화수목금토'[new Date().getDay()]):null;
     const meals=DB.식단.filter(x=>x.날짜===t),kc=meals.reduce((a,x)=>a+num(x.칼로리),0);
@@ -483,6 +609,14 @@ V.fit=()=>{
   }else if(m==='식단'){
     h+=`<div class="card"><h2>🥗 저칼로리 메뉴 아이디어</h2>${LOWCAL.map(x=>`<span class="chip" style="display:inline-block;margin:3px">${x}</span>`).join('')}<p class="muted">일반적으로 칼로리가 낮은 편인 메뉴 예시예요 (양·조리법에 따라 달라짐).</p></div>
     <div class="card"><h2>🤖 내 재료로 저칼로리 식단 추천</h2><p class="muted">내 냉장고 재료를 활용해 하루 식단을 짜 드려요.</p><button class="p" style="width:100%" data-act="aiMeal">추천 받기</button><div id="mealPlan"></div></div>`;
+  }else if(m==='운동 사전'){
+    const pt=sub.exp||'전체',q=(sub.exq||'').trim();
+    const L=EXDB.filter(x=>(pt==='전체'||x.p===pt)&&(!q||(x.n+x.m+x.eq).includes(q)));
+    h+=`<div class="hero" style="margin-top:4px"><b>📖 운동 사전 ${EXDB.length}종</b><p style="margin:4px 0 0">부위를 고르고 운동을 누르면 시작·끝 동작 사진과 단계별 방법이 나와요.</p></div>
+    <input id="exq" placeholder="🔍 운동 이름·근육·도구 검색 (예: 덤벨, 허벅지)" value="${esc(sub.exq||'')}">
+    <div class="chips" style="margin-top:8px">${EXPARTS.map(x=>`<span class="chip ${pt===x?'on':''}" data-act="chip" data-k="exp" data-v="${x}">${x} <span class="muted">${x==='전체'?EXDB.length:EXDB.filter(e=>e.p===x).length}</span></span>`).join('')}</div>
+    <div class="exgrid">${L.map(x=>`<button class="excard" data-act="ex" data-id="${x.id}"><img src="img/ex/${x.id}_0.jpg" alt="${esc(x.n)}" loading="lazy"><div><b>${esc(x.n)}</b><span>${x.p} · ${esc(x.eq)} · ${x.lv}</span></div></button>`).join('')||'<div class="card empty" style="grid-column:1/-1">검색 결과가 없어요</div>'}</div>
+    <p class="muted">사진·동작 설명 출처: <a target="_blank" rel="noopener" href="https://github.com/yuhonas/free-exercise-db">free-exercise-db</a>(퍼블릭 도메인) — 한국어로 요약. 통증이 있으면 중단하고 전문가와 상의하세요.</p>`;
   }else if(m==='1RM'){
     h+=`<div class="card"><h2>1RM 계산기</h2><div class="grid2"><div><label>무게 (kg)</label><input id="rmW" inputmode="decimal" placeholder="예: 80"></div><div><label>횟수 (회)</label><input id="rmR" inputmode="numeric" placeholder="예: 5"></div></div><div class="rmres" id="rmOut">예상 1RM <b>— kg</b></div><div class="grid3" id="rmSets"></div><p class="muted">Epley 공식: 무게 × (1 + 횟수 ÷ 30). 세트 추천(60·75·85%)은 일반적인 예시 비율이며 개인차가 있어요.</p></div>`;
   }else{
@@ -491,12 +625,24 @@ V.fit=()=>{
   }
   return h;
 };
-AFTER.fit=()=>{rmBind();const i=$('#mealIn');if(i)i.onchange=async e=>{const f=e.target.files[0];if(!f)return;const out=$('#mealOut');
+AFTER.fit=()=>{rmBind();const eq=$('#exq');if(eq)eq.oninput=()=>{sub.exq=eq.value;const p=eq.selectionStart;render();const n=$('#exq');n.focus();n.setSelectionRange(p,p)};const i=$('#mealIn');if(i)i.onchange=async e=>{const f=e.target.files[0];if(!f)return;const out=$('#mealOut');
   try{const im=await imgToB64(f);out.innerHTML=`<img class="thumb" src="${im.url}"><p class="muted">🔍 추정 중…</p>`;
    const r=await ai(`이 음식 사진을 보고 음식 이름과 1인분 기준 대략적 칼로리를 추정해. 여러 음식이면 각각. 반드시 JSON으로만: {"foods":[{"name":"음식명","kcal":300,"note":"추정 근거 한 줄"}],"total":300,"tip":"더 가볍게 먹는 팁 한 줄"}`,im.b64);
    const fs=r.foods||[];out.innerHTML=`<img class="thumb" src="${im.url}"><div class="item"><div class="b"><div class="t">${fs.map(x=>esc(x.name)+' 약 '+esc(x.kcal)+'kcal').join(', ')}</div><div class="d">합계 약 ${esc(r.total)} kcal (추정)\n💡 ${esc(r.tip||'')}</div></div></div><div class="row"><select id="mk" style="flex:1"><option>아침</option><option selected>점심</option><option>저녁</option><option>간식</option></select><button class="p" id="mSave">식단에 저장</button></div>`;
    $('#mSave').onclick=()=>{put('식단',{날짜:today(),끼니:$('#mk').value,음식:fs.map(x=>x.name).join(', '),칼로리:String(r.total||''),메모:'사진 AI 추정'});toast('저장했어요');render()};
   }catch(er){out.innerHTML=`<div class="notice">${esc(er.message)}</div>`}}};
+ACT.ex=d=>{const x=EXDB.find(e=>e.id===d.id);if(!x)return;const dl=$('#dlg');
+  dl.innerHTML=`<div style="padding:16px 16px 18px"><div class="flip"><img src="img/ex/${x.id}_0.jpg" alt="시작 자세"><img class="b" src="img/ex/${x.id}_1.jpg" alt="끝 자세"><i>▶ 동작 반복 보기</i></div>
+   <div class="pair"><figure><img src="img/ex/${x.id}_0.jpg" alt="">① 시작 자세</figure><figure><img src="img/ex/${x.id}_1.jpg" alt="">② 끝 자세</figure></div>
+   <h3 style="margin:14px 0 4px;font-size:20px">${esc(x.n)}</h3>
+   <div class="row"><span class="tag">${x.p}</span><span class="tag">${esc(x.eq)}</span><span class="tag w">${x.lv}</span></div>
+   <div class="drow"><span>주 근육</span><b>${esc(x.m)}</b></div>
+   <h3 style="margin:14px 0 0">운동 방법</h3><ol class="num">${x.s.map(t=>`<li>${esc(t)}</li>`).join('')}</ol>
+   <div class="notice">⚠️ ${esc(x.t)}</div>
+   <p class="muted">출처: free-exercise-db (퍼블릭 도메인) 원문을 한국어로 요약</p>
+   <div class="row" style="margin-top:8px"><a class="btn" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=${encodeURIComponent(x.n+' 자세')}">▶ 영상</a><span style="flex:1"></span><button id="exClose">닫기</button><button class="p" id="exLog">기록하기</button></div></div>`;
+  dl.showModal();$('#exClose').onclick=()=>dl.close();
+  $('#exLog').onclick=()=>{dl.close();setTimeout(()=>form('운동',{날짜:today(),종류:x.n,부위:x.p}),0)}};
 ACT.setPlan=d=>{LS.set('plan',{name:d.k,days:PLANS[d.k].days});setCfg({});toast('계획 설정: '+d.k);render()};
 ACT.doneWo=d=>{put('운동',{날짜:today(),종류:d.t,부위:'전신',세트시간:d.i,칼로리:'',메모:'계획 완료'});toast('수고했어요! 💪');render()};
 ACT.aiPlan=async()=>{const out=$('#planOut');out.innerHTML='<p class="muted">🤖 계획을 만들고 있어요…</p>';
@@ -527,12 +673,20 @@ V.more=()=>{
     L.sort((a,b)=>String(b.평점||'').length-String(a.평점||'').length);
     const stars=v=>{const n=String(v||'').length;return '★'.repeat(n)+'☆'.repeat(5-n)};
     const THEMES=[['가족모임','M8 6a2 2 0 1 0 0-.01M16 6a2 2 0 1 0 0-.01M5 21v-6a3 3 0 0 1 6 0v6M13 21v-6a3 3 0 0 1 6 0v6'],['데이트','M12 20s-7-4.5-7-10a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 5.5-7 10-7 10z'],['친구 모임','M8 8a3 3 0 1 0 0-.01M16 8a3 3 0 1 0 0-.01M3 20c0-3 2-5 5-5s5 2 5 5M11 20c0-3 2-5 5-5s5 2 5 5'],['비오는 날','M3 12a9 8 0 0 1 18 0zM12 12v7a2 2 0 0 1-4 0'],['드라이브','M4 18l3-9h10l3 9zM4 18v2h4v-2M16 18v2h4v-2'],['치맥','M6 8h9v11H6zM15 10h3a2 2 0 0 1 0 5h-3M8 5c0-1 2-1 2-2M12 5c0-1 2-1 2-2'],['디저트','M12 4a5 5 0 1 1 0 10 5 5 0 0 1 0-10zM12 14v7'],['건강식','M5 19c0-9 5-14 15-14 0 10-5 15-14 15zM5 19l8-8'],['TV맛집','M4 8h16v11H4zM9 4l3 4 3-4'],['돼지고기','M5 12a7 6 0 0 1 14 0v2a7 6 0 0 1-14 0zM10 13h4'],['소고기','M4 8l3 2h10l3-2M7 10v6a5 4 0 0 0 10 0v-6M10 15h4'],['닭요리','M14 4a3 3 0 0 1 3 3v2l3 1-3 1v3a6 6 0 0 1-12 0c0-4 3-6 5-6V6a3 3 0 0 1 4-2z'],['해산물','M3 12c4-6 12-6 16 0-4 6-12 6-16 0zM19 12l3-3v6zM8 11h.01'],['뷔페','M3 17h18M5 17a7 7 0 0 1 14 0M12 8V6'],['가성비','M4 7h15v12H4zM4 7l12-3v3M15 13h4'],['무한리필','M7 9a3 3 0 1 0 0 6c4 0 6-6 10-6a3 3 0 1 1 0 6c-4 0-6-6-10-6z']];
+    const tf=sub.ft||'';if(tf)L=L.filter(x=>String(x.테마||'').split(',').map(t=>t.trim()).includes(tf));
+    const used=[...new Set(DB.맛집.flatMap(x=>String(x.테마||'').split(',').map(t=>t.trim()).filter(Boolean)))];
+    const rg=LS.get('fregion','');const mq=n=>encodeURIComponent((rg?rg+' ':'')+n+' 맛집');
+    const STAR='M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z';
     h+=`<input id="fq" placeholder="🔍 맛집 이름, 지역, 메뉴" value="${esc(sub.fq||'')}">
-    <img class="banner" src="img/rest-hero.svg" alt=""><h2 class="big2">오늘 뭐 먹지?</h2><p class="muted" style="margin:0">테마를 누르면 지도에서 검색해요.</p>
-    <div class="themes">${THEMES.map(([n,d])=>n==='TV맛집'?`<button class="tile" data-act="tv">${svgI(d)}<span>${n}</span></button>`:`<a class="tile" target="_blank" rel="noopener" href="https://map.naver.com/p/search/${encodeURIComponent(n+' 맛집')}">${svgI(d)}<span>${n}</span></a>`).join('')}</div>
+    <img class="banner" src="img/rest-hero.svg" alt=""><h2 class="big2">오늘 뭐 먹지?</h2><p class="muted" style="margin:0">테마를 누르면 지도에서 검색해요. <b>★ 내 테마</b>는 직접 만들 수 있어요.</p>
+    <div class="row" style="flex-wrap:nowrap;margin-top:8px"><input id="freg" placeholder="📍 검색 지역 (예: 송도, 강남역)" value="${esc(rg)}" style="flex:1"></div>
+    <div class="themes">${THEMES.map(([n,d])=>n==='TV맛집'?`<button class="tile" data-act="tv">${svgI(d)}<span>${n}</span></button>`:`<a class="tile" target="_blank" rel="noopener" href="https://map.naver.com/p/search/${mq(n)}">${svgI(d)}<span>${n}</span></a>`).join('')}
+     ${THM.map((t,i)=>`<button class="tile my" data-act="myTheme" data-i="${i}">${svgI(STAR)}<span>${esc(t.n)}</span></button>`).join('')}
+     <button class="tile add" data-act="addTheme">${svgI('M12 5v14M5 12h14')}<span>내 테마 추가</span></button></div>
     <div class="card"><h2>🎲 내 목록에서 랜덤 추천</h2><button class="p" data-act="pick" style="width:100%">추천 받기</button><div id="pickOut"></div></div>
     <div class="chips">${['전체','가보고싶음','가봄'].map(x=>`<span class="chip ${f===x?'on':''}" data-act="chip" data-k="mf" data-v="${x}">${x}</span>`).join('')}</div>
-    <div class="pgrid">${L.length?L.map(x=>{const im=REST[[...String(x.이름)].reduce((a,c)=>a+c.charCodeAt(0),0)%3];return `<div class="pcard" data-act="detail" data-id="${x.id}"><img src="${im}" alt=""><div class="pb"><div class="t">${esc(x.이름)}</div><div class="d">📍 ${esc(x.지역||'-')}${x.메뉴?'\n'+esc(x.메뉴):''}</div><div class="st">${stars(x.평점)} <span>${esc(x.가격대||'')}</span></div></div></div>`}).join(''):'<div class="card empty" style="grid-column:1/-1">맛집을 추가해 보세요</div>'}</div><button class="fab" data-act="add" data-s="맛집">＋</button>`;
+    ${used.length?`<div class="chips"><span class="muted" style="align-self:center">테마</span>${['',...used].map(x=>`<span class="chip ${tf===x?'on':''}" data-act="chip" data-k="ft" data-v="${esc(x)}">${x?'★ '+esc(x):'전체'}</span>`).join('')}</div>`:''}
+    <div class="pgrid">${L.length?L.map(x=>{const im=REST[[...String(x.이름)].reduce((a,c)=>a+c.charCodeAt(0),0)%3];return `<div class="pcard" data-act="detail" data-id="${x.id}"><img src="${im}" alt=""><div class="pb"><div class="t">${esc(x.이름)}</div><div class="d">📍 ${esc(x.지역||'-')}${x.메뉴?'\n'+esc(x.메뉴):''}</div>${x.테마?String(x.테마).split(',').filter(t=>t.trim()).map(t=>`<span class="tag">★ ${esc(t.trim())}</span>`).join(''):''}<div class="st">${stars(x.평점)} <span>${esc(x.가격대||'')}</span></div></div></div>`}).join(''):'<div class="card empty" style="grid-column:1/-1">맛집을 추가해 보세요</div>'}</div><button class="fab" data-act="add" data-s="맛집">＋</button>`;
   }else if(m==='교통'){
     const P=DB.장소;const opts=P.map(x=>`<option value="${esc(x.주소||x.이름)}">${esc(x.이름)}</option>`).join('');
     h+=`<div class="card"><h2>🚇 길찾기</h2><label>출발</label><input id="from" list="pl" placeholder="장소명 또는 주소 (비우면 현재 위치)"><label>도착</label><input id="to" list="pl" placeholder="장소명 또는 주소"><datalist id="pl">${opts}</datalist>
@@ -562,13 +716,33 @@ V.more=()=>{
       <button data-act="copyCode">📋 서버 코드 복사</button></details></div>
     <div class="card"><h2>🎯 하루 목표 칼로리</h2><div class="row"><input id="kc" type="number" value="${esc(CFG.kcal)}" placeholder="예: 직접 정한 목표" style="flex:1"><button data-act="saveKcal">저장</button></div></div>
     <div class="card"><h2>💾 백업</h2><div class="row"><button data-act="exp">내보내기(JSON)</button><label class="btn" style="margin:0">가져오기<input type="file" id="impIn" accept=".json" class="hide"></label></div><p class="muted">서버 연결 시 모든 데이터는 구글 시트에도 저장돼요. 대기 중 ${Q.length}건.</p></div>
-    <p class="muted" style="text-align:center">나의 하루 v1.2 · 무료 도구만 사용 (GitHub Pages · Google Apps Script · Gemini 무료 등급)</p>`;
+    <p class="muted" style="text-align:center">나의 하루 v1.3 · 무료 도구만 사용 (GitHub Pages · Google Apps Script · Gemini 무료 등급)</p>`;
   }
   return h;
 };
-AFTER.more=()=>{const fq=$('#fq');if(fq){fq.oninput=()=>{sub.fq=fq.value;const p=fq.selectionStart;render();const n=$('#fq');n.focus();n.setSelectionRange(p,p)}}
+AFTER.more=()=>{const fr=$('#freg');if(fr)fr.onchange=()=>{LS.set('fregion',fr.value.trim());render()};const fq=$('#fq');if(fq){fq.oninput=()=>{sub.fq=fq.value;const p=fq.selectionStart;render();const n=$('#fq');n.focus();n.setSelectionRange(p,p)}}
   const q=$('#mq');if(q){q.oninput=()=>{sub.mq=q.value;const p=q.selectionStart;render();const n=$('#mq');n.focus();n.setSelectionRange(p,p)}}
   const im=$('#impIn');if(im)im.onchange=async e=>{try{const d=JSON.parse(await e.target.files[0].text());if(!confirm('가져온 데이터를 추가할까요? (같은 id는 덮어씀)'))return;for(const k in SHEETS)(d[k]||[]).forEach(r=>put(k,r));toast('가져오기 완료');render()}catch(er){toast('파일을 읽지 못했어요')}}};
+function allThemes(){return [...new Set([...THM.map(t=>t.n),'가족모임','데이트','친구 모임','회식','혼밥','비오는 날','드라이브','건강식','가성비'])]}
+function saveThemes(){THM_AT=Date.now();LS.set('themes',THM);LS.set('themesAt',THM_AT);CLOUD.saveCfg()}
+ACT.addTheme=(d,edit)=>{const dl=$('#dlg'),t=edit!==undefined?THM[edit]:{n:'',q:''};
+  dl.innerHTML=`<form method="dialog"><h3>${edit!==undefined?'내 테마 수정':'★ 내 테마 추가'}</h3><p class="muted" style="margin:0">예: 회식, 혼밥, 노포, 반려견 동반, 브런치, 야장…</p>
+   <label>테마 이름</label><input name="n" value="${esc(t.n)}" placeholder="예: 회식 장소" maxlength="12">
+   <label>지도 검색어 (선택)</label><input name="q" value="${esc(t.q||'')}" placeholder="비우면 테마 이름 + 맛집으로 검색">
+   <div class="row" style="margin-top:14px">${edit!==undefined?'<button value="del" class="x" style="color:var(--bad)">삭제</button>':''}<span style="flex:1"></span><button value="cancel">취소</button><button value="ok" class="p">저장</button></div></form>`;
+  dl.showModal();dl.onclose=()=>{const fm=dl.querySelector('form');if(!fm)return;
+    if(dl.returnValue==='del'){THM.splice(edit,1);saveThemes();toast('테마를 삭제했어요');render();return}
+    if(dl.returnValue!=='ok')return;const n=fm.elements.n.value.trim();if(!n)return toast('테마 이름을 입력해 주세요');
+    if(THM.some((x,i)=>x.n===n&&i!==edit))return toast('이미 있는 테마예요');
+    const o={n,q:fm.elements.q.value.trim()};if(edit!==undefined)THM[edit]=o;else THM.push(o);saveThemes();toast('★ '+n+' 테마 저장');render()}};
+ACT.myTheme=d=>{const i=+d.i,t=THM[i];if(!t)return;const dl=$('#dlg');const rg=LS.get('fregion','');const mine=DB.맛집.filter(x=>String(x.테마||'').split(',').map(s=>s.trim()).includes(t.n));
+  dl.innerHTML=`<div style="padding:18px"><h3>★ ${esc(t.n)}</h3><p class="muted" style="margin:0 0 10px">${rg?'📍 '+esc(rg)+' 기준 · ':''}검색어: ${esc(t.q||t.n+' 맛집')}</p>
+   <div class="grid2"><a class="btn p" target="_blank" rel="noopener" href="https://map.naver.com/p/search/${encodeURIComponent((rg?rg+' ':'')+(t.q||t.n+' 맛집'))}">네이버 지도</a><a class="btn" target="_blank" rel="noopener" href="https://map.kakao.com/?q=${encodeURIComponent((rg?rg+' ':'')+(t.q||t.n+' 맛집'))}">카카오맵</a></div>
+   <h3 style="margin:14px 0 4px">내 목록에서 이 테마 <span class="muted">${mine.length}곳</span></h3>${mine.map(x=>`<div class="drow"><b>${esc(x.이름)}</b><span style="flex:0 0 auto">${esc(x.지역||'')}</span></div>`).join('')||'<p class="muted">맛집 추가 시 테마에 “'+esc(t.n)+'”를 넣으면 여기 모여요.</p>'}
+   <div class="row" style="margin-top:12px"><button id="tEdit">수정·삭제</button><button id="tAdd">＋ 이 테마로 맛집 추가</button><span style="flex:1"></span><button class="p" id="tClose">닫기</button></div></div>`;
+  dl.showModal();$('#tClose').onclick=()=>{dl.returnValue='';dl.close()};
+  $('#tEdit').onclick=()=>{dl.returnValue='';dl.close();setTimeout(()=>ACT.addTheme({},i),0)};
+  $('#tAdd').onclick=()=>{dl.returnValue='';dl.close();setTimeout(()=>form('맛집',{테마:t.n}),0)}};
 ACT.pick=()=>{const L=DB.맛집;if(!L.length)return toast('먼저 맛집을 추가해 주세요');const x=L[Math.floor(Math.random()*L.length)];$('#pickOut').innerHTML=`<div class="item"><div class="b"><div class="t">🍽 ${esc(x.이름)}</div><div class="d">${esc([x.지역,x.메뉴].filter(Boolean).join(' · '))}</div></div><a class="btn s" target="_blank" href="https://map.naver.com/p/search/${encodeURIComponent((x.지역||'')+' '+x.이름)}">지도</a></div>`};
 ACT.swap=()=>{const a=$('#from').value;$('#from').value=$('#to').value;$('#to').value=a};
 ACT.toHere=d=>{$('#to').value=d.a;$('#to').scrollIntoView({behavior:'smooth',block:'center'})};
@@ -594,9 +768,8 @@ ACT.install=async()=>{if(!window.__bip)return;window.__bip.prompt();try{await wi
 ACT.exp=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(DB,null,1)],{type:'application/json'}));a.download='나의하루_백업_'+today()+'.json';a.click()};
 
 ACT.msort=d=>{sub.ms=d.v;render()};
-ACT.rsearch=()=>{const q=$('#rq').value.trim();if(!q)return toast('검색어를 입력해 주세요');window.open(q10(q),'_blank')};
 ACT.detail=d=>{const x=DB.맛집.find(r=>r.id===d.id);if(!x)return;const dl=$('#dlg');
-  const rows=[['업체명',x.이름],['지역',x.지역],['추천 메뉴',x.메뉴],['평점',x.평점],['가격대',x.가격대],['방문',x.방문],['메모',x.메모]].filter(r=>r[1]);
+  const rows=[['업체명',x.이름],['지역',x.지역],['추천 메뉴',x.메뉴],['테마',x.테마],['평점',x.평점],['가격대',x.가격대],['방문',x.방문],['메모',x.메모]].filter(r=>r[1]);
   dl.innerHTML=`<div class="dhead"><img src="img/rest-store.svg" alt=""><h3>${esc(x.이름)}</h3></div><div style="padding:6px 18px 4px">${rows.map(([k,v])=>`<div class="drow"><span>${k}</span><b style="white-space:pre-wrap">${esc(v)}</b></div>`).join('')}</div><div class="row" style="padding:12px 18px 18px"><a class="btn" target="_blank" rel="noopener" href="https://map.naver.com/p/search/${encodeURIComponent((x.지역||'')+' '+x.이름)}">지도</a><span style="flex:1"></span><button id="dClose">닫기</button><button class="p" id="dEdit">수정</button></div>`;
   dl.showModal();
   $('#dClose').onclick=()=>{dl.returnValue='';dl.close()};
