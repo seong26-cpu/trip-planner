@@ -1891,15 +1891,23 @@ async function commonsSearch(q,o){o=o||{};const w=o.w||1600,minW=o.minW||1200,la
   const j=await (await fetch(u)).json();
   return Object.values((j.query||{}).pages||{}).sort((a,b)=>(a.index||0)-(b.index||0)).map(p=>{const ii=(p.imageinfo||[])[0]||{},md=ii.extmetadata||{};
     return {u:ii.thumburl||"",w:ii.width||0,h:ii.height||0,m:ii.mime||"",t:p.title||"",a:String((md.Artist||{}).value||"").replace(/<[^>]*>/g,"").replace(/\s+/g," ").trim().slice(0,40),l:String((md.LicenseShortName||{}).value||""),p:ii.descriptionurl||""}})
-    .filter(x=>x.u&&/jpe?g/i.test(x.m)&&x.w>=minW&&(!land||x.w>=x.h*1.25)&&!/\bmap\b|logo|diagram|floor ?plan|ticket|interior of train/i.test(x.t))}
+    .filter(x=>x.u&&/jpe?g/i.test(x.m)&&x.w>=minW&&(!land||x.w>=x.h*(o.ratio||1.25))&&!/\bmap\b|logo|diagram|floor ?plan|ticket|interior of train/i.test(x.t))}
 function phLoad(slot,key){const ck=key+"|"+slot;
   const all=lsGet(PHOTO_KEY,{}),c=all[ck];if(c&&c.list&&c.list.length&&Date.now()-(c.at||0)<MONTH)return Promise.resolve(c);
   const st=PHS[slot]||(PHS[slot]={});if(st.loading&&st.loading.ck===ck)return st.loading.p;
   const spots=phSpots(slot);if(!spots.length)return Promise.resolve(null);
   const per=slot==="home"?2:2,max=slot==="home"?16:8;
-  const p=Promise.all(spots.map(s=>commonsSearch(s.q).then(r=>r.slice(0,per).map(x=>Object.assign(x,{label:s.label,cat:s.cat}))).catch(()=>[]))).then(rs=>{
+  const grab=(sp,o)=>Promise.all(sp.map(s=>commonsSearch(s.q,o).then(r=>r.slice(0,per).map(x=>Object.assign(x,{label:s.label,cat:s.cat}))).catch(()=>[])));
+  /* 주제 사진이 하나도 없으면(작은 도시·자연 관광지) → 조건 완화 → 도시 대표 사진 → 같은 도시의 다른 메뉴 사진 순으로 대신 채움 */
+  const p=grab(spots).then(async rs=>{
+    if(rs.some(a=>a.length))return rs;
+    const loose=await grab(spots,{minW:800,ratio:1.05});if(loose.some(a=>a.length))return loose;
+    const en=cityEn(),nm=T().city||en,m=MENU_PH[slot]||{};
+    const gen=[["","풍경"],["landscape","자연 풍경"],["city","도시 풍경"],["landmark","명소"]].map(([q,l])=>({label:nm+" "+l,cat:m.t||"풍경",q:(en+" "+q).trim()}));
+    const g2=await grab(gen,{minW:800,ratio:1.05});if(g2.some(a=>a.length))return g2;
+    const a=lsGet(PHOTO_KEY,{});const other=Object.keys(a).filter(k=>k.startsWith(key+"|")&&a[k].list&&a[k].list.length).map(k=>a[k].list);return other.length?[other[0]]:[]}).then(rs=>{
     const seen=new Set(),list=[];
-    for(let r=0;r<per;r++)rs.forEach(arr=>{const x=arr[r];if(x&&!seen.has(x.u)){seen.add(x.u);list.push(x)}});
+    for(let r=0;r<Math.max(per,...rs.map(a=>a.length));r++)rs.forEach(arr=>{const x=arr[r];if(x&&!seen.has(x.u)){seen.add(x.u);list.push(x)}});
     const out={at:Date.now(),list:list.slice(0,max),i:0};
     if(out.list.length){const a=lsGet(PHOTO_KEY,{});a[ck]=out;Object.keys(a).filter(k=>Date.now()-(a[k].at||0)>MONTH).forEach(k=>delete a[k]);lsSet(PHOTO_KEY,a)}
     return out}).finally(()=>{if(st.loading&&st.loading.ck===ck)st.loading=null});
@@ -1953,7 +1961,7 @@ function phMount(slot){if(!document.querySelector(`section[data-ph="${slot}"]`))
   if(!key)return;
   phLoad(slot,key).then(c=>{if(st.key!==key)return;
     if(c&&c.list&&c.list.length){st.list=c.list;st.i=(c.i||0)%c.list.length;phShow(slot)}
-    else{const e=document.querySelector(`section[data-ph="${slot}"] .ph-empty`);if(e)e.textContent="사진을 불러오지 못했어요. 인터넷 연결과 도시(영문) 이름을 확인해 주세요."}})}
+    else{const e=document.querySelector(`section[data-ph="${slot}"] .ph-empty`);if(e)e.innerHTML=`사진을 불러오지 못했어요. 인터넷 연결과 도시(영문) 이름을 확인해 주세요. <button type="button" class="btn sm" data-ph="${slot}" data-ph-act="retry">다시 시도</button>`}})}
 /* 추천 장소: 장소별 작은 사진 (화면에 보일 때만 불러옴) */
 let thumbIO=null,thumbQ=[],thumbRun=0;
 function thumbHTML(p,t){const en=cityEn()||t.cityEn||"";const q=withCity(p.nameEn||p.name,en);
@@ -1969,6 +1977,7 @@ function thumbMount(){const els=[...document.querySelectorAll("a.pthumb:not([dat
   els.forEach(a=>{a.dataset.done="1";const hit=c[a.dataset.tq];if(hit&&Date.now()-(hit.at||0)<MONTH){thumbFill(a,hit);return}if(thumbIO)thumbIO.observe(a);else{thumbQ.push(a)}});thumbPump()}
 document.addEventListener("click",e=>{const b=e.target.closest("[data-ph-act]");if(!b)return;const root=b.closest("[data-ph]");if(!root)return;const slot=root.dataset.ph;
   if(b.dataset.phAct==="fold"){const f=lsGet(PHFOLD_KEY,{});f[slot]=!f[slot];lsSet(PHFOLD_KEY,f);const y=scrollY;render();scrollTo(0,y);return}
+  const st=PHS[slot];if(b.dataset.phAct==="retry"||!st||!st.list||!st.list.length){if(st){st.key=null;st.list=[];st.loading=null}const em=document.querySelector(`section[data-ph="${slot}"] .ph-empty`);if(em){em.hidden=false;em.textContent="사진을 다시 찾는 중…"}phMount(slot);return}
   phStep(slot,b.dataset.phAct==="prev"?-1:1)});
 
 function rHome(){
