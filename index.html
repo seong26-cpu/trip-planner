@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="color-scheme" content="light dark">
+<meta name="color-scheme" content="only light">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>여행 올인원 플래너</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#0E86B8">
 <script>/* 화면 테마: 기본 '시원하게(밝은 하늘색)'. 폰이 다크 모드여도 밝게 보이도록 시스템 설정을 따르지 않음(선택 시에만) */
-(function(){var t="cool";try{t=localStorage.getItem("tp-theme")||"cool"}catch(e){}document.documentElement.setAttribute("data-theme",t);var m=document.querySelector('meta[name="theme-color"]');if(m&&t!=="auto")m.setAttribute("content",{cool:"#0E86B8",light:"#C2451F",dark:"#1C1317"}[t]||"#0E86B8")})();</script>
+(function(){var t="cool";try{t=localStorage.getItem("tp-theme")||"cool"}catch(e){}document.documentElement.setAttribute("data-theme",t);var cs=document.querySelector('meta[name="color-scheme"]');if(cs)cs.setAttribute("content",(t==="cool"||t==="light")?"only light":"light dark");var m=document.querySelector('meta[name="theme-color"]');if(m&&t!=="auto")m.setAttribute("content",{cool:"#0E86B8",light:"#C2451F",dark:"#1C1317"}[t]||"#0E86B8")})();</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="여행플래너">
@@ -1245,12 +1245,12 @@ a.pthumb.none{display:none}
   --bg:#EAF6FB; --surface:#FFFFFF; --surface-2:#E1F1F8; --fg:#10304A; --muted:#4F6B80;
   --line:#CBE3EE; --ink:#0B5D86; --ink-fg:#FFFFFF; --accent:#0E86B8; --accent-soft:#D3EEF9;
   --good:#2E7D5B; --warn:#8A5A00; --bad:#B3261E; --route:#0E86B8; --sea:#CFEAF6; --land:#F4FAFC;
-  --shadow:0 22px 44px -28px rgba(14,134,184,.55); --shadow-s:0 12px 28px -22px rgba(14,134,184,.6); color-scheme:light}
+  --shadow:0 22px 44px -28px rgba(14,134,184,.55); --shadow-s:0 12px 28px -22px rgba(14,134,184,.6); color-scheme:only light}
 :root[data-theme="cool"],:root[data-theme="cool"] body{background-color:#EAF6FB}
 :root[data-theme="cool"] body{background-image:linear-gradient(180deg,#DDF1FA 0,#EEF8FC 340px,#F6FBFD 100%);background-attachment:fixed}
 :root[data-theme="cool"] .thero,:root[data-theme="cool"] .pban{background:linear-gradient(160deg,#8FD3F0,#D9F3FB)}
 :root[data-theme="cool"] .th-hud i{background:#0E86B8}
-:root[data-theme="light"]{color-scheme:light}
+:root[data-theme="light"]{color-scheme:only light}
 .themes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
 .themes button{font:inherit;font-size:.85rem;font-weight:600;padding:10px 4px;border:2px solid var(--line);border-radius:14px;background:var(--surface);color:var(--fg);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px}
 .themes button i{width:34px;height:22px;border-radius:7px;border:1px solid rgba(0,0,0,.12)}
@@ -2826,15 +2826,12 @@ function infoLinks(){const t=T(),pk=PK();const cc=(pk&&pk.country)||({JPY:"jp",K
 const THEMES=[["cool","시원하게","linear-gradient(135deg,#8FD3F0,#EAF6FB)"],["light","밝게","linear-gradient(135deg,#FFD2B0,#FFF5EC)"],["dark","어둡게","linear-gradient(135deg,#33242A,#1C1317)"],["auto","시스템","linear-gradient(135deg,#EAF6FB 50%,#1C1317 50%)"]];
 const THEME_COLOR={cool:"#0E86B8",light:"#C2451F",dark:"#1C1317"};
 function curTheme(){return document.documentElement.getAttribute("data-theme")||"cool"}
-function setTheme(k){document.documentElement.setAttribute("data-theme",k);try{localStorage.setItem("tp-theme",k)}catch(_){}const m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute("content",THEME_COLOR[k]||(matchMedia("(prefers-color-scheme: dark)").matches?THEME_COLOR.dark:THEME_COLOR.cool));render()}
+function setTheme(k){document.documentElement.setAttribute("data-theme",k);{const cs=document.querySelector('meta[name="color-scheme"]');if(cs)cs.setAttribute("content",(k==="cool"||k==="light")?"only light":"light dark")}try{localStorage.setItem("tp-theme",k)}catch(_){}const m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute("content",THEME_COLOR[k]||(matchMedia("(prefers-color-scheme: dark)").matches?THEME_COLOR.dark:THEME_COLOR.cool));render()}
 document.addEventListener("click",e=>{const b=e.target.closest("[data-theme-set]");if(b)setTheme(b.dataset.themeSet)});
 function rMore(){if(!packIndex&&!packIndexErr)loadPackIndex().then(()=>{if(tab==="more")render()});const t=T(),pk=PK(),list=infoLinks();const city=t.city||"";
   const link=x=>`<a class="lk" href="${esc(x.u)}" target="_blank" rel="noopener"><b>${esc(x.n)} ↗</b><span>${esc(x.d)}</span><span class="url">${esc(x.u.replace(/^https?:\/\//,"").replace(/\/$/,""))}</span></a>`;
   const tr=pk?[pk.access&&`<li><b>공항↔시내</b>: ${esc(pk.access.name)} — ${esc(pk.access.note||"")}</li>`,pk.pass&&`<li><b>추천 패스</b>: ${esc(pk.pass.name)} — ${esc(pk.pass.note||"")}</li>`].filter(Boolean).join(""):"";
   $("#p-more").innerHTML=`
-  <div class="card"><div class="row between"><h2>🎨 화면 테마</h2><span class="small muted">이 기기에 저장</span></div>
-    <div class="themes" role="group" aria-label="화면 테마">${THEMES.map(([k,n,c])=>`<button data-theme-set="${k}" aria-pressed="${curTheme()===k}"><i style="background:${c}"></i>${n}</button>`).join("")}</div>
-    <p class="small muted">폰이 다크 모드여도 기본은 <b>시원하게(밝은 하늘색)</b>로 보여요. '시스템'을 고르면 폰 설정(밝게/어둡게)을 따라가요.</p></div>
   <div class="card"><h2>더보기</h2>
     <div class="more-grid">
       <button data-tab="money" class="new"><b>💳 경비·정산</b><span>지출 기록 · 1/N 정산</span></button>
@@ -2844,7 +2841,9 @@ function rMore(){if(!packIndex&&!packIndexErr)loadPackIndex().then(()=>{if(tab==
       <button data-tab="check"><b>✅ 준비물·버킷리스트</b><span>체크리스트 · 현지에서 할 것</span></button>
       <button data-tab="memo"><b>📝 메모</b><span>여행 메모장</span></button>
       <button data-tab="what"><b>🔍 WHAT</b><span>사진으로 물건·간판·장소 알아보기</span></button>
-    </div></div>
+    </div>
+    ${fold("fd-more-theme","🎨 화면 테마",`<div class="themes" role="group" aria-label="화면 테마">${THEMES.map(([k,n,c])=>`<button data-theme-set="${k}" aria-pressed="${curTheme()===k}"><i style="background:${c}"></i>${n}</button>`).join("")}</div>
+    <p class="small muted">폰이 다크 모드여도 기본은 <b>시원하게(밝은 하늘색)</b>로 보여요. '시스템'을 고르면 폰 설정(밝게/어둡게)을 따라가요.</p>`,{open:true,cnt:(THEMES.find(x=>x[0]===curTheme())||[])[1]||""})}</div>
   ${tplCard()}
   <div class="card">${fold("fd-more-pack","📦 도시 팩 (다운로드·자동 만들기)",packCard(),{open:!PK(),cnt:Object.keys(PACKS).length+"개"})}</div>
   ${acctCard()}

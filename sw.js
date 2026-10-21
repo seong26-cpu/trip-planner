@@ -1,5 +1,5 @@
 /* 여행 올인원 플래너 서비스워커: 앱 화면은 최신 우선(network-first), 라이브러리는 캐시 우선. 지도 타일·로그인·DB는 캐시하지 않음 */
-const V="tp-v15";
+const V="tp-v16";
 const SHELL=["./","index.html","manifest.webmanifest","firebase-config.js","icons/icon-192.png","icons/icon-512.png"];
 self.addEventListener("install",e=>{e.waitUntil(caches.open(V).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting()))});
 self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==V).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
