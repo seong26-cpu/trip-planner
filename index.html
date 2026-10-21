@@ -7,7 +7,9 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>여행 올인원 플래너</title>
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#C2451F">
+<meta name="theme-color" content="#0E86B8">
+<script>/* 화면 테마: 기본 '시원하게(밝은 하늘색)'. 폰이 다크 모드여도 밝게 보이도록 시스템 설정을 따르지 않음(선택 시에만) */
+(function(){var t="cool";try{t=localStorage.getItem("tp-theme")||"cool"}catch(e){}document.documentElement.setAttribute("data-theme",t);var m=document.querySelector('meta[name="theme-color"]');if(m&&t!=="auto")m.setAttribute("content",{cool:"#0E86B8",light:"#C2451F",dark:"#1C1317"}[t]||"#0E86B8")})();</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="여행플래너">
@@ -29,7 +31,7 @@ html{-webkit-text-size-adjust:100%}body{margin:0}img{max-width:100%}[hidden]{dis
   --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
   --r:10px; --sea:#B9D3E0; --land:#EEF0E6; --route:#E07B24;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+@media (prefers-color-scheme: dark){:root[data-theme="auto"]{
   --bg:#0E141C; --surface:#17202B; --surface-2:#202B38; --fg:#E7ECF2; --muted:#9AA8B8;
   --line:#2C3846; --ink:#8FB4E3; --ink-fg:#0E141C; --accent:#E8B04A; --accent-soft:#3A2F17;
   --good:#5CC195; --warn:#E3A84B; --bad:#E07A74; --sea:#1B3242; --land:#2A3340; --route:#F0923F; color-scheme:dark}}
@@ -890,7 +892,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   --r:16px; --sea:#CFE0EA; --land:#EEF0E6; --route:#D9264E;
   --shadow:0 6px 20px rgba(0,0,0,.10); --shadow-s:0 2px 8px rgba(0,0,0,.08);
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+@media (prefers-color-scheme: dark){:root[data-theme="auto"]{
   --bg:#121212; --surface:#1E1E1E; --surface-2:#2A2A2A; --fg:#F2F2F2; --muted:#B0B0B0;
   --line:#3A3A3A; --ink:#F2F2F2; --ink-fg:#121212; --accent:#FF5A78; --accent-soft:#3A1E25;
   --good:#5CC195; --warn:#E3A84B; --bad:#FF7A66; --sea:#1B3242; --land:#2A3340; --route:#FF5A78;
@@ -1150,7 +1152,7 @@ nav.tabs button[data-tab="what"]{--ico:url("data:image/svg+xml,%3Csvg xmlns='htt
   --f-mono:"Space Mono",ui-monospace,monospace;
   --shadow:0 22px 44px -28px rgba(214,72,40,.65); --shadow-s:0 12px 28px -22px rgba(214,72,40,.7);
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+@media (prefers-color-scheme: dark){:root[data-theme="auto"]{
   --bg:#1C1317; --surface:#281C21; --surface-2:#33242A; --fg:#FBEDE4; --muted:#CDB2A8;
   --line:#45323A; --ink:#FBEDE4; --ink-fg:#1C1317; --accent:#FF8A5C; --accent-soft:#4A2A20;
   --good:#7CC27A; --warn:#E8B04A; --bad:#FF8A7A; --route:#FF8A5C;
@@ -1238,6 +1240,22 @@ a.pthumb.none{display:none}
 .bad-t{color:var(--bad)}
 .pstat{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);font-size:.88rem}
 .pstat.warn{border-color:var(--warn);background:var(--accent-soft)}
+/* v12: 화면 테마 — 시원하게(기본) · 밝게 · 어둡게 · 시스템 */
+:root[data-theme="cool"]{
+  --bg:#EAF6FB; --surface:#FFFFFF; --surface-2:#E1F1F8; --fg:#10304A; --muted:#4F6B80;
+  --line:#CBE3EE; --ink:#0B5D86; --ink-fg:#FFFFFF; --accent:#0E86B8; --accent-soft:#D3EEF9;
+  --good:#2E7D5B; --warn:#8A5A00; --bad:#B3261E; --route:#0E86B8; --sea:#CFEAF6; --land:#F4FAFC;
+  --shadow:0 22px 44px -28px rgba(14,134,184,.55); --shadow-s:0 12px 28px -22px rgba(14,134,184,.6); color-scheme:light}
+:root[data-theme="cool"],:root[data-theme="cool"] body{background-color:#EAF6FB}
+:root[data-theme="cool"] body{background-image:linear-gradient(180deg,#DDF1FA 0,#EEF8FC 340px,#F6FBFD 100%);background-attachment:fixed}
+:root[data-theme="cool"] .thero,:root[data-theme="cool"] .pban{background:linear-gradient(160deg,#8FD3F0,#D9F3FB)}
+:root[data-theme="cool"] .th-hud i{background:#0E86B8}
+:root[data-theme="light"]{color-scheme:light}
+.themes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.themes button{font:inherit;font-size:.85rem;font-weight:600;padding:10px 4px;border:2px solid var(--line);border-radius:14px;background:var(--surface);color:var(--fg);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px}
+.themes button i{width:34px;height:22px;border-radius:7px;border:1px solid rgba(0,0,0,.12)}
+.themes button[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+@media (max-width:420px){.themes{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
 </head>
 <body>
@@ -2118,7 +2136,7 @@ function drawMap(){
   if(!LF){el.innerHTML='<div class="lmap-empty">지도를 불러오려면 인터넷 연결이 필요해요.</div>';return}
   const pl=dayPlan(day);const pts=pl.list.filter(hasLL);
   lmap=LF.map(el,{zoomControl:true,minZoom:3,maxZoom:18,zoomSnap:0.25});
-  const dark=document.documentElement.getAttribute("data-theme")==="dark"||(!document.documentElement.getAttribute("data-theme")&&matchMedia("(prefers-color-scheme: dark)").matches);
+  const th=document.documentElement.getAttribute("data-theme");const dark=th==="dark"||((!th||th==="auto")&&matchMedia("(prefers-color-scheme: dark)").matches);
   addBaseMap(LF,lmap);
   LF.control.scale({metric:true,imperial:false}).addTo(lmap);
   const cs=getComputedStyle(document.documentElement);
@@ -2805,10 +2823,18 @@ function infoLinks(){const t=T(),pk=PK();const cc=(pk&&pk.country)||({JPY:"jp",K
   const list=[...(key?INFO[key]:[]),...(INFO[cc]||[]),...INFO.all];
   const q=(t.cityEn||t.city||"").trim();if(q)list.push({c:"맛집",n:"구글 지도 맛집 검색",d:`${t.city||q} 식당을 평점·리뷰·위치로 찾기`,u:"https://www.google.com/maps/search/"+enc(q+" restaurants")});
   return list}
+const THEMES=[["cool","시원하게","linear-gradient(135deg,#8FD3F0,#EAF6FB)"],["light","밝게","linear-gradient(135deg,#FFD2B0,#FFF5EC)"],["dark","어둡게","linear-gradient(135deg,#33242A,#1C1317)"],["auto","시스템","linear-gradient(135deg,#EAF6FB 50%,#1C1317 50%)"]];
+const THEME_COLOR={cool:"#0E86B8",light:"#C2451F",dark:"#1C1317"};
+function curTheme(){return document.documentElement.getAttribute("data-theme")||"cool"}
+function setTheme(k){document.documentElement.setAttribute("data-theme",k);try{localStorage.setItem("tp-theme",k)}catch(_){}const m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute("content",THEME_COLOR[k]||(matchMedia("(prefers-color-scheme: dark)").matches?THEME_COLOR.dark:THEME_COLOR.cool));render()}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-theme-set]");if(b)setTheme(b.dataset.themeSet)});
 function rMore(){if(!packIndex&&!packIndexErr)loadPackIndex().then(()=>{if(tab==="more")render()});const t=T(),pk=PK(),list=infoLinks();const city=t.city||"";
   const link=x=>`<a class="lk" href="${esc(x.u)}" target="_blank" rel="noopener"><b>${esc(x.n)} ↗</b><span>${esc(x.d)}</span><span class="url">${esc(x.u.replace(/^https?:\/\//,"").replace(/\/$/,""))}</span></a>`;
   const tr=pk?[pk.access&&`<li><b>공항↔시내</b>: ${esc(pk.access.name)} — ${esc(pk.access.note||"")}</li>`,pk.pass&&`<li><b>추천 패스</b>: ${esc(pk.pass.name)} — ${esc(pk.pass.note||"")}</li>`].filter(Boolean).join(""):"";
   $("#p-more").innerHTML=`
+  <div class="card"><div class="row between"><h2>🎨 화면 테마</h2><span class="small muted">이 기기에 저장</span></div>
+    <div class="themes" role="group" aria-label="화면 테마">${THEMES.map(([k,n,c])=>`<button data-theme-set="${k}" aria-pressed="${curTheme()===k}"><i style="background:${c}"></i>${n}</button>`).join("")}</div>
+    <p class="small muted">폰이 다크 모드여도 기본은 <b>시원하게(밝은 하늘색)</b>로 보여요. '시스템'을 고르면 폰 설정(밝게/어둡게)을 따라가요.</p></div>
   <div class="card"><h2>더보기</h2>
     <div class="more-grid">
       <button data-tab="money" class="new"><b>💳 경비·정산</b><span>지출 기록 · 1/N 정산</span></button>
