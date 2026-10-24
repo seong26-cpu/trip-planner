@@ -134,14 +134,19 @@ function calSave_(ev) {
   var cal = cal_(), e = null;
   if (ev.eventId) { try { e = cal.getEventById(ev.eventId); } catch (x) { e = null; } }
   var allDay = !ev.start;
-  var s = dt_(ev.date, ev.start), en = ev.end ? dt_(ev.date, ev.end) : new Date(s.getTime() + 3600000);
+  var endDate = ev.endDate && ev.endDate > ev.date ? ev.endDate : ''; // 여러 날 일정(종료일)
+  var s = dt_(ev.date, ev.start);
+  var en = ev.end ? dt_(endDate || ev.date, ev.end) : new Date(dt_(endDate || ev.date, ev.start).getTime() + 3600000);
+  if (en <= s) en = new Date(s.getTime() + 3600000);
+  var adEnd = endDate ? new Date(dt_(endDate).getTime() + 86400000) : null; // 종일 일정의 끝은 '다음 날 0시'
   var opt = { location: ev.location || '', description: ev.description || '' };
   if (e) {
     e.setTitle(ev.title);
-    if (allDay) e.setAllDayDate(s); else e.setTime(s, en);
+    if (allDay) { if (adEnd) e.setAllDayDates(s, adEnd); else e.setAllDayDate(s); } else e.setTime(s, en);
     e.setLocation(opt.location); if (!ev.keepDesc) e.setDescription(opt.description); // 날짜만 옮길 때는 설명 유지
   } else {
-    e = allDay ? cal.createAllDayEvent(ev.title, s, opt) : cal.createEvent(ev.title, s, en, opt);
+    e = allDay ? (adEnd ? cal.createAllDayEvent(ev.title, s, adEnd, opt) : cal.createAllDayEvent(ev.title, s, opt))
+               : cal.createEvent(ev.title, s, en, opt);
   }
   return e.getId();
 }
@@ -158,6 +163,9 @@ function calList_(from, to) {
       date: Utilities.formatDate(e.getStartTime(), 'Asia/Seoul', 'yyyy-MM-dd'),
       start: e.isAllDayEvent() ? '' : Utilities.formatDate(e.getStartTime(), 'Asia/Seoul', 'HH:mm'),
       end: e.isAllDayEvent() ? '' : Utilities.formatDate(e.getEndTime(), 'Asia/Seoul', 'HH:mm'),
+      // 여러 날 일정의 마지막 날 (종일 일정은 끝이 '다음 날 0시'라 하루 빼기)
+      endDate: Utilities.formatDate(new Date(e.getEndTime().getTime() - (e.isAllDayEvent() ? 86400000 : 60000)), 'Asia/Seoul', 'yyyy-MM-dd'),
+      description: String(e.getDescription() || '').slice(0, 1500),
       location: e.getLocation()
     };
   });
