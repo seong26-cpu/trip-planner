@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="only light">
+<title>미리 걷기 영상</title>
+<style>
+:root{--bg:#EAF6FB;--fg:#10304A;--muted:#4F6B80;--accent:#0E86B8;--line:#CBE3EE;--card:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:"Noto Sans KR",system-ui,-apple-system,sans-serif;line-height:1.5}
+main{max-width:1000px;margin:0 auto;padding:16px}
+h1{font-size:1.3rem;margin:4px 0 2px}
+.muted{color:var(--muted);font-size:.88rem}
+.card{background:var(--card);border-radius:18px;padding:14px;margin:12px 0;box-shadow:0 10px 26px -20px rgba(14,134,184,.6)}
+canvas{width:100%;height:auto;aspect-ratio:16/9;border-radius:14px;background:#0b1b26;display:block}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+button,select{font:inherit;padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:#fff;color:var(--fg);cursor:pointer}
+button.p{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+button:disabled{opacity:.5}
+.bar{height:8px;border-radius:99px;background:#d8ebf3;overflow:hidden}.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
+ol.sc{margin:0;padding-left:20px;font-size:.88rem}ol.sc li{margin:2px 0}
+.cred{font-size:.75rem;color:var(--muted);max-height:180px;overflow:auto}
+.cred a{color:var(--muted)}
+a.back{color:var(--accent);font-weight:700;text-decoration:none}
+</style>
+</head>
+<body>
+<main>
+  <a class="back" href="./">← 여행 플래너로</a>
+  <h1 id="ttl">미리 걷기 영상</h1>
+  <p class="muted">일정에 담긴 장소의 <b>실제 사진</b>(Wikimedia Commons, 자유 라이선스)을 이어 붙여 1인칭으로 걷는 느낌의 약 3분 영상을 만들어요. 사진마다 촬영자·라이선스를 표시해요.</p>
+  <div class="card">
+    <canvas id="cv" width="1280" height="720"></canvas>
+    <div class="bar" style="margin-top:10px"><i id="bar"></i></div>
+    <p class="muted" id="msg">준비 중…</p>
+    <div class="row">
+      <select id="day" aria-label="날짜"></select>
+      <button class="p" id="play" disabled>▶ 재생</button>
+      <button id="rec" disabled>💾 영상 파일로 저장</button>
+      <button id="reload">🔄 사진 다시 찾기</button>
+    </div>
+    <p class="muted">영상 파일 저장은 재생하면서 녹화해요(약 3분, 화면을 켜 두세요). 안드로이드 크롬은 .webm(또는 .mp4) 파일로 저장돼요.</p>
+  </div>
+  <div class="card"><b>장면 순서</b><ol class="sc" id="scenes"></ol></div>
+  <div class="card"><b>사진 출처</b><div class="cred" id="cred"></div></div>
+</main>
+<script>
+(()=>{"use strict";
+const $=s=>document.querySelector(s);const esc=v=>String(v==null?"":v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const W=1280,H=720,cv=$("#cv"),cx=cv.getContext("2d");
+const KEY="trip-planner-v1";let ST={};try{ST=JSON.parse(localStorage.getItem(KEY)||"{}")}catch(_){}
+const T=ST.trip||{},ITEMS=Array.isArray(ST.items)?ST.items:[],PLACES=Array.isArray(ST.places)?ST.places:[];
+const WD=["일","월","화","수","목","금","토"];
+const parseD=s=>{const [y,m,d]=String(s).split("-").map(Number);return new Date(y,m-1,d)};
+const dayLabel=s=>{const d=parseD(s);return (d.getMonth()+1)+"/"+d.getDate()+"("+WD[d.getDay()]+")"};
+const days=[...new Set(ITEMS.map(i=>i.day).filter(Boolean))].sort();
+const qd=new URLSearchParams(location.search).get("day");
+let DAY=days.includes(qd)?qd:days[0];
+
+/* 한국어 일정 이름 → 사진 검색어(영문). 일정 이름·메모에 이 단어가 있으면 그 사진을 찾음 */
+const KW=[
+ [/나리타.*(제1|T1)|成田空港/,["Narita International Airport Terminal 1","Narita Airport Terminal 1 station"],"成田空港 第1ターミナル"],
+ [/웰컴|Welcome Suica|Suica/,["Welcome Suica","Suica card"],""],
+ [/게이세이.*액세스|アクセス特急|京成/,["Keisei Access Express","Keisei Narita Airport Station platform"],"京成 アクセス特急"],
+ [/짐 보관|보관소|코인로커/,["Asakusa Station Toei","coin lockers Japan station"],"浅草駅"],
+ [/타카사고|다카사고/,["Keisei-Takasago Station"],"京成高砂駅"],
+ [/시바마타.*참배|참배길|구사당고|당고/,["Shibamata Taishakuten sando","kusa dango Shibamata"],"柴又帝釈天 参道"],
+ [/다이샤쿠텐|帝釈天|제경사/,["Shibamata Taishakuten","Taishakuten Daikyoji"],"柴又帝釈天 題経寺"],
+ [/야마모토테이|山本亭/,["Yamamoto-tei Shibamata garden","Yamamoto-tei Katsushika"],"山本亭"],
+ [/야기리|矢切/,["Yagiri no Watashi"],"矢切の渡し"],
+ [/시바마타|柴又/,["Shibamata Station"],"柴又駅"],
+ [/가미나리몬|雷門/,["Kaminarimon"],"雷門"],
+ [/나카미세|仲見世/,["Nakamise-dori"],"仲見世通り"],
+ [/센소지|浅草寺/,["Senso-ji at night","Senso-ji five-storied pagoda"],"浅草寺"],
+ [/돈키호테|ドン・キホーテ/,["Don Quijote store Japan"],"ドン・キホーテ"],
+ [/라멘|덮밥|저녁/,["ramen Japan","Asakusa restaurant street"],""],
+ [/사기노미야|鷺ノ宮/,["Saginomiya Station"],"鷺ノ宮駅"],
+ [/다카다노바바|高田馬場/,["Takadanobaba Station"],"高田馬場駅"],
+ [/아사쿠사|浅草/,["Asakusa Tokyo street"],"浅草"],
+];
+/* 일정에 없던 근처 추천(먹거리·명소) — 확인한 정보만, 출처는 화면 아래 */
+const EXTRA=[
+ {area:/시바마타|柴又/,title:"토라상 기념관",jp:"葛飾柴又寅さん記念館",q:["Tora-san Museum Shibamata"],sub:["영화 '남자는 괴로워' 기념관 · 야마모토테이 바로 옆","요금·시간은 현장 확인 (야마모토테이 통합권 있음)"]},
+ {area:/시바마타|柴又/,title:"참배길 먹거리",jp:"柴又 参道グルメ",q:["Shibamata senbei","unagi don"],sub:["손으로 굽는 센베이 가게와 장어덮밥 노포가 참배길에 있어요","가격은 가게마다 다름 · 현장 확인"]},
+ {area:/아사쿠사|浅草|센소지|가미나리몬/,title:"닌교야키 · 아게만주",jp:"人形焼 · 揚げまんじゅう",q:["ningyo-yaki Asakusa","agemanju Asakusa"],sub:["닌교야키: 가장 오래된 가게 '기무라야 본점'이 센소지 옆","튀긴 만주 '아게만주'도 나카미세 명물"]},
+ {area:/아사쿠사|浅草|센소지|가미나리몬/,title:"아사쿠사 문화관광센터 8층 전망대",jp:"浅草文化観光センター 8F",q:["Asakusa Culture Tourist Information Center","Nakamise view from Asakusa Culture Tourist Information Center"],sub:["가미나리몬 맞은편 · 무료 · 9:00~22:00","나카미세 불빛과 도쿄 스카이트리 야경이 한눈에"]},
+ {area:/아사쿠사|浅草|센소지|가미나리몬/,title:"아즈마바시 다리",jp:"吾妻橋 · 隅田川",q:["Azumabashi Tokyo Skytree","Sumida River Asakusa Skytree"],sub:["스미다강 건너 스카이트리와 아사히 맥주 본사 건물이 보이는 사진 명소"]},
+ {area:/저녁|라멘|아사쿠사/,title:"홋피 거리",jp:"ホッピー通り",q:["Hoppy Street Asakusa"],sub:["이자카야 골목 · 모츠니(곱창 조림)와 홋피 음료로 유명"]},
+];
+const CITY=(T.cityEn||"").trim();
+
+/* ---------- Wikimedia Commons 사진 찾기 ---------- */
+const CK="tp-tour-photos";const cache=(()=>{try{return JSON.parse(localStorage.getItem(CK)||"{}")}catch(_){return{}}})();
+const saveCache=()=>{try{localStorage.setItem(CK,JSON.stringify(cache))}catch(_){}};
+async function commons(q,n){const k=q+"|"+n;if(cache[k]&&Date.now()-cache[k].at<30*864e5)return cache[k].r;
+  const u="https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrnamespace=6&gsrlimit=15&gsrsearch="+encodeURIComponent(q+" filetype:bitmap")+"&prop=imageinfo&iiprop=url|size|mime|extmetadata&iiextmetadatafilter=Artist|LicenseShortName&iiurlwidth=1600";
+  const j=await (await fetch(u)).json();
+  const r=Object.values((j.query||{}).pages||{}).sort((a,b)=>(a.index||0)-(b.index||0)).map(p=>{const ii=(p.imageinfo||[])[0]||{},md=ii.extmetadata||{};
+    return{u:ii.thumburl||"",w:ii.width||0,h:ii.height||0,m:ii.mime||"",t:p.title||"",a:String((md.Artist||{}).value||"").replace(/<[^>]*>/g,"").replace(/\s+/g," ").trim().slice(0,50),l:String((md.LicenseShortName||{}).value||""),p:ii.descriptionurl||""}})
+    .filter(x=>x.u&&/jpe?g/i.test(x.m)&&x.w>=1000&&x.w>=x.h*1.15&&!/\bmap\b|logo|diagram|plan|chart|sign ?board only/i.test(x.t)).slice(0,n);
+  cache[k]={at:Date.now(),r};saveCache();return r}
+async function photosFor(qs,n){for(const q of qs){try{const r=await commons(q,n);if(r.length)return r}catch(_){}}return[]}
+let TAINT=false;
+function loadImg(src){return new Promise(res=>{const im=new Image();im.crossOrigin="anonymous";im.onload=()=>res(im);
+  im.onerror=()=>{const j=new Image();j.onload=()=>{TAINT=true;res(j)};j.onerror=()=>res(null);j.src=src};im.src=src})}
+
+/* ---------- 장면 만들기 ---------- */
+const clean=s=>String(s||"").replace(/\((?:[^()]*(?:LIVE JAPAN|GO TOKYO|에키탄|tripmate|루루부|GOOD LUCK TRIP|사용자)[^()]*)\)/g,"").replace(/\s+/g," ").trim();
+function subsFrom(it){const n=clean(it.note);const parts=n.split(/(?<=[.。])\s+|\s*→\s*(?=[^→]{25,})|·\s(?=[^·]{30,})/).map(s=>s.trim()).filter(Boolean);
+  const out=[];let cur="";for(const p of parts){if((cur+" "+p).length>58){if(cur)out.push(cur);cur=p}else cur=cur?cur+" "+p:p;if(out.length>=2)break}if(cur&&out.length<2)out.push(cur);
+  return out.map(s=>s.length>70?s.slice(0,68)+"…":s)}
+function sceneFor(it){let hits=KW.filter(k=>k[0].test(it.title));if(!hits.length)hits=KW.filter(k=>k[0].test(it.note||""));
+  const pl=it.placeId&&PLACES.find(p=>p.id===it.placeId);const qs=[];
+  if(pl&&pl.nameEn)qs.push(pl.nameEn+(CITY?" "+CITY:""));
+  hits.slice(0,3).forEach(h=>h[1].forEach(q=>qs.push(q)));
+  if(!qs.length&&CITY)qs.push(CITY+" street");
+  let tt=it.title.replace(/\s*\(.*?\)\s*/g," ").replace(/\s+/g," ").trim();if(tt.length>26&&/→/.test(tt)){const p=tt.split("→").map(x=>x.trim());tt=p[0]+" → … → "+p[p.length-1]}
+  return{kind:"item",title:tt,jp:(hits[0]&&hits[0][2])||"",time:it.time||"",subs:subsFrom(it),groups:hits.length>1?hits.slice(0,3).map(h=>h[1]):[qs],weight:/이동|→|특급|환승/.test(it.title)?0.8:1}}
+let SCENES=[],TOTAL=0,CRED=[];
+async function build(){
+  const list=ITEMS.filter(i=>i.day===DAY).sort((a,b)=>(a.time||"99:99").localeCompare(b.time||"99:99")||(a.createdAt||0)-(b.createdAt||0));
+  $("#ttl").textContent=`${T.city||CITY||"여행"} ${dayLabel(DAY)} 미리 걷기`;
+  SCENES=[{kind:"title",dur:5}];
+  const used=new Set();
+  list.forEach(it=>{SCENES.push(sceneFor(it));
+    const txt=it.title+" "+(it.note||"");EXTRA.forEach((e,i)=>{if(!used.has(i)&&e.area.test(txt)&&/명소|맛집|쇼핑/.test(it.kind||"")){used.add(i);SCENES.push({kind:"extra",title:e.title,jp:e.jp,time:"",subs:e.sub,groups:[e.q],weight:0.75})}})});
+  SCENES.push({kind:"end",dur:8});
+  const fixed=SCENES.filter(s=>s.dur).reduce((a,s)=>a+s.dur,0),wsum=SCENES.filter(s=>!s.dur).reduce((a,s)=>a+s.weight,0);
+  SCENES.filter(s=>!s.dur).forEach(s=>s.dur=Math.max(5,(180-fixed)*s.weight/wsum));
+  TOTAL=SCENES.reduce((a,s)=>a+s.dur,0);
+  $("#scenes").innerHTML=SCENES.map(s=>s.kind==="title"?"<li>시작 화면</li>":s.kind==="end"?"<li>끝 · 사진 출처</li>":`<li>${s.time?`<b>${esc(s.time)}</b> `:""}${esc(s.title)}${s.kind==="extra"?" <small>(추가 추천)</small>":""} · ${Math.round(s.dur)}초</li>`).join("");
+  /* 사진 불러오기 */
+  const work=SCENES.filter(s=>s.groups);let done=0;CRED=[];
+  for(const s of work){msg(`실제 사진 찾는 중… ${++done}/${work.length} · ${s.title}`);bar(done/work.length*100);
+    const per=s.groups.length>1?1:Math.min(3,Math.max(1,Math.round(s.dur/5)));s.pics=[];
+    for(const g of s.groups){const ps=await photosFor(g,per);for(const p of ps){const im=await loadImg(p.u);if(im){s.pics.push({im,cr:p});CRED.push(p)}}}}
+  const miss=work.filter(s=>!s.pics.length).length;
+  $("#cred").innerHTML=CRED.length?[...new Map(CRED.map(c=>[c.u,c])).values()].map(c=>`<div>📷 <a href="${esc(c.p)}" target="_blank" rel="noopener">${esc(c.t.replace(/^File:/,""))}</a> · ${esc(c.a||"작가 미상")} · ${esc(c.l||"자유 라이선스")}</div>`).join(""):"사진을 불러오지 못했어요.";
+  msg(CRED.length?`준비 완료 · 실제 사진 ${CRED.length}장 · 약 ${Math.round(TOTAL/60*10)/10}분${miss?` · 사진을 못 찾은 장면 ${miss}개는 장소 이름 화면으로 대신해요`:""}`:"사진을 불러오지 못했어요. 인터넷 연결을 확인하고 '사진 다시 찾기'를 눌러 주세요.");
+  bar(0);$("#play").disabled=false;$("#rec").disabled=!window.MediaRecorder||!cv.captureStream||TAINT;if(TAINT)msg($("#msg").textContent+" · 이 브라우저에서는 사진 보안 설정 때문에 파일 저장은 안 되고 재생만 돼요(화면 녹화 기능을 써 주세요)");drawFrame(0)}
+const msg=s=>{$("#msg").textContent=s};const bar=p=>{$("#bar").style.width=p+"%"};
+
+/* ---------- 그리기 ---------- */
+const FF='"Noto Sans KR",system-ui,sans-serif';
+function rr(x,y,w,h,r){cx.beginPath();cx.moveTo(x+r,y);cx.arcTo(x+w,y,x+w,y+h,r);cx.arcTo(x+w,y+h,x,y+h,r);cx.arcTo(x,y+h,x,y,r);cx.arcTo(x,y,x+w,y,r);cx.closePath()}
+function wrap(s,max){const out=[];let line="";for(const ch of s){if(cx.measureText(line+ch).width>max&&line){out.push(line);line=ch}else line+=ch}if(line)out.push(line);return out}
+function photo(p,t,seed,walk){const im=p.im;const z=walk?1.04+0.16*t:1.06+0.06*t;const sc=Math.max(W/im.width,H/im.height)*z;
+  const dir=(seed%4);const px=[0.5,0.38,0.62,0.5][dir],py=[0.5,0.48,0.52,0.42][dir];
+  const bob=walk?Math.sin(performance.now()/1000*2*Math.PI*1.6)*4:0;
+  const dw=im.width*sc,dh=im.height*sc;const ox=(W-dw)*(0.5+(px-0.5)*t*1.2),oy=(H-dh)*(0.5+(py-0.5)*t*1.2)+bob;
+  cx.drawImage(im,ox,oy,dw,dh)}
+function overlay(s,t){const subs=s.subs&&s.subs.length?s.subs:[""];const sub=subs[Math.min(subs.length-1,Math.floor(t*subs.length))];
+  cx.font=`900 30px ${FF}`;const w1=Math.max(cx.measureText(s.title).width,(cx.font=`500 20px ${FF}`,cx.measureText(s.jp||"").width))+70;
+  cx.fillStyle="rgba(10,20,30,.78)";rr(24,22,Math.min(w1,W-220),s.jp?96:62,18);cx.fill();
+  cx.fillStyle="#ff5a3c";cx.beginPath();cx.arc(48,48,8,0,7);cx.fill();
+  cx.fillStyle="#fff";cx.font=`900 30px ${FF}`;cx.textBaseline="top";cx.fillText(s.title,66,26,W-300);
+  if(s.jp){cx.fillStyle="#cfe4f1";cx.font=`500 20px ${FF}`;cx.fillText(s.jp,66,70)}
+  if(s.time){cx.font=`700 26px ${FF}`;const tw=cx.measureText(s.time).width+36;cx.fillStyle="rgba(255,255,255,.9)";rr(W-24-tw,22,tw,48,16);cx.fill();cx.fillStyle="#10304A";cx.fillText(s.time,W-24-tw+18,30)}
+  if(sub){cx.font=`700 30px ${FF}`;const lines=wrap(sub,W-240).slice(0,3);const bh=22+44*lines.length,y0=H-60-bh;
+    cx.fillStyle="rgba(0,0,0,.66)";rr(90,y0,W-180,bh,16);cx.fill();
+    if(s.kind==="extra"){cx.font=`900 20px ${FF}`;const tw=cx.measureText("추가 추천").width+28;cx.fillStyle="#ffc828";rr(110,y0-32,tw,32,10);cx.fill();cx.fillStyle="#2a1e00";cx.fillText("추가 추천",124,y0-28);cx.font=`700 30px ${FF}`}
+    cx.textAlign="center";lines.forEach((ln,i)=>{cx.lineWidth=4;cx.strokeStyle="rgba(0,0,0,.8)";cx.strokeText(ln,W/2,y0+14+i*44);cx.fillStyle="#fff";cx.fillText(ln,W/2,y0+14+i*44)});cx.textAlign="left"}}
+function credit(p){if(!p)return;cx.font=`400 16px ${FF}`;const s=`📷 ${p.cr.a||"작가 미상"} · ${p.cr.l||"자유 라이선스"} · Wikimedia Commons`;const w=cx.measureText(s).width+20;cx.fillStyle="rgba(0,0,0,.45)";rr(W-w-14,H-40,w,26,8);cx.fill();cx.fillStyle="#fff";cx.fillText(s,W-w-4,H-36)}
+function card(lines){const g=cx.createLinearGradient(0,0,0,H);g.addColorStop(0,"#0E78AA");g.addColorStop(1,"#DDF1FA");cx.fillStyle=g;cx.fillRect(0,0,W,H);cx.textAlign="center";cx.textBaseline="middle";
+  lines.forEach(([s,size,wt,col,y])=>{cx.font=`${wt} ${size}px ${FF}`;cx.fillStyle=col;cx.fillText(s,W/2,y,W-120)});cx.textAlign="left";cx.textBaseline="top"}
+function drawFrame(tt){let acc=0,si=0;while(si<SCENES.length-1&&tt>=acc+SCENES[si].dur){acc+=SCENES[si].dur;si++}
+  const s=SCENES[si];if(!s){return}const t=Math.min(1,(tt-acc)/s.dur);
+  cx.fillStyle="#0b1b26";cx.fillRect(0,0,W,H);
+  if(s.kind==="title")card([[`${T.city||CITY||""} ${dayLabel(DAY)} 미리 걷기`,72,900,"#fff",250],[(SCENES.filter(x=>x.kind==="item").slice(0,4).map(x=>x.title.split(/[ +→]/)[0]).join(" → ")),30,700,"#0b3550",350],["실제 장소 사진(Wikimedia Commons)으로 구성한 1인칭 미리보기",26,500,"#0b3550",420],["요금·시간은 일정 메모 기준 · 방문 전 다시 확인",22,400,"#1f4d66",600]]);
+  else if(s.kind==="end")card([["즐거운 여행 되세요!",68,900,"#fff",260],[`사진 ${new Set(CRED.map(c=>c.u)).size}장 · 출처: Wikimedia Commons (각 사진의 촬영자·라이선스는 페이지 아래 목록)`,24,600,"#0b3550",370],["사진은 실제 장소이지만 촬영 시점·계절은 다를 수 있어요",22,400,"#1f4d66",430]]);
+  else{const P=s.pics||[];
+    if(P.length){const k=P.length,seg=1/k,i=Math.min(k-1,Math.floor(t*k)),lt=(t-i*seg)/seg;photo(P[i],lt,si+i,s.kind!=="extra");
+      if(lt>0.9&&i<k-1){cx.globalAlpha=(lt-0.9)/0.1;photo(P[i+1],0,si+i+1,s.kind!=="extra");cx.globalAlpha=1}credit(P[i])}
+    else card([[s.title,52,900,"#fff",H/2-40],["(이 장소의 사진을 찾지 못했어요)",24,500,"#0b3550",H/2+30]]);
+    overlay(s,t)}
+  const f=Math.min(1,(tt-acc)/0.5,(acc+s.dur-tt)/0.5);if(f<1){cx.fillStyle=`rgba(0,0,0,${1-Math.max(0,f)})`;cx.fillRect(0,0,W,H)}
+  cx.fillStyle="#000";cx.fillRect(0,H-8,W,8);cx.fillStyle="#ff7a3c";cx.fillRect(0,H-8,W*tt/TOTAL,8)}
+let raf=0,start=0,rec=null,chunks=[];
+function play(recording){cancelAnimationFrame(raf);start=performance.now();$("#play").textContent="■ 정지";
+  const loop=()=>{const tt=(performance.now()-start)/1000;if(tt>=TOTAL){drawFrame(TOTAL-0.01);stop();return}drawFrame(tt);bar(tt/TOTAL*100);raf=requestAnimationFrame(loop)};loop()}
+function stop(){cancelAnimationFrame(raf);raf=0;$("#play").textContent="▶ 재생";if(rec&&rec.state!=="inactive")rec.stop()}
+$("#play").onclick=()=>{raf?stop():play(false)};
+$("#rec").onclick=()=>{try{const st=cv.captureStream(30);const types=["video/mp4;codecs=avc1","video/mp4","video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm"];const mt=types.find(t=>MediaRecorder.isTypeSupported(t))||"";
+    rec=new MediaRecorder(st,mt?{mimeType:mt,videoBitsPerSecond:6e6}:undefined);chunks=[];rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
+    rec.onstop=()=>{const type=rec.mimeType||mt||"video/webm";const b=new Blob(chunks,{type});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=`${T.city||"여행"}_${DAY}_미리걷기.${/mp4/.test(type)?"mp4":"webm"}`;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},4000);msg("영상 파일을 저장했어요 · 다운로드 폴더를 확인하세요");rec=null};
+    rec.start(1000);msg("녹화 중… 끝까지 재생되면 파일이 저장돼요(화면을 켜 두세요)");play(true)}catch(e){msg("이 브라우저는 영상 저장을 지원하지 않거나 사진 보안 설정 때문에 녹화할 수 없어요: "+e.message)}};
+$("#reload").onclick=()=>{try{localStorage.removeItem(CK)}catch(_){}for(const k in cache)delete cache[k];stop();$("#play").disabled=true;$("#rec").disabled=true;build()};
+$("#day").innerHTML=days.map(d=>`<option value="${d}" ${d===DAY?"selected":""}>${dayLabel(d)}</option>`).join("");
+$("#day").onchange=e=>{DAY=e.target.value;history.replaceState(null,"","?day="+DAY);stop();$("#play").disabled=true;$("#rec").disabled=true;build()};
+if(!days.length){msg("일정이 없어요. 여행 플래너에서 일정을 먼저 넣어 주세요(같은 브라우저에서 열어야 해요).");card([["일정이 없어요",56,900,"#fff",H/2]]);return}
+document.fonts&&document.fonts.ready.then(()=>build())||build();
+})();
+</script>
+</body>
+</html>

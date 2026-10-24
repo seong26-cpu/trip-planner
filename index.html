@@ -2164,7 +2164,7 @@ function rPlan(){
   $("#p-plan").innerHTML=`
   <div class="daytabs">${ds.map((d,i)=>`<button data-day="${d}" aria-pressed="${d===day}"><b>DAY ${i+1}</b><span>${dayLabel(d)} · ${S.items.filter(x=>x.day===d).length}곳</span></button>`).join("")}</div>
   <div class="card">
-    <div class="row between"><h2>DAY ${ds.indexOf(day)+1} · ${dayLabel(day)}</h2>${route?`<a class="btn sm" href="${esc(route)}" target="_blank" rel="noopener">구글 지도로 전체 동선 ↗</a>`:""}</div>
+    <div class="row between"><h2>DAY ${ds.indexOf(day)+1} · ${dayLabel(day)}</h2><span class="row">${pl.list.length?`<a class="btn sm primary" href="tour.html?day=${day}">🎬 미리 걷기 영상</a>`:""}${route?`<a class="btn sm" href="${esc(route)}" target="_blank" rel="noopener">구글 지도로 전체 동선 ↗</a>`:""}</span></div>
     <div class="lmapwrap"><div id="lmap" role="img" aria-label="하루 동선 지도"></div>${stops.length?"":`<div class="lmap-empty">추천 장소에서 "일정에 담기"를 누르면 여기에 번호 순서대로 표시돼요.</div>`}</div>
     <div class="legend"><span><i style="border-top-color:var(--route)"></i>${esc(modeName("지하철·전철"))}</span><span><i class="walk"></i>도보</span><span><i class="taxi"></i>택시</span><span>번호 = 방문 순서 · 초록 = 완료 · 핀을 누르면 주변 맛집·편의점 찾기</span></div><p class="src"><b id="mapLang"></b> · 지도 © OpenFreeMap·OpenMapTiles·OpenStreetMap 기여자. 확대하면 주변 건물·가게·역 이름이 보여요. 왼쪽 아래 축척 막대로 실제 거리를 가늠하세요.</p>
     <div class="stat3">
