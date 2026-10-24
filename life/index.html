@@ -1283,6 +1283,14 @@ V.more=()=>{
      <button class="p" data-act="pasteUrl" style="width:100%;margin-bottom:8px">📋 붙여넣고 연결</button>
      <label>Apps Script 웹 앱 URL</label><input id="surl" value="${esc(CFG.url)}" placeholder="https://script.google.com/macros/s/…/exec">
      <div class="row" style="margin-top:8px"><button class="p" data-act="connect">연결 테스트 & 저장</button>${CFG.sheetUrl?`<a class="btn" target="_blank" href="${esc(CFG.sheetUrl)}">시트 열기</a>`:''}</div>
+     ${CFG.url?`<div style="margin-top:12px;padding:12px;border-radius:12px;background:var(--brand2)"><b>🔄 서버 코드 업데이트</b> <span class="muted">(새 기능이 나오면 이따금 1번)</span>
+      <ol class="steps" style="margin:6px 0 8px;padding-left:20px;font-size:14px">
+       <li>아래 <b>① 코드 복사</b> 누르기</li>
+       <li><b>② Apps Script 열기</b> → 「나만의 생활 대시보드 DB」 프로젝트 클릭 → 왼쪽 <b>Code.gs</b> 클릭</li>
+       <li>편집기 글자를 <b>Ctrl+A</b>(전체 선택) → <b>Ctrl+V</b>(붙여넣기) → <b>Ctrl+S</b>(저장)</li>
+       <li>오른쪽 위 파란 <b>배포 ▾ → 배포 관리</b> → 연필 ✏️ → 버전 <b>「새 버전」</b> → <b>배포</b></li>
+      </ol><p class="muted" style="margin:0 0 8px">웹 앱 URL은 그대로라서 앱에서 다시 붙여넣을 필요 없어요.</p>
+      <div class="grid2"><button class="p" data-act="copyCode">① 코드 복사</button><a class="btn" target="_blank" rel="noopener" href="https://script.google.com/home">② Apps Script 열기</a></div></div>`:''}
      <details style="margin-top:10px"><summary><b>처음 설정 방법 (약 5분, 한 번만)</b></summary><ol class="steps">
       <li>구글 드라이브에서 <b>「나만의 생활 대시보드 DB」</b> 시트를 엽니다 (이미 만들어 두었어요).</li>
       <li>메뉴 <b>확장 프로그램 → Apps Script</b> 클릭.</li>
