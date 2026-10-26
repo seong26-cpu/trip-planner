@@ -1621,10 +1621,30 @@ const SAVES_KEY="trip-planner-saves-v1";
 function saves(){try{return JSON.parse(localStorage.getItem(SAVES_KEY)||"[]")}catch(e){return[]}}
 function writeSaves(a,fromRemote){try{localStorage.setItem(SAVES_KEY,JSON.stringify(a));if(!fromRemote){localUpdatedAt=Date.now();persist(true);Sync.schedule()}return true}catch(e){toast("이 기기 저장 공간이 가득 찼어요. 오래된 저장본을 지우거나 백업을 내보내세요.");return false}}
 function snapshot(){const o={trip:S.trip};COLS.forEach(c=>o[c]=S[c]);return JSON.parse(JSON.stringify(o))}
-function saveTo(no){const a=saves();if(!S.trip)S.trip=Object.assign({},DEFAULT_TRIP);S.trip.saveNo=no;const snap=snapshot();const old=a.find(s=>s.no===no);
-  const rec={no,name:(old&&old.name)||T().title||("여행 "+no),city:T().city,start:T().start,end:T().end,savedAt:Date.now(),counts:{items:S.items.length,places:S.places.filter(p=>!p.rec).length,expenses:S.expenses.length},data:snap};
-  const next=a.filter(s=>s.no!==no);next.push(rec);if(writeSaves(next)){persist();render();toast(`#${no}에 저장했어요`)}}
-function loadSave(no){const s=saves().find(x=>x.no===no);if(!s)return;const d=s.data;S.trip=d.trip||null;COLS.forEach(c=>S[c]=Array.isArray(d[c])?d[c]:[]);if(S.trip)S.trip.saveNo=no;day=null;commit();toast(`#${no} "${s.name}"을 불러왔어요`)}
+const DEL_KEY="trip-planner-saves-del";
+function delMarks(){try{return JSON.parse(localStorage.getItem(DEL_KEY)||"{}")}catch(e){return{}}}
+function setDelMarks(o){try{localStorage.setItem(DEL_KEY,JSON.stringify(o))}catch(_){}}
+const sidOf=s=>s.sid||("legacy-"+s.no);
+const nextNo=()=>saves().reduce((m,x)=>Math.max(m,x.no),0)+1;
+function countsOf(d){return{items:(d.items||[]).length,places:(d.places||[]).filter(p=>!p.rec).length,expenses:(d.expenses||[]).length}}
+function saveTo(no,quiet){const a=saves();if(!S.trip)S.trip=Object.assign({},DEFAULT_TRIP);const old=a.find(x=>x.no===no);const sid=old?sidOf(old):"s"+uid();
+  S.trip.saveNo=no;S.trip.saveSid=sid;const snap=snapshot();
+  const rec={sid,no,name:(old&&old.name)||T().title||("여행 "+no),city:T().city,start:T().start,end:T().end,savedAt:Date.now(),counts:countsOf(snap),data:snap};
+  const next=a.filter(x=>x.no!==no);next.push(rec);if(writeSaves(next)){persist();if(!quiet){render();toast(`#${no}에 저장했어요`)}}return no}
+function loadSave(no){const s=saves().find(x=>x.no===no);if(!s)return;const d=JSON.parse(JSON.stringify(s.data||{}));S.trip=d.trip||null;COLS.forEach(c=>S[c]=Array.isArray(d[c])?d[c]:[]);if(S.trip){S.trip.saveNo=no;S.trip.saveSid=sidOf(s)}day=null;commit();toast(`#${no} "${s.name}"을 불러왔어요`)}
+/* 지금 여행에 내용이 있으면 저장 목록에 보관(편집 중인 번호가 있으면 그 번호에 덮어쓰기) */
+function sig(d){const t=Object.assign({},d.trip||{});delete t.saveNo;delete t.saveSid;delete t.recStatus;const o={t};COLS.forEach(c=>o[c]=d[c]||[]);return JSON.stringify(o)}
+function sameSave(d){const g=sig(d);const x=saves().find(v=>v.data&&sig(v.data)===g);return x?x.no:0}
+function hasContentOf(d){return !!(d&&((d.items||[]).length||(d.bookings||[]).length||(d.expenses||[]).length||(d.checklist||[]).length||(d.bucket||[]).length||(d.notes||[]).length||(d.memories||[]).length||(d.places||[]).some(p=>!p.rec)))}
+function archiveCurrent(){if(!S.trip||!hasContentOf(S))return 0;{const same=sameSave(S);if(same)return same}const cur=saves().find(x=>(T().saveSid&&sidOf(x)===T().saveSid)||x.no===T().saveNo);return saveTo(cur?cur.no:nextNo(),true)}
+function addAutoSave(d,label){if(!hasContentOf(d)||sameSave(d))return 0;const a=saves();const no=a.reduce((m,x)=>Math.max(m,x.no),0)+1;const t=d.trip||{};
+  a.push({sid:"s"+uid(),no,name:`${t.title||t.city||"여행"} · 자동 보관(${label})`,city:t.city||"",start:t.start||"",end:t.end||"",savedAt:Date.now(),counts:countsOf(d),data:JSON.parse(JSON.stringify(d)),auto:true});writeSaves(a,true);return no}
+/* 두 기기(또는 로그아웃 중 편집)의 저장 목록 합치기: 지운 것은 지운 채로, 같은 저장본은 최근 것으로 */
+function mergeSaves(local,remote,dl,dr){const del=Object.assign({},dr||{},dl||{});const by={};
+  [...(remote||[]),...(local||[])].forEach(x=>{const id=sidOf(x);if(del[id])return;const o=by[id];if(!o||(x.savedAt||0)>(o.savedAt||0))by[id]=Object.assign({},x,{sid:id})});
+  const arr=Object.values(by).sort((a,b)=>a.no-b.no||(a.savedAt||0)-(b.savedAt||0));let mx=arr.reduce((m,x)=>Math.max(m,x.no),0);const used=new Set();
+  arr.forEach(x=>{if(used.has(x.no))x.no=++mx;used.add(x.no)});return{arr,del}}
+function fixSaveNo(){if(!S.trip||!S.trip.saveSid)return;const x=saves().find(v=>sidOf(v)===S.trip.saveSid);if(x)S.trip.saveNo=x.no;else delete S.trip.saveNo}
 function addDoc(col,data){
   if(EDIT&&EDIT.col===col){const o=S[col].find(r=>r.id===EDIT.id);EDIT=null;
     if(o){["id","createdAt","done","visited","rec","pid","src"].forEach(k=>delete data[k]);
@@ -1704,19 +1724,32 @@ const Sync={user:null,ready:false,state:"off",last:0,timer:null,db:null,auth:nul
   async logout(){if(this.auth){await this.auth.signOut();toast("로그아웃했어요. 이 기기의 데이터는 그대로 남아 있어요")}},
   ref(){return this.db.collection("users").doc(this.user.uid)},
   schedule(){if(!this.user)return;clearTimeout(this.timer);this.timer=setTimeout(()=>this.push(),1500)},
-  payload(){const o={updatedAt:localUpdatedAt||Date.now(),trip:S.trip||null,saves:saves()};COLS.forEach(c=>o[c]=S[c]);return JSON.parse(JSON.stringify(o))},
+  payload(){const o={updatedAt:localUpdatedAt||Date.now(),trip:S.trip||null,saves:saves(),savesDel:delMarks()};COLS.forEach(c=>o[c]=S[c]);return JSON.parse(JSON.stringify(o))},
   async push(){if(!this.user)return;this.state="saving";this.paint();
     try{const data=this.payload();const size=JSON.stringify(data).length;if(size>900000){this.state="error";this.err="데이터가 너무 커요(저장 목록 일부 삭제 필요)";this.paint();return}
-      await this.ref().collection("data").doc("main").set(data);await this.pushPhotos();this.state="ok";this.last=Date.now();this.paint()}
+      await this.ref().collection("data").doc("main").set(data);try{localStorage.setItem("tp-last-sync",String(data.updatedAt))}catch(_){}await this.pushPhotos();this.state="ok";this.last=Date.now();this.paint()}
     catch(e){this.state="error";this.err=(e&&e.code)==="permission-denied"?"권한 오류(보안 규칙 확인)":"네트워크 확인";this.paint()}},
   async pushPhotos(){const done=JSON.parse(localStorage.getItem("tp-photo-up")||"[]");const set=new Set(done);
     for(const id of allPhotoIds()){if(set.has(id)||!PH[id])continue;if(PH[id].length>950000)continue;await this.ref().collection("photos").doc(id).set({data:PH[id],at:Date.now()});set.add(id)}
     try{localStorage.setItem("tp-photo-up",JSON.stringify([...set]))}catch(_){}},
   async pull(){this.state="saving";this.paint();
     try{const snap=await this.ref().collection("data").doc("main").get();
-      if(snap.exists){const r=snap.data();const rAt=Number(r.updatedAt)||0;
-        if(rAt>localUpdatedAt){S.trip=r.trip||null;COLS.forEach(c=>S[c]=Array.isArray(r[c])?r[c]:[]);if(Array.isArray(r.saves))writeSaves(r.saves,true);localUpdatedAt=rAt;persist(true);day=null;toast("계정에 저장된 데이터를 불러왔어요")}
-        else if(rAt<localUpdatedAt){await this.push()}}
+      if(snap.exists){const r=snap.data();const rAt=Number(r.updatedAt)||0;const last=Number(localStorage.getItem("tp-last-sync"))||0;
+        /* ① 저장 목록은 항상 합침(어느 쪽도 지워지지 않게) */
+        const before=JSON.stringify(saves().map(sidOf).sort());const m=mergeSaves(saves(),Array.isArray(r.saves)?r.saves:[],delMarks(),r.savesDel||{});writeSaves(m.arr,true);setDelMarks(m.del);
+        const remoteSnap={trip:r.trip||null};COLS.forEach(c=>remoteSnap[c]=Array.isArray(r[c])?r[c]:[]);
+        const remoteChanged=rAt>last,localChanged=localUpdatedAt>last&&hasContentOf(S);
+        let msg="";
+        if(remoteChanged&&localChanged&&rAt!==localUpdatedAt){
+          /* ② 양쪽 다 바뀜(다른 기기 또는 로그아웃 중 편집): 최근 것을 화면에, 다른 쪽은 저장 목록에 자동 보관 */
+          if(rAt>localUpdatedAt){const no=addAutoSave(snapshot(),"이 기기에서 고친 내용");S.trip=remoteSnap.trip;COLS.forEach(c=>S[c]=remoteSnap[c]);localUpdatedAt=rAt;msg=`계정의 최신 내용을 불러왔어요. 이 기기에서 고친 내용은 저장 목록 #${no}에 보관했어요`}
+          else{const no=addAutoSave(remoteSnap,"다른 기기에서 고친 내용");msg=no?`다른 기기에서 고친 내용은 저장 목록 #${no}에 보관했어요`:""}
+          day=null}
+        else if(remoteChanged&&rAt>localUpdatedAt){S.trip=remoteSnap.trip;COLS.forEach(c=>S[c]=remoteSnap[c]);localUpdatedAt=rAt;day=null;msg="계정에 저장된 데이터를 불러왔어요"}
+        fixSaveNo();persist(true);
+        const changedSaves=before!==JSON.stringify(saves().map(sidOf).sort())||JSON.stringify((r.saves||[]).map(sidOf).sort())!==JSON.stringify(saves().map(sidOf).sort());
+        if(localUpdatedAt!==rAt||changedSaves||Object.keys(m.del).length!==Object.keys(r.savesDel||{}).length)await this.push();else{try{localStorage.setItem("tp-last-sync",String(rAt))}catch(_){}}
+        if(msg)toast(msg)}
       else if(S.trip||S.items.length||saves().length){await this.push();toast("이 기기 데이터를 계정에 올렸어요")}
       await this.pullPhotos();this.state="ok";this.last=Date.now();
       try{if(!lsj("tp-ai-url","")&&!((lsj("life.cfg",{})||{}).url)){const ls=await this.ref().collection("life").doc("state").get();const u=ls.exists&&ls.data().cfg&&ls.data().cfg.url;if(u){lss("tp-ai-url",u);toast("✅ '나의 하루' AI 서버를 연결했어요 (WHAT 사용 가능)")}}}catch(_){}}
@@ -2884,12 +2917,12 @@ document.addEventListener("click",async e=>{
     case "refreshPacks":await loadPackIndex(true);render();toast(packIndexErr||"팩 목록을 새로 불러왔어요");break;
     case "dlPack":{const ent=(packIndex&&packIndex.packs||[]).find(p=>p.id===id);if(!ent)break;b.disabled=true;b.textContent="내려받는 중…";try{const pk=await downloadPack(ent);await applyPackToTrip(pk)}catch(err){toast("팩을 내려받지 못했어요. 인터넷 연결을 확인하세요");render()}break}
     case "usePack":await applyPackToTrip(PACKS[id]);break;
-    case "saveNew":{const a=saves();saveTo(a.reduce((m,s)=>Math.max(m,s.no),0)+1);break}
-    case "saveOver":saveTo(T().saveNo);break;
-    case "loadSave":{const no=Number(b.dataset.no);if(S.trip&&S.trip.saveNo!==no&&!confirm("지금 화면의 내용을 저장하지 않았다면 사라져요. 불러올까요?"))break;loadSave(no);break}
+    case "saveNew":{saveTo(nextNo());break}
+    case "saveOver":{const cur=saves().find(x=>(T().saveSid&&sidOf(x)===T().saveSid)||x.no===T().saveNo);saveTo(cur?cur.no:nextNo());break}
+    case "loadSave":{const no=Number(b.dataset.no);if(S.trip&&S.trip.saveNo!==no&&hasContentOf(S)){if(confirm("불러오기 전에 지금 화면의 여행을 저장 목록에 보관할까요?\n[확인] 보관하고 불러오기\n[취소] 보관하지 않고 불러오기")){const k=archiveCurrent();if(k)toast(`지금 여행을 #${k}에 보관했어요`)}}loadSave(no);break}
     case "renameSave":{const no=Number(b.dataset.no);const a=saves();const s=a.find(x=>x.no===no);if(!s)break;const nm=prompt("새 이름",s.name);if(nm&&nm.trim()){s.name=nm.trim().slice(0,40);writeSaves(a);render()}break}
-    case "delSave":{const no=Number(b.dataset.no);if(!confirm(`#${no} 저장본을 삭제할까요? 되돌릴 수 없어요.`))break;writeSaves(saves().filter(x=>x.no!==no));if(T().saveNo===no){delete S.trip.saveNo;persist()}render();toast(`#${no}를 삭제했어요`);break}
-    case "newTrip":{if(!confirm("지금 화면을 비우고 새 여행을 시작할까요? (저장 목록은 그대로예요)"))break;S.trip=null;COLS.forEach(c=>S[c]=[]);day=null;commit();break}
+    case "delSave":{const no=Number(b.dataset.no);if(!confirm(`#${no} 저장본을 삭제할까요? 되돌릴 수 없어요.`))break;{const x=saves().find(v=>v.no===no);if(x){const dm=delMarks();dm[sidOf(x)]=Date.now();setDelMarks(dm)}}writeSaves(saves().filter(x=>x.no!==no));if(T().saveNo===no){delete S.trip.saveNo;persist()}render();toast(`#${no}를 삭제했어요`);break}
+    case "newTrip":{if(!confirm("새 여행을 시작할까요?\n지금 여행은 저장 목록에 자동으로 보관하고, 일정·예약·경비·준비물·버킷리스트·메모를 비워요."))break;const k=archiveCurrent();S.trip=null;COLS.forEach(c=>S[c]=[]);day=null;commit();toast(k?`지금 여행을 #${k}에 보관하고 새 여행을 시작했어요`:"새 여행을 시작했어요");break}
     case "pickHotel":{const t=Object.assign({},T());t.hotelPick=t.hotelPick===id?"":id;saveTrip(t);break}
     case "toggleItem":{const x=S.items.find(r=>r.id===id);if(!x)break;x.done=!x.done;syncAuto(x,x.done);commit();toast(x.done?"실제 경비에 넣었어요":"실제 경비에서 뺐어요");break}
     case "delItem":armDelete(b,()=>{const x=S.items.find(r=>r.id===id);if(x&&x.done)syncAuto(x,false);delDoc("items",id)});break;
@@ -2984,6 +3017,11 @@ document.addEventListener("input",e=>{if(e.target.id==="if-title"){const p=S.pla
 document.addEventListener("submit",async e=>{
   e.preventDefault();const f=e.target,d=formData(f);delete d.attfile;{const ai=f.querySelector("input[data-att]");PENDING_ATT=ai&&ai.files.length?await saveAtts(ai):null}
   if(f.id==="tripForm"){const apply=e.submitter&&e.submitter.value==="apply";{const dd=dictFor(d.city);if(dd){if(!d.cityEn)d.cityEn=dd[1];if(!d.to)d.to=dd[2]}}const trip=Object.assign({},T(),{title:d.title,city:d.city,cityEn:d.cityEn,from:(d.from||"").toUpperCase(),to:(d.to||"").toUpperCase(),start:d.start,end:d.end,budget:Number(d.budget)||0,bud:Object.fromEntries(BCATS.map(k=>[k,Number(d["b_"+k])||0])),cur:d.cur,rate:Number(d.rate)||0,lang:d.lang,travelers:d.travelers.split(",").map(s=>s.trim()).filter(Boolean)});
+    {const old=S.trip;const oldCity=old&&(old.cityEn||old.city),newCity=trip.cityEn||trip.city;
+     if(old&&oldCity&&newCity&&oldCity.trim().toLowerCase()!==newCity.trim().toLowerCase()&&hasContentOf(S)){
+       if(confirm(`도시가 '${old.city||old.cityEn}'에서 '${trip.city||trip.cityEn}'(으)로 바뀌었어요. 새 여행으로 시작할까요?\n\n[확인] '${old.title||old.city}'는 저장 목록에 보관하고, 일정·예약·경비·준비물·버킷리스트·메모를 비운 새 여행으로 시작\n[취소] 지금 내용을 그대로 두고 도시만 바꾸기`)){
+         const k=archiveCurrent();COLS.forEach(c=>S[c]=[]);day=null;delete trip.saveNo;delete trip.saveSid;delete trip.hotelPick;delete trip.recStatus;delete trip.rateFrom;
+         if(!d.title||d.title===old.title||/여행$/.test(d.title))trip.title=(trip.city||trip.cityEn)+" 여행";if(k)setTimeout(()=>toast(`'${old.title||old.city}'를 저장 목록 #${k}에 보관했어요`),1800)}}}
     if(apply&&(!trip.title||trip.title==="새 여행")&&trip.city)trip.title=trip.city+" 여행";if(apply){const ab=e.submitter;if(ab){ab.disabled=true;ab.textContent="추천 찾는 중…"}const n=await applyRecs(trip);S.trip=trip;commit();toast(n?`추천 ${n}곳·숙소 ${S.hotels.length}곳을 반영했어요`:"추천 칸을 비워뒀어요");}else{saveTrip(trip);toast("저장했어요")}return}
   if(f.id==="itemForm"){let ll=parseLL(d.ll),how="";const btn=f.querySelector("button.primary");
     if(!ll&&!d.ll){const m=findLL(d.title);if(m){ll=m;how=m.how}else{if(btn){btn.disabled=true;btn.textContent="📍 위치 찾는 중…"}try{const r=await geocodeBest(d.title,d.query);if(r){ll=r;how=r.how}}catch(_){}}}
