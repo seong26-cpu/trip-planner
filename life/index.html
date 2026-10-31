@@ -272,6 +272,7 @@ dialog{border-radius:24px}
 <script src="ex2.js"></script>
 <script src="routines.js"></script>
 <script src="recipes.js"></script>
+<script src="recipes2.js"></script>
 <script>
 /* ===================== 기본 ===================== */
 const TABS=[['home','M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z','홈'],['plan','M4 6h16v14H4zM4 10h16M8 3v4M16 3v4','일정'],['cook','M3 11h18a9 7 0 0 1-18 0zM8 7c0-2 2-2 2-4M13 7c0-2 2-2 2-4','요리'],['fit','M6 7v10M3 9v6M18 7v10M21 9v6M6 12h12','운동'],['more','M4 6h16M4 12h16M4 18h16','더보기']];
@@ -782,16 +783,34 @@ function matchRecipes(have){
     return {r,okM,okO,miss:r.main.filter(w=>!hasIng(have,w)),score:okM.length*3+okO.length-(r.main.length-okM.length)*4}})
    .filter(x=>x.okM.length||x.okO.length>=2).sort((a,b)=>b.score-a.score);
 }
+/* 레시피 검색: 이름·재료·분류어·동의어(생선→고등어·갈치…)·부분 일치 + 점수순 */
+function rcpSearch(q,cat){q=String(q||'').trim();const SY=window.RCP_SYN||{};
+  const words=q?[...new Set(q.split(/[\s,]+/).filter(Boolean))]:[];const terms=new Set();words.forEach(w=>{terms.add(w);(SY[w]||[]).forEach(x=>terms.add(x));const w2=w.replace(/(요리|반찬|레시피|만들기|으로|로)$/,'');if(w2&&w2!==w){terms.add(w2);(SY[w2]||[]).forEach(x=>terms.add(x))}});
+  return RECIPES.map(r=>{if(cat&&r.c!==cat)return null;if(!q)return {r,sc:1};let sc=0;const tg=r.tag||[];
+    for(const t of terms){if(r.n.includes(t))sc+=8;if(r.main.some(m=>m.includes(t)||t.includes(m)&&m.length>1))sc+=5;if(tg.some(g=>g.includes(t)))sc+=5;if(r.c.includes(t))sc+=3;if(r.opt.some(m=>m.includes(t)))sc+=2;if((r.sea||'').includes(t))sc+=1}
+    return sc?{r,sc}:null}).filter(Boolean).sort((a,b)=>b.sc-a.sc).map(x=>x.r)}
+const AIRCP=()=>LS.get('aiRcp',{});
+async function aiRecipeSearch(q){if(!q||CK.busy.rq||!CFG.url)return;const all=AIRCP();if(all[q])return;CK.busy.rq=q;if(tab==='cook')render();
+  try{const r=await ai(`너는 한국 가정식 요리 도우미야. 사용자가 레시피 검색창에 "${q}"라고 입력했어. "${q}"가 재료면 그 재료로 만드는 대표 가정식, 요리 이름이면 그 요리와 비슷한 요리, 분류(예: 생선, 국, 반찬)면 그 분류의 대표 요리를 5개 추천해. 누구나 집에서 만들 수 있는 흔한 요리로, 없는 요리를 지어내지 마. kcal는 1인분 대략 추정치. ${RULE} 반드시 다음 JSON 형식으로만 답해: ${RECIPE_JSON}`);
+    if(r&&r.dishes&&r.dishes.length){r._at=stamp();all[q]=r;const ks=Object.keys(all);while(ks.length>20)delete all[ks.shift()];LS.set('aiRcp',all)}else toast('AI가 레시피를 찾지 못했어요. 다른 말로 검색해 보세요',3500)}
+  catch(e){toast(e.message,4000)}
+  CK.busy.rq='';if(tab==='cook')render()}
 function cookHome(){
   const cats=[['밑반찬','#ffe9d6','#9a3412'],['메인반찬','#fee2e2','#991b1b'],['국/탕','#fef3c7','#854d0e'],['찌개','#ffedd5','#9a3412'],['면/만두','#fef9c3','#713f12'],['밥/죽','#ecfccb','#3f6212'],['간식','#fce7f3','#9d174d'],['샐러드','#e0e7ff','#3730a3']];
   const q=(CK.q||'').trim(),cat=sub.ccat||'';
   let res=[];
-  if(q||cat){res=RECIPES.filter(r=>(!cat||r.c===cat)&&(!q||(r.n+r.main.join()+r.opt.join()).includes(q))).map(r=>({n:r.n,sub:r.c+' · '+r.min+'분',k:'b|'+r.n}));
-    if(q)DB.레시피.filter(x=>(x.이름+x.재료).includes(q)).forEach(x=>res.push({n:x.이름,sub:'내 레시피 · '+(x.출처||''),k:'s|'+x.id}))}
+  if(q||cat){res=rcpSearch(q,cat).map(r=>({n:r.n,sub:r.c+' · '+r.min+'분 · '+r.main.join(', '),k:'b|'+r.n}));
+    if(q)DB.레시피.filter(x=>(x.이름+x.재료).includes(q)).forEach(x=>res.unshift({n:x.이름,sub:'내 레시피 · '+(x.출처||''),k:'s|'+x.id}))}
+  const aiR=q?AIRCP()[q]:null,syn=q?((window.RCP_SYN||{})[q]||[]).filter(w=>!w.includes('/')).slice(0,8):[];
   return `<div class="row" style="flex-wrap:nowrap"><input id="rq" placeholder="요리 이름이나 재료로 검색 (예: 계란)" value="${esc(CK.q||'')}" style="flex:1"><button class="p" data-act="rsearch">검색</button></div>
-  <div class="chips" style="margin-top:8px">${['계란','두부','김치','돼지고기','감자'].map(b=>`<span class="chip ${q===b?'on':''}" data-act="rq" data-v="${b}"># ${b}</span>`).join('')}</div>
-  ${q||cat?`<div class="card"><h2>검색 결과 ${res.length}개<span class="sp"></span><button class="x" data-act="rclear">✕ 지우기</button></h2>
-   ${res.length?res.map(x=>`<div class="rcp" data-act="recipe" data-k="${esc(x.k)}">${dishImg(x.n)}<div class="b"><div class="t">${esc(x.n)}</div><div class="muted">${esc(x.sub)}</div></div><span class="muted">›</span></div>`).join(''):'<div class="empty">앱 안에서 찾지 못했어요</div>'}
+  <div class="chips" style="margin-top:8px">${['계란','두부','김치','돼지고기','생선','해산물','닭','국'].map(b=>`<span class="chip ${q===b?'on':''}" data-act="rq" data-v="${b}"># ${b}</span>`).join('')}</div>
+  ${q||cat?`<div class="card"><h2>검색 결과 ${res.length+(aiR?aiR.dishes.length:0)}개<span class="sp"></span><button class="x" data-act="rclear">✕ 지우기</button></h2>
+   ${res.length?res.map(x=>`<div class="rcp" data-act="recipe" data-k="${esc(x.k)}">${dishImg(x.n)}<div class="b"><div class="t">${esc(x.n)}</div><div class="muted">${esc(x.sub)}</div></div><span class="muted">›</span></div>`).join(''):(q?'':'<div class="empty">이 분류의 레시피가 없어요</div>')}
+   ${q?(aiR?`<h3 style="margin:14px 0 4px">🤖 AI가 찾은 ‘${esc(q)}’ 요리 ${aiR.dishes.length}개 <span class="muted" style="font-weight:400">누르면 만드는 법</span></h3>${aiR.dishes.map((d,i)=>dishCard(d,i,'q')).join('')}<button class="x" data-act="rAiAgain">🔄 다시 찾기</button>`
+     :CK.busy.rq===q?`<div class="notice" style="margin-top:8px">🤖 AI가 ‘${esc(q)}’ 요리를 찾는 중이에요… (10~30초)</div>`
+     :CFG.url?`<button class="p" style="width:100%;margin-top:8px" data-act="rAi">🤖 AI에게 ‘${esc(q)}’ 요리 더 찾아달라기</button>`
+     :(res.length?'':`<div class="empty" style="padding:8px">앱에 저장된 레시피 중에는 없어요.<br><span class="muted">더보기 → 설정에서 서버를 연결하면 AI가 대신 찾아줘요.</span></div>`)):''}
+   ${syn.length?`<div class="chips" style="margin-top:8px"><span class="muted" style="align-self:center;font-size:12px">이렇게도 찾아보세요</span>${syn.map(w=>`<span class="chip" data-act="rq" data-v="${esc(w)}">${esc(w)}</span>`).join('')}</div>`:''}
    ${q?`<a class="btn" style="width:100%;margin-top:8px" target="_blank" rel="noopener" href="${q10(q)}">📸 만개의레시피에서 '${esc(q)}' 사진 레시피 보기</a>`:''}</div>`:''}
   <h3 style="margin:16px 0 4px">레시피 분류</h3><div class="cats">${cats.map(c=>`<a href="#" data-act="ccat" data-v="${c[0]}"><i style="background:${c[1]};color:${c[2]};${cat===c[0]?'outline:3px solid var(--brand)':''}">${c[0].charAt(0)}</i>${c[0]}</a>`).join('')}</div>
   <h3 style="margin:16px 0 4px">기본 가정식 ${RECIPES.length}가지 <span class="muted" style="font-weight:400">누르면 사진·만드는 법</span></h3>
@@ -850,8 +869,10 @@ AFTER.cook=()=>{
   const rq=$('#rq');if(rq){rq.oninput=()=>{CK.q=rq.value;saveCK()};rq.onkeydown=e=>{if(e.key==='Enter')ACT.rsearch()}}
   fillImgs();
 };
-ACT.rsearch=()=>{const v=$('#rq').value.trim();CK.q=v;saveCK();if(!v)return toast('검색어를 입력해 주세요');render()};
-ACT.rq=d=>{CK.q=CK.q===d.v?'':d.v;saveCK();render()};
+ACT.rsearch=()=>{const v=$('#rq').value.trim();CK.q=v;saveCK();if(!v)return toast('검색어를 입력해 주세요');render();if(rcpSearch(v).length<3&&CFG.url)aiRecipeSearch(v)};
+ACT.rAi=()=>aiRecipeSearch(CK.q.trim());
+ACT.rAiAgain=()=>{const all=AIRCP();delete all[CK.q.trim()];LS.set('aiRcp',all);aiRecipeSearch(CK.q.trim())};
+ACT.rq=d=>{CK.q=CK.q===d.v?'':d.v;saveCK();render();if(CK.q&&rcpSearch(CK.q).length<3&&CFG.url)aiRecipeSearch(CK.q)};
 ACT.rclear=()=>{CK.q='';sub.ccat='';saveCK();render()};
 ACT.ccat=d=>{if(d.v==='__all')return ACT.showAll();sub.ccat=sub.ccat===d.v?'':d.v;render()};
 ACT.showAll=()=>{const dl=$('#dlg');dl.innerHTML=`<div style="padding:18px"><h3>기본 가정식 ${RECIPES.length}가지</h3>${RECIPES.map(r=>`<div class="rcp" data-k="b|${esc(r.n)}">${dishImg(r.n)}<div class="b"><div class="t">${esc(r.n)}</div><span class="tag">${r.c}</span> <span class="muted">${r.min}분 · 주재료 ${esc(r.main.join(', '))}</span></div></div>`).join('')}<div class="row" style="margin-top:12px"><span style="flex:1"></span><button class="p" id="aClose">닫기</button></div></div>`;
@@ -864,7 +885,7 @@ ACT.recipe=d=>{
   const [src,key]=String(d.k).split('|');const have=myIng();let o;
   if(src==='b'){const r=RECIPES.find(x=>x.n===key);if(!r)return;o={name:r.n,min:r.min,cat:r.c,need:[...r.main.map(n=>({name:n})),...r.opt.map(n=>({name:n,opt:1}))],sea:r.sea,steps:r.st,from:'기본 가정식 예시(2인분 기준) · 간은 취향껏'}}
   else if(src==='s'){const x=DB.레시피.find(y=>y.id===key);if(!x)return;o={name:x.이름,min:x.시간,kcal:x.칼로리,need:String(x.재료||'').split(/[,\n]/).map(s=>s.trim()).filter(Boolean).map(n=>({name:n})),steps:String(x.조리법||'').split('\n').map(s=>s.replace(/^\d+[.)]\s*/,'').trim()).filter(Boolean),from:'내 레시피 · '+(x.출처||''),id:x.id}}
-  else{const r=src==='scan'?LS.get('lastScan',{}):CK.fridge||{};const x=(r.dishes||[])[+key];if(!x)return;
+  else{const r=src==='scan'?LS.get('lastScan',{}):src==='q'?(AIRCP()[(CK.q||'').trim()]||{}):CK.fridge||{};const x=(r.dishes||[])[+key];if(!x)return;
     o={name:x.name,min:x.minutes,kcal:x.kcal,need:(x.need&&x.need.length?x.need:[...(x.use||[]),...(x.missing||[])].map(n=>({name:n}))),steps:x.steps||[],tip:x.tip,from:'AI 추천 (칼로리·분량은 추정)',ai:{src,i:+key}}}
   const rows=o.need.map(n=>{const ok=hasIng(have,String(n.name).replace(/\s*\(.*\)/,''));return `<div class="drow"><span class="${ok?'ok':n.opt?'':'no'}" style="flex:0 0 22px">${ok?'✓':n.opt?'·':'✕'}</span><b style="${n.opt&&!ok?'font-weight:400;color:var(--sub)':''}">${esc(n.name)}${n.opt?' <small class="muted">(선택)</small>':''}</b><span style="flex:0 0 auto;text-align:right">${esc(n.amount||'')}</span></div>`}).join('');
   const dl=$('#dlg');
