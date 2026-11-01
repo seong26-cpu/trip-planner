@@ -2397,8 +2397,20 @@ const AUTO_SRC={osm:{n:"OpenStreetMap",u:"https://www.openstreetmap.org/copyrigh
 function tfetch(u,o,ms){const c=new AbortController();const t=setTimeout(()=>c.abort(),ms||30000);return fetch(u,Object.assign({},o||{},{signal:c.signal})).catch(e=>{throw new Error(e.name==="AbortError"?"응답 시간 초과":"연결 실패")}).finally(()=>clearTimeout(t))}
 async function jget(u,o,ms){const r=await tfetch(u,o,ms);if(!r.ok)throw new Error("HTTP "+r.status);return r.json()}
 /* 지도 데이터 서버(Overpass): 공식 서버 → 실패 시 공개 미러 */
-const OVP=["https://overpass-api.de/api/interpreter","https://overpass.kumi.systems/api/interpreter"];
-async function overpass(q){let last;for(const u of OVP){try{const r=await tfetch(u,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:"data="+encodeURIComponent(q)},50000);if(r.ok)return (await r.json()).elements||[];last=new Error("지도 서버 응답 "+r.status+(r.status===429?"(요청 많음)":r.status===504?"(서버 바쁨)":""))}catch(e){last=e}}throw last}
+const OVP=["https://overpass-api.de/api/interpreter","https://overpass.private.coffee/api/interpreter","https://maps.mail.ru/osm/tools/overpass/api/interpreter","https://overpass.kumi.systems/api/interpreter"];
+/* 같은 기기에서 동시에 2개 이상 보내면 공식 서버가 429(요청 많음)로 막고, 이때 브라우저에는 '연결 실패'로만 보임 → 한 번에 하나씩 보내고, 실패하면 잠시 쉬었다 다른 서버로 재시도 */
+let OVP_Q=Promise.resolve();
+function overpass(q){const run=OVP_Q.then(()=>ovpRun(q));OVP_Q=run.catch(()=>{});return run}
+async function ovpRun(q){let last;for(let round=0;round<2;round++){for(const u of OVP){try{const r=await tfetch(u,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:"data="+encodeURIComponent(q)},50000);
+      if(r.ok){const j=await r.json();if(!(j.elements||[]).length&&/runtime error|timed out|out of memory/i.test(j.remark||"")){last=new Error("지도 서버 시간 초과");continue}return j.elements||[]}
+      last=new Error("지도 서버 응답 "+r.status+(r.status===429?"(요청 많음)":r.status===504?"(서버 바쁨)":""))}catch(e){last=new Error(e.message==="연결 실패"?"연결 실패(서버 혼잡 또는 차단)":e.message)}}
+    if(round===0)await new Promise(r=>setTimeout(r,5000))}throw last}
+/* 섬·광역 도시는 Nominatim 좌표가 행정구역 한가운데(숲·산)일 수 있음 → 범위 안의 가장 큰 시가지로 중심 옮기기 */
+function bboxKm(b){if(!b||b.length<4)return 0;const s=+b[0],n=+b[1],w=+b[2],e=+b[3];const dy=(n-s)*111,dx=(e-w)*111*Math.cos((s+n)/2*Math.PI/180);return Math.sqrt(dx*dx+dy*dy)/2}
+async function recenter(b){const el=await overpass(`[out:json][timeout:20];node["place"~"^(city|town)$"]["name"](${b[0]},${b[2]},${b[1]},${b[3]});out tags 60;`);
+  const pop=t=>parseInt(String(t.population||"0").replace(/[^0-9]/g,""))||0;const sc=e=>pop(e.tags)+(e.tags.place==="city"?1e6:0)+(e.tags.capital?5e5:0);
+  el.sort((a,b)=>sc(b)-sc(a));return el[0]?{lat:el[0].lat,lng:el[0].lon,name:el[0].tags["name:en"]||el[0].tags.name}:null}
+const clampN=(v,a,b)=>Math.max(a,Math.min(b,v));
 function osmKind(t){if(t.amenity==="restaurant")return"맛집";if(t.tourism==="viewpoint"||t.man_made==="tower"||t.natural==="peak")return"전망대";if(/theme_park|zoo|aquarium/.test(t.tourism||"")||t.natural==="beach"||t.natural==="cave_entrance")return"체험";if(t.amenity==="marketplace"||t.shop)return"쇼핑";return"명소"}
 function descKind(d){d=String(d||"").toLowerCase();if(/observation|tower|lookout|전망/.test(d))return"전망대";if(/zoo|aquarium|theme park|amusement|beach|동물원|수족관|해변|테마파크/.test(d))return"체험";if(/market|mall|shopping|시장|쇼핑/.test(d))return"쇼핑";return"명소"}
 const NOT_SIGHT=/(railway station|metro station|train station|bus station|suburb|neighbo(u)?rhood|district|street|road|avenue|highway|school|university|college|hospital|company|business|electoral|local government|council|airport|역$|행정|선거구|대학교|고등학교|초등학교|병원|도로)/i;
@@ -2442,16 +2454,20 @@ async function buildCityPack(trip,prog){prog=prog||(()=>{});const en=(trip.cityE
   prog("loc","run");
   let nm;try{nm=await jget(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&accept-language=en&addressdetails=1&q=${enc(en)}${cc0?"&countrycodes="+cc0.toLowerCase():""}`,null,20000)}catch(e){prog("loc","fail",e.message);throw new Error("도시 위치를 찾지 못했어요("+e.message+"). 인터넷 연결을 확인하세요.")}
   if(!nm.length){prog("loc","fail","결과 없음");throw new Error(`"${en}" 위치를 찾지 못했어요(도시 영문 확인)`)}
-  const lat=+nm[0].lat,lng=+nm[0].lon,cc=String((nm[0].address||{}).country_code||cc0).toUpperCase(),ci=COUNTRY[cc]||[];
-  prog("loc","ok",`${lat.toFixed(3)}, ${lng.toFixed(3)}`);
+  let lat=+nm[0].lat,lng=+nm[0].lon;const cc=String((nm[0].address||{}).country_code||cc0).toUpperCase(),ci=COUNTRY[cc]||[];
+  const hk=bboxKm(nm[0].boundingbox),wide=hk>5&&hk<60;let moved="";
+  if(wide){prog("loc","run","넓은 지역 → 중심가 찾는 중");try{const c=await recenter(nm[0].boundingbox);if(c){lat=c.lat;lng=c.lng;moved=` (중심가: ${c.name})`}}catch(_){}}
+  const RS=wide?clampN(hk*1000,10000,25000):10000,RF=wide?clampN(hk*500,2500,12000):2500,RH=wide?clampN(hk*600,4000,15000):4000;
+  prog("loc","ok",`${lat.toFixed(3)}, ${lng.toFixed(3)}${moved}`);
   const warn=[];let places=[],hotels=[],guide=[],rateHint=null,foodL=[];
   /* ① 명소 후보: OpenStreetMap + 한국어 위키백과 주변 문서 → ② Wikidata로 인기순·한글 이름 */
   const sightsJob=(async()=>{prog("sights","run");const cand={};
-    const R=10000,A=`(around:${R},${lat},${lng})`;
+    const R=RS,A=`(around:${R},${lat},${lng})`,RW=Math.min(R,10000);
     const osm=overpass(`[out:json][timeout:30];(nwr${A}["tourism"~"^(attraction|museum|viewpoint|theme_park|zoo|aquarium|gallery)$"]["wikidata"];nwr${A}["historic"~"^(castle|monument|ruins|archaeological_site|city_gate|fort)$"]["wikidata"];nwr${A}["leisure"~"^(park|garden)$"]["wikidata"];nwr${A}["amenity"="marketplace"]["wikidata"];nwr${A}["shop"="mall"]["wikidata"];nwr${A}["man_made"="tower"]["tower:type"="observation"]["wikidata"];nwr${A}["natural"~"^(peak|beach|cave_entrance)$"]["wikidata"];);out center tags 250;`)
       .then(el=>{el.forEach(e=>{const q=String(e.tags.wikidata||"").split(";")[0].trim();const ll=osmLL(e);if(/^Q\d+$/.test(q)&&ll&&!cand[q])cand[q]={ll,kind:osmKind(e.tags),area:osmArea(e.tags),osm:e,tags:e.tags}});return el.length}).catch(e=>{warn.push("지도 데이터: "+e.message);return -1});
-    const wiki=jget(`https://ko.wikipedia.org/w/api.php?action=query&format=json&origin=*&generator=geosearch&ggscoord=${lat}|${lng}&ggsradius=${R}&ggslimit=50&prop=coordinates|pageprops&ppprop=wikibase_item`,null,20000)
-      .then(j=>{let n=0;Object.values((j.query||{}).pages||{}).forEach(p=>{const q=p.pageprops&&p.pageprops.wikibase_item,c=(p.coordinates||[])[0];if(q&&c&&!cand[q]){cand[q]={ll:{lat:c.lat,lng:c.lon},kind:"",area:"",ko:p.title,wikiOnly:true};n++}});return n}).catch(e=>{warn.push("위키백과: "+e.message);return -1});
+    const wq=lg=>jget(`https://${lg}.wikipedia.org/w/api.php?action=query&format=json&origin=*&generator=geosearch&ggscoord=${lat}|${lng}&ggsradius=${RW}&ggslimit=50&prop=coordinates|pageprops&ppprop=wikibase_item`,null,20000)
+      .then(j=>{let n=0;Object.values((j.query||{}).pages||{}).forEach(p=>{const q=p.pageprops&&p.pageprops.wikibase_item,c=(p.coordinates||[])[0];if(q&&c&&!cand[q]){cand[q]={ll:{lat:c.lat,lng:c.lon},kind:"",area:"",ko:lg==="ko"?p.title:"",wikiOnly:true};n++}});return n});
+    const wiki=wq("ko").then(n=>n>=15?n:wq("en").then(m=>n+m).catch(()=>n)).catch(e=>wq("en").catch(()=>{warn.push("위키백과: "+e.message);return -1}));
     const [no,nw]=await Promise.all([osm,wiki]);
     if(no<0&&nw<0){prog("sights","fail","지도·위키 서버 모두 실패");prog("rank","skip");return}
     prog("sights","ok",`지도 ${Math.max(no,0)}곳${nw>0?` · 위키 ${nw}곳`:""}${no<0?" (지도 서버 실패)":""}`);
@@ -2466,15 +2482,15 @@ async function buildCityPack(trip,prog){prog=prog||(()=>{});const en=(trip.cityE
     prog("rank",places.length?"ok":"fail",places.length?`${places.length}곳 (위키 문서 많은 순)`:"정리할 장소 없음")})();
   /* 식당·숙소: 한 번의 요청 */
   const fhJob=(async()=>{prog("fh","run");try{
-    const el=await overpass(`[out:json][timeout:30];nwr(around:2500,${lat},${lng})["amenity"="restaurant"]["name"]["cuisine"];out center tags 150;nwr(around:4000,${lat},${lng})["tourism"="hotel"]["name"];out center tags 100;`);
+    const el=await overpass(`[out:json][timeout:30];nwr(around:${RF},${lat},${lng})["amenity"="restaurant"]["name"]["cuisine"];out center tags 150;nwr(around:${RF},${lat},${lng})["amenity"="restaurant"]["name"][!"cuisine"];out center tags 60;nwr(around:${RH},${lat},${lng})["tourism"~"^(hotel|guest_house|hostel)$"]["name"];out center tags 100;`);
     const intl=/^(pizza|burger|italian|american|coffee_shop|sandwich|kebab|chicken|fast_food|international|mexican|steak_house)$/;
     const sc=t=>(t["name:ko"]?3:0)+(t["name:en"]?2:0)+(t.wikidata?3:0)+(t.website||t["contact:website"]?1:0)+(t.opening_hours?1:0)+(intl.test(String(t.cuisine).split(";")[0])?-2:0);
     const food=[],used=new Set();
-    el.filter(e=>e.tags.amenity==="restaurant"&&osmLL(e)).sort((a,b)=>sc(b.tags)-sc(a.tags)).forEach(e=>{const c=String(e.tags.cuisine).split(";")[0];if(food.length>=6||used.has(c)&&used.size<4)return;used.add(c);const ll=osmLL(e),t=e.tags;
-      food.push({pid:"r"+e.id,name:t["name:ko"]||t["name:en"]||t.name,nameEn:t["name:en"]||t.name,kind:"맛집",area:osmArea(t),lat:ll.lat,lng:ll.lng,cost:0,costUnknown:true,note:`음식 종류: ${String(t.cuisine).replace(/_/g," ").replace(/;/g,", ")}${t.opening_hours?" · 영업: "+t.opening_hours:""} · 지도 데이터 식당(평점 아님)`,src:[{n:"OpenStreetMap",u:osmUrl(e)}]})});
+    el.filter(e=>e.tags.amenity==="restaurant"&&osmLL(e)).sort((a,b)=>sc(b.tags)+(b.tags.cuisine?2:0)-sc(a.tags)-(a.tags.cuisine?2:0)).forEach(e=>{const c=String(e.tags.cuisine||"기타").split(";")[0];if(food.length>=6||used.has(c)&&used.size<4)return;used.add(c);const ll=osmLL(e),t=e.tags;
+      food.push({pid:"r"+e.id,name:t["name:ko"]||t["name:en"]||t.name,nameEn:t["name:en"]||t.name,kind:"맛집",area:osmArea(t),lat:ll.lat,lng:ll.lng,cost:0,costUnknown:true,note:`음식 종류: ${String(t.cuisine||"정보 없음").replace(/_/g," ").replace(/;/g,", ")}${t.opening_hours?" · 영업: "+t.opening_hours:""} · 지도 데이터 식당(평점 아님)`,src:[{n:"OpenStreetMap",u:osmUrl(e)}]})});
     const st=t=>parseFloat(t.stars)||0,hs=t=>(t.wikidata?2:0)+(t.website||t["contact:website"]?1:0)+(t["name:en"]?1:0);
-    const H=el.filter(e=>e.tags.tourism==="hotel"&&osmLL(e)).sort((a,b)=>hs(b.tags)-hs(a.tags));const pick=[...H.filter(e=>st(e.tags)>=4).slice(0,2),...H.filter(e=>st(e.tags)===3).slice(0,2),...H.filter(e=>st(e.tags)<3).slice(0,3)];
-    (pick.length>=3?pick:H.slice(0,6)).slice(0,7).forEach(e=>{const t=e.tags,ll=osmLL(e);hotels.push({name:t["name:ko"]||t["name:en"]||t.name,nameEn:t["name:en"]||t.name,area:osmArea(t),lat:ll.lat,lng:ll.lng,price:null,priceTier:st(t)?st(t)+"성급(지도 데이터)":"등급 정보 없음",why:"도시 중심 4km 안 · 가격은 아고다·부킹에서 확인",src:[{n:"OpenStreetMap",u:osmUrl(e)}]})});
+    const H=el.filter(e=>/^(hotel|guest_house|hostel)$/.test(e.tags.tourism)&&osmLL(e)).sort((a,b)=>hs(b.tags)-hs(a.tags));const pick=[...H.filter(e=>st(e.tags)>=4).slice(0,2),...H.filter(e=>st(e.tags)===3).slice(0,2),...H.filter(e=>st(e.tags)<3).slice(0,3)];
+    (pick.length>=3?pick:H.slice(0,6)).slice(0,7).forEach(e=>{const t=e.tags,ll=osmLL(e);hotels.push({name:t["name:ko"]||t["name:en"]||t.name,nameEn:t["name:en"]||t.name,area:osmArea(t),lat:ll.lat,lng:ll.lng,price:null,priceTier:st(t)?st(t)+"성급(지도 데이터)":"등급 정보 없음",why:`도시 중심 ${Math.round(RH/1000)}km 안${t.tourism!=="hotel"?" · "+(t.tourism==="hostel"?"호스텔":"게스트하우스"):""} · 가격은 아고다·부킹에서 확인`,src:[{n:"OpenStreetMap",u:osmUrl(e)}]})});
     foodL=food;prog("fh","ok",`식당 ${food.length} · 숙소 ${hotels.length}`)}catch(e){warn.push("식당·숙소: "+e.message);prog("fh","fail",e.message)}})();
   const guideJob=(async()=>{prog("guide","run");try{guide=await wvGuide(en);prog("guide",guide.length?"ok":"skip",guide.length?`${guide.length}개 주제`:"Wikivoyage 문서 없음")}catch(e){warn.push("교통 안내: "+e.message);prog("guide","fail",e.message)}})();
   const fxJob=(async()=>{if(!ci[0]||ci[0]==="KRW"){prog("fx","skip","원화");return}prog("fx","run");try{rateHint=await fxHint(ci[0]);prog("fx",rateHint?"ok":"skip",rateHint?`1${ci[0]} ≈ ${rateHint.value}원`:"")}catch(e){prog("fx","fail",e.message)}})();
