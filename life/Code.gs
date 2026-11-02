@@ -49,6 +49,7 @@ function doPost(e) {
     if (a === 'calDelete') return out_({ ok: true, data: calDelete_(req.eventId) });
     if (a === 'calList') return out_({ ok: true, data: calList_(req.from, req.to) });
     if (a === 'ai') return out_({ ok: true, data: ai_(req.prompt, req.image, req.mime) });
+    if (a === 'yt') return out_({ ok: true, data: yt_(req.q, req.n) });
     return out_({ ok: false, error: '알 수 없는 요청: ' + a });
   } catch (err) {
     return out_({ ok: false, error: String(err && err.message || err) });
@@ -169,6 +170,17 @@ function calList_(from, to) {
       location: e.getLocation()
     };
   });
+}
+
+/* ---------- 유튜브 영상 검색 (클리닝 메뉴) ----------
+   편집기 왼쪽 「서비스 +」 → YouTube Data API v3 추가가 필요합니다. (하루 약 100번 검색 무료) */
+function yt_(q, n) {
+  if (typeof YouTube === 'undefined') return { off: true };
+  var r = YouTube.Search.list('id,snippet', { q: String(q || '').slice(0, 100), maxResults: Math.min(+n || 3, 6),
+    type: 'video', regionCode: 'KR', relevanceLanguage: 'ko', safeSearch: 'strict', videoEmbeddable: 'true' });
+  return { items: ((r && r.items) || []).map(function (it) {
+    return { id: it.id.videoId, t: it.snippet.title, ch: it.snippet.channelTitle, d: String(it.snippet.description || '').slice(0, 120) };
+  }) };
 }
 
 /* ---------- Gemini (사진 인식·AI 추천) ---------- */

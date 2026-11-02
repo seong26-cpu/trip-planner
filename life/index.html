@@ -192,6 +192,19 @@ details.rday summary .ar{margin-left:auto;color:var(--sub);transition:transform 
 .stc .ok{font-size:14px;margin:6px 0 0;line-height:1.5}.stc .wn{font-size:12.5px;color:var(--warn);background:var(--warnbg);border-radius:8px;padding:6px 8px;margin-top:6px;line-height:1.45}
 .stc .ft{display:flex;align-items:center;gap:6px;margin-top:8px}.stc .ft .dom{flex:1;min-width:0;font-size:11px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .scat{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:8px 0}.scat button{flex-direction:column;gap:2px;padding:8px 2px;font-size:11px;border-radius:12px;min-height:60px;line-height:1.2}.scat button span{font-size:20px}.scat button.on{border:2px solid var(--brand);background:var(--brand2);font-weight:700}
+.clban{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:12px 14px;margin:10px 0;border-radius:var(--r);background:var(--card);border:1px solid var(--line);color:var(--ink)}.clban>span:first-child{font-size:28px}.clban div{flex:1;min-width:0}.clban b{display:block;font-size:16px}.clban small{color:var(--sub);font-size:12px}
+.clcat{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:8px 0}.clcat button{flex-direction:column;gap:2px;padding:8px 2px;font-size:12px;border-radius:14px;min-height:62px}.clcat button span{font-size:22px}.clcat button.on{border:2px solid var(--cc);background:var(--cb);color:#1f2937;font-weight:800}
+.clin{display:grid;grid-template-columns:1fr 1fr;gap:8px}.clin label{margin:0 0 4px;font-weight:700;color:var(--ink)}.clin label i{font-style:normal;font-weight:400;color:var(--sub);font-size:12px}
+.clin input{border-width:2px}.clchips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 2px}.clchips .chip{font-size:12.5px;padding:5px 10px}.clchips .chip.on{background:var(--cb);border-color:var(--cc);color:#1f2937}
+.clchips .chip .x{margin-left:4px;color:var(--bad);font-weight:700}.cladd{display:flex;gap:6px;margin-top:4px}.cladd input{padding:7px 10px;font-size:13px}
+.clres .gl{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}.clres .gl span{background:var(--cb);color:#1f2937;border-radius:10px;padding:4px 10px;font-size:13px;font-weight:700}
+.clphoto{width:100%;max-height:200px;object-fit:cover;border-radius:12px;margin:6px 0}
+.clst{display:flex;gap:12px;padding:12px 0;border-top:1px solid var(--line)}.clst:first-of-type{border-top:0}.clst .ic{flex:0 0 auto;width:56px;height:56px;border-radius:16px;background:var(--cb);color:var(--cc);display:flex;align-items:center;justify-content:center;position:relative}
+.clst .ic svg{width:30px;height:30px}.clst .ic i{position:absolute;left:-6px;top:-6px;width:22px;height:22px;border-radius:50%;background:var(--cc);color:#fff;font-style:normal;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.clst b{display:block;margin-bottom:2px}.clst p{margin:0;font-size:14px;line-height:1.55;color:var(--ink)}
+.clvid{border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:8px 0;background:var(--card)}.clvid .th{position:relative;display:block;width:100%;aspect-ratio:16/9;background:#000 center/cover}.clvid .th b{position:absolute;inset:auto auto 8px 8px;background:rgba(0,0,0,.7);color:#fff;border-radius:8px;padding:3px 8px;font-size:12px}
+.clvid .bd{padding:8px 10px}.clvid .bd .t{font-weight:700;font-size:14px;line-height:1.35}.clvid .sc{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:0 10px 8px}.clvid .sc img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:6px;cursor:pointer}
+.clvid iframe{width:100%;aspect-ratio:16/9;border:0;display:block}
 .gbtn{width:100%;background:#fff;color:#1f1f1f;border:1px solid #dadce0;font-weight:600;gap:10px}.gbtn svg{width:18px;height:18px}
 /* ===== 골든아워 마을 테마 (samsy.ninja 풍 · 따뜻한 실사 사진) ===== */
 header{background:rgba(255,243,230,.92);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
@@ -279,9 +292,10 @@ dialog{border-radius:24px}
 <script src="recipes.js"></script>
 <script src="recipes2.js"></script>
 <script src="sites.js"></script>
+<script src="clean.js"></script>
 <script>
 /* ===================== 기본 ===================== */
-const TABS=[['home','M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z','홈'],['plan','M4 6h16v14H4zM4 10h16M8 3v4M16 3v4','일정'],['cook','M3 11h18a9 7 0 0 1-18 0zM8 7c0-2 2-2 2-4M13 7c0-2 2-2 2-4','요리'],['fit','M6 7v10M3 9v6M18 7v10M21 9v6M6 12h12','운동'],['more','M4 6h16M4 12h16M4 18h16','더보기']];
+const TABS=[['home','M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z','홈'],['plan','M4 6h16v14H4zM4 10h16M8 3v4M16 3v4','일정'],['cook','M3 11h18a9 7 0 0 1-18 0zM8 7c0-2 2-2 2-4M13 7c0-2 2-2 2-4','요리'],['fit','M6 7v10M3 9v6M18 7v10M21 9v6M6 12h12','운동'],['clean','M20 4l-8 8M10 10l4 4M4 20c2-1 3-3 4-6l2 2c-1 3-3 4-6 4zM6 15l-2 1M9 18l-1 2','클리닝'],['more','M4 6h16M4 12h16M4 18h16','더보기']];
 const svgI=d=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
 const SHEETS={메모:['제목','내용','태그','고정'],일정:['구분','종류','제목','날짜','종료일','시작','종료','장소','상대','메모','캘린더ID'],맛집:['이름','지역','메뉴','테마','평점','가격대','방문','메모'],장소:['이름','주소','종류'],식재료:['이름','수량','보관','유통기한'],레시피:['이름','재료','조리법','칼로리','시간','출처'],운동:['날짜','종류','부위','세트시간','칼로리','메모'],식단:['날짜','끼니','음식','칼로리','메모']};
 const $=s=>document.querySelector(s);
@@ -334,13 +348,14 @@ const CLOUD={auth:null,db:null,user:null,ready:false,failed:false,t:null,busy:fa
   },
   async logout(){if(this.auth&&confirm('로그아웃할까요? (이 기기 데이터는 그대로 남아요)')){await this.auth.signOut();render()}},
   ref(){return this.db.collection('users').doc(this.user.uid).collection('life').doc('state')},
-  cfgOut(){return {url:CFG.url||'',kcal:CFG.kcal||'',hasAI:!!CFG.hasAI,sheetUrl:CFG.sheetUrl||'',plan:LS.get('plan',null),at:CFG.at||0,themes:THM,themesAt:THM_AT,plans:LS.get('plans',[]),woOv:LS.get('woOv',{}),plansAt:LS.get('plansAt',0),sites:LS.get('mySites',[]),siteFav:LS.get('siteFav',[]),sitesAt:LS.get('sitesAt',0)}},
+  cfgOut(){return {url:CFG.url||'',kcal:CFG.kcal||'',hasAI:!!CFG.hasAI,sheetUrl:CFG.sheetUrl||'',plan:LS.get('plan',null),at:CFG.at||0,themes:THM,themesAt:THM_AT,plans:LS.get('plans',[]),woOv:LS.get('woOv',{}),plansAt:LS.get('plansAt',0),sites:LS.get('mySites',[]),siteFav:LS.get('siteFav',[]),sitesAt:LS.get('sitesAt',0),clChips:LS.get('cleanChips',{}),clSaved:LS.get('cleanSaved',[]),clAt:LS.get('cleanAt',0)}},
   async pull(){
     if(!this.user)return;this.busy=true;setSync('☁︎ 불러오는 중…');
     try{
       const snap=await this.ref().get();const r=snap.exists?snap.data():{};
       const rc=r.cfg||{};
       if((rc.plansAt||0)>LS.get('plansAt',0)){LS.set('plans',rc.plans||[]);LS.set('woOv',rc.woOv||{});if(rc.plan!==undefined)LS.set('plan',rc.plan);LS.set('plansAt',rc.plansAt)}else if(LS.get('plansAt',0)>(rc.plansAt||0))await this.saveCfg(true);
+      if((rc.clAt||0)>LS.get('cleanAt',0)){LS.set('cleanChips',rc.clChips||{});LS.set('cleanSaved',rc.clSaved||[]);LS.set('cleanAt',rc.clAt)}else if(LS.get('cleanAt',0)>(rc.clAt||0))await this.saveCfg(true);
       if((rc.sitesAt||0)>LS.get('sitesAt',0)){LS.set('mySites',rc.sites||[]);LS.set('siteFav',rc.siteFav||[]);LS.set('sitesAt',rc.sitesAt)}else if(LS.get('sitesAt',0)>(rc.sitesAt||0))await this.saveCfg(true);
       if((rc.themesAt||0)>THM_AT){THM=rc.themes||[];THM_AT=rc.themesAt;LS.set('themes',THM);LS.set('themesAt',THM_AT)}else if(THM_AT>(rc.themesAt||0))await this.saveCfg(true);
       if(rc.url&&(!CFG.url||(rc.at||0)>(CFG.at||0))){
@@ -501,7 +516,8 @@ const PH={
   plan:{q:'Gyeongbokgung autumn',fb:'img/rest-hero.svg'},
   meet:{q:'cafe interior coffee Seoul',fb:'img/rest-hero.svg'},
   store:{q:'Korean restaurant exterior',fb:'img/rest-store.svg'},
-  sites:{q:'library reading room books',fb:'img/memo-hero.svg'}
+  sites:{q:'library reading room books',fb:'img/memo-hero.svg'},
+  clean:{q:'cleaning supplies bucket sponge',fb:'img/memo-hero.svg'}
 };
 const PHC=LS.get('phc',{});
 const PHP={};
@@ -532,7 +548,7 @@ function dhero(slot,code,title,opt={}){
 const V={};
 function render(){
   $('#tabs').innerHTML=TABS.map(([k,i,l])=>`<button data-t="${k}" class="${k===tab?'on':''}">${svgI(i)}${l}</button>`).join('');
-  $('#title').textContent={home:'나의 하루',plan:sub.plan==='약속'?'약속':'일정 · 약속',cook:'요리',fit:'운동',more:sub.more||'메모'}[tab];
+  $('#title').textContent={home:'나의 하루',plan:sub.plan==='약속'?'약속':'일정 · 약속',cook:'요리',fit:'운동',clean:'클리닝',more:sub.more||'메모'}[tab];
   const tp=tab==='fit'?'fit':tab==='cook'?'cook':tab==='more'?({맛집:'food',메모:'memo'}[sub.more||'메모']||''):'';
   if(tp)document.documentElement.dataset.topic=tp;else document.documentElement.removeAttribute('data-topic');
   paintAcct();
@@ -585,6 +601,7 @@ V.home=()=>{
    ${pins.map(x=>`<div class="item" data-ed="메모|${x.id}"><div class="b"><div class="t">📌 ${esc(x.제목)}</div><div class="d">${esc((x.내용||'').slice(0,80))}</div></div></div>`).join('')}</div>
   <div class="sh"><div class="mono">DISTRICTS</div><h3>구역으로 이동</h3></div>
   <div class="topics" style="margin-top:0">${[['01 · GYM','운동','루틴 · 1RM · 기록','gym','fit',''],['02 · KITCHEN','요리','레시피 · 사진 · 냉장고','cook','cook',''],['03 · STREET','맛집','테마 · 랜덤 · 내 목록','street','more','맛집'],['04 · LIBRARY','메모','노트 · 검색 · 고정','memo','more','메모']].map(([cd,n,sb,ph,tt,sv])=>`<button class="tcard" data-act="go" data-t="${tt}" ${sv?`data-s="${sv}"`:''} style="position:relative">${phImg(ph)}<span class="mono" style="position:absolute;left:8px;top:8px;background:rgba(255,255,255,.92);border-radius:10px;padding:2px 8px;color:#2B1734;font-size:10px">${cd}</span><div><b>${n}</b><span>${sb}</span></div></button>`).join('')}</div>
+  <button class="clban" data-act="go" data-t="clean"><span>🧹</span><div><b>클리닝</b><small>수리 · 청소 · 정리 · 수선 · 세탁 — 키워드만 넣으면 단계별 방법</small></div><span class="muted">›</span></button>
   <div class="tiles3">${[['교통','정류장 · 길찾기','#FFE4CF','M5 4h14v12H5zM5 11h14M8 20v-4M16 20v-4','data-t="more" data-s="교통"'],['일정','공적 · 사적','#FFEFC2','M4 6h16v14H4zM4 10h16M8 3v4M16 3v4','data-t="plan" data-k="plan" data-v="다가오는"'],['약속','누구와 · 어디서','#FFD9E2','M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM3 20c0-3 3-5 6-5s6 2 6 5M17 8a3 3 0 0 1 0 6M21 20c0-2-1-4-3-5','data-t="plan" data-k="plan" data-v="약속"']].map(([n,sb,bg,d,at])=>`<button data-act="go" ${at}><span class="ic" style="background:${bg}">${svgI(d)}</span><b>${n}</b><small>${sb}</small></button>`).join('')}</div>
   ${(()=>{const di=Math.floor(Date.now()/864e5);const r=RECIPES[di%RECIPES.length];const fp=DB.맛집.length?DB.맛집[di%DB.맛집.length]:null;
     const exi=['Barbell_Squat_1','Dumbbell_Bench_Press_0','Plank_0','Dumbbell_Lunges_1','Pullups_1'][di%5];
@@ -681,6 +698,96 @@ function calPopup(x){const dl=$('#dlg');
   dl.showModal();const close=()=>{dl.returnValue='';dl.close()};$('#cpClose').onclick=close;
   $('#cpDel').onclick=async()=>{if(!confirm('구글 캘린더에서 이 일정을 삭제할까요?'))return;close();try{await api('calDelete',{eventId:x.eventId});CAL=CAL.filter(c=>c.eventId!==x.eventId);LS.set('cal',CAL);toast('🗑 삭제했어요');render()}catch(e){toast('삭제 실패: '+e.message,4000)}};
   $('#cpImp').onclick=()=>{close();setTimeout(()=>form('일정',{구분:kindOf(x)==='미분류'?'':kindOf(x),종류:'일정',제목:x.제목,날짜:x.날짜,종료일:x.종료일||'',시작:x.시작||'',장소:x.장소||'',캘린더ID:x.eventId}),0)}}
+
+/* ---- 클리닝 (수리·청소·정리·수선·세탁) ---- */
+let CLB='';
+const clCat=k=>CL_CATS.find(c=>c.k===k)||CL_CATS[0];
+const clSt=()=>Object.assign({cat:'수리',obj:'',goal:''},LS.get('cleanQ',{}));
+const clKey=q=>q.cat+'|'+q.obj.trim()+'|'+q.goal.trim();
+function clChips(cat,f){const C=LS.get('cleanChips',{})[cat];return C&&C[f]?C[f]:clCat(cat)[f]}
+function clSaveCloud(){LS.set('cleanAt',Date.now());CLOUD.saveCfg()}
+const clIcon=n=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${CL_ICONS[n]||CL_ICONS['확인']}"/></svg>`;
+function clChipRow(cat,f,cur,ed){const L=clChips(cat,f);
+  return `<div class="clchips">${L.map(w=>`<span class="chip ${cur===w?'on':''}" data-act="${ed?'clDel':'clPick'}" data-f="${f}" data-v="${esc(w)}">${esc(w)}${ed?'<span class="x">✕</span>':''}</span>`).join('')}</div>
+   ${ed?`<div class="cladd"><input id="cladd-${f}" placeholder="${f==='obj'?'대상 단어 추가':'목적 단어 추가'}" maxlength="15"><button class="s" data-act="clAdd" data-f="${f}">＋</button></div>`:''}`}
+V.clean=()=>{const q=clSt(),c=clCat(q.cat),ed=!!sub.cledit,R=LS.get('cleanRes',{}),res=R[clKey(q)],busy=CLB===clKey(q),saved=LS.get('cleanSaved',[]);
+  return `<div style="--cc:${c.col};--cb:${c.bg}">${dhero('clean','HOME · CARE','클리닝<br>고치고 · 닦고 · 정리하기')}
+  <div class="clcat">${CL_CATS.map(x=>`<button class="${x.k===q.cat?'on':''}" style="--cc:${x.col};--cb:${x.bg}" data-act="clCat" data-v="${x.k}"><span>${x.ic}</span>${x.k}</button>`).join('')}</div>
+  <div class="card"><h2 style="flex-wrap:nowrap">${c.ic} ${c.k}<span class="sp"></span><button class="s ${ed?'p':''}" data-act="clEdit" style="white-space:nowrap">${ed?'✅ 편집 끝':'✏️ 단어 편집'}</button></h2><div class="muted" style="margin:-4px 0 8px;font-size:13px">${c.hint} — 대상과 목적을 넣거나 단어를 누르세요</div>
+   <div class="clin"><div><label>🎯 대상 <i>무엇을</i></label><input id="clObj" value="${esc(q.obj)}" placeholder="예: ${esc(c.obj[0])}" maxlength="30"></div><div><label>✅ 목적 <i>어떻게</i></label><input id="clGoal" value="${esc(q.goal)}" placeholder="예: ${esc(c.goal[0])}" maxlength="30"></div></div>
+   <div class="muted" style="margin-top:10px;font-size:12px">🎯 대상 — 누르면 바로 입력</div>${clChipRow(q.cat,'obj',q.obj,ed)}
+   <div class="muted" style="margin-top:8px;font-size:12px">✅ 목적 — 누르면 바로 입력</div>${clChipRow(q.cat,'goal',q.goal,ed)}
+   ${ed?`<button class="x" data-act="clReset" style="margin-top:6px">↩ ${c.k} 기본 단어로 되돌리기</button>`:''}
+   <div class="row" style="margin-top:12px;flex-wrap:nowrap"><button class="x" data-act="clClear">지우기</button><button class="p" style="flex:1;min-height:48px;background:var(--cc);border-color:var(--cc)" data-act="clGo" ${busy?'disabled':''}>${busy?'🔍 방법을 찾는 중… (10~30초)':'🔍 방법 찾기'}</button></div></div>
+  ${busy?`<div class="card"><p class="muted">🤖 「${esc(q.obj)} · ${esc(q.goal)}」 방법을 정리하고 관련 영상을 찾고 있어요. 다른 메뉴에 다녀와도 결과는 여기 남아요.</p></div>`:res?clResult(q,res):''}
+  ${saved.length?`<h3 style="margin:16px 0 6px">💾 저장한 가이드 <span class="muted" style="font-weight:400">${saved.length}</span></h3><div class="card">${saved.map(x=>`<div class="item" style="cursor:pointer" data-act="clOpen" data-k="${esc(x.key)}"><span style="font-size:20px">${clCat(x.cat).ic}</span><div class="b"><div class="t">${esc(x.obj)} · ${esc(x.goal)}</div><div class="d">${esc(x.title||'')}</div></div><span class="muted">›</span></div>`).join('')}</div>`:''}
+  </div>`};
+function clResult(q,r){const c=clCat(q.cat),a=r.ai||{},vids=r.vids||[],yq=a.yt||(q.obj+' '+q.goal),sv=LS.get('cleanSaved',[]).some(x=>x.key===clKey(q));
+  if(r.err)return `<div class="card"><div class="notice">${esc(r.err)}</div>${clLinks(yq,q)}</div>`;
+  return `<div class="card clres"><h2 style="font-size:18px">${esc(a.title||q.obj+' '+q.goal)}</h2>
+   <div class="gl"><span>🎯 ${esc(q.obj||'-')}</span><span>✅ ${esc(q.goal||'-')}</span></div>
+   <img class="clphoto" data-wk="${esc(q.obj)}" alt="" hidden>
+   ${a.summary?`<p style="margin:6px 0">${esc(a.summary)}</p>`:''}
+   <div class="row" style="gap:6px">${a.difficulty?`<span class="tag ${a.difficulty==='어려움'?'w':''}">난이도 ${esc(a.difficulty)}</span>`:''}${a.minutes?`<span class="tag">⏱ 약 ${esc(a.minutes)}분</span>`:''}${a.cost?`<span class="tag">💰 ${esc(a.cost)}</span>`:''}</div>
+   ${(a.safety||[]).length?`<div class="notice" style="margin-top:10px">⚠️ <b>안전 먼저</b><br>${a.safety.map(esc).join('<br>')}</div>`:''}
+   ${(a.tools||[]).length?`<h3 style="margin:14px 0 4px">🧰 준비물</h3>${a.tools.map((t,i)=>`<label class="chk"><input type="checkbox"><span>${esc(t)}</span></label>`).join('')}`:''}
+   <h3 style="margin:14px 0 2px">🪜 단계별 방법</h3>
+   ${(a.steps||[]).map((st,i)=>`<div class="clst"><div class="ic"><i>${i+1}</i>${clIcon(st.icon)}</div><div style="flex:1;min-width:0"><b>${esc(st.t||'')}</b><p>${esc(st.d||'')}</p></div></div>`).join('')}
+   ${(a.tips||[]).length?`<div class="sec ws" style="margin-top:8px"><b>💡 팁</b>${a.tips.map(t=>`<div class="d">· ${esc(t)}</div>`).join('')}</div>`:''}
+   ${(a.pro||[]).length?`<div class="notice" style="margin-top:10px;background:#fee2e2;color:#991b1b">🚨 <b>이럴 땐 전문가에게</b><br>${a.pro.map(esc).join('<br>')}</div>`:''}
+   <h3 style="margin:16px 0 4px">▶ 관련 동영상</h3>
+   ${vids.length?vids.map(v=>`<div class="clvid" data-vid="${esc(v.id)}"><a class="th" href="https://www.youtube.com/watch?v=${esc(v.id)}" data-act="clPlay" data-id="${esc(v.id)}" style="background-image:url(https://i.ytimg.com/vi/${esc(v.id)}/hqdefault.jpg)"><b>▶ 여기서 보기</b></a>
+      <div class="bd"><div class="t">${esc(v.t)}</div><div class="muted" style="font-size:12px">${esc(v.ch||'')}</div></div>
+      <div class="muted" style="font-size:11px;padding:0 10px 4px">🎞 영상 장면 미리보기 (누르면 재생)</div><div class="sc">${[1,2,3].map(n=>`<img src="https://i.ytimg.com/vi/${esc(v.id)}/hq${n}.jpg" alt="영상 장면 ${n}" loading="lazy" data-act="clPlay" data-id="${esc(v.id)}">`).join('')}</div></div>`).join('')
+     :`<p class="muted" style="margin:4px 0">${r.ytOff?'앱 안에서 영상을 바로 보려면 서버에서 「YouTube」 서비스를 한 번 켜 주세요 (아래 설정 안내). 지금은 유튜브 검색으로 연결돼요.':'관련 영상을 불러오지 못했어요. 아래 버튼으로 유튜브에서 찾아보세요.'}</p>`}
+   ${clLinks(yq,q)}
+   <div class="grid2" style="margin-top:12px"><button class="${sv?'':'p'}" data-act="clSave">${sv?'💾 저장됨 (해제)':'💾 내 가이드 저장'}</button><button data-act="clMemo">📝 메모로 보내기</button><button data-act="clCal">📅 일정에 등록</button><button data-act="clRedo">🔄 다시 만들기</button></div>
+   <p class="muted" style="margin:10px 0 0">AI가 정리한 일반적인 방법이에요${r.at?' · '+esc(r.at):''}. 제품마다 다를 수 있으니 설명서를 먼저 확인하고, 전기·가스·높은 곳 작업은 무리하지 마세요.</p></div>`}
+function clLinks(yq,q){return `<div class="grid2" style="margin-top:8px"><a class="btn" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=${encodeURIComponent(yq)}">▶ 유튜브에서 더 보기</a><a class="btn" target="_blank" rel="noopener" href="https://search.naver.com/search.naver?where=view&query=${encodeURIComponent((q.obj+' '+q.goal).trim()+' 방법')}">📷 사진 설명 글 보기</a></div>`}
+function clSetQ(o){const q=Object.assign(clSt(),o);LS.set('cleanQ',q);return q}
+ACT.clCat=d=>{clSetQ({cat:d.v,obj:'',goal:''});sub.cledit=0;render()};
+ACT.clPick=d=>{const q=clSt();clSetQ({[d.f]:q[d.f]===d.v?'':d.v});const y=scrollY;render();scrollTo(0,y)};
+ACT.clClear=()=>{clSetQ({obj:'',goal:''});render()};
+ACT.clEdit=()=>{sub.cledit=sub.cledit?0:1;const y=scrollY;render();scrollTo(0,y)};
+function clSetChips(cat,f,L){const A=LS.get('cleanChips',{});A[cat]=A[cat]||{};A[cat][f]=L;LS.set('cleanChips',A);clSaveCloud()}
+ACT.clDel=d=>{const q=clSt();clSetChips(q.cat,d.f,clChips(q.cat,d.f).filter(w=>w!==d.v));const y=scrollY;render();scrollTo(0,y)};
+ACT.clAdd=d=>{const q=clSt(),i=$('#cladd-'+d.f),v=(i&&i.value||'').trim();if(!v)return toast('추가할 단어를 입력해 주세요');const L=clChips(q.cat,d.f);if(L.includes(v))return toast('이미 있는 단어예요');clSetChips(q.cat,d.f,[...L,v]);toast('＋ '+v);const y=scrollY;render();scrollTo(0,y);const n=$('#cladd-'+d.f);if(n)n.focus()};
+ACT.clReset=()=>{const q=clSt();if(!confirm(`${q.cat}의 자주쓰는 단어를 기본값으로 되돌릴까요?`))return;const A=LS.get('cleanChips',{});delete A[q.cat];LS.set('cleanChips',A);clSaveCloud();render()};
+ACT.clOpen=d=>{const [cat,obj,goal]=d.k.split('|');clSetQ({cat,obj,goal});render();scrollTo(0,0);setTimeout(()=>{const e=document.querySelector('.clres');if(e)e.scrollIntoView({behavior:'smooth'})},100)};
+ACT.clRedo=()=>{const q=clSt(),R=LS.get('cleanRes',{});delete R[clKey(q)];LS.set('cleanRes',R);ACT.clGo()};
+ACT.clGo=async()=>{const oi=$('#clObj'),gi=$('#clGoal');const q=clSetQ({obj:oi?oi.value.trim():clSt().obj,goal:gi?gi.value.trim():clSt().goal});
+  if(!q.obj&&!q.goal)return toast('대상이나 목적을 입력하거나 아래 단어를 눌러 주세요');const key=clKey(q),R=LS.get('cleanRes',{});
+  if(R[key]){render();setTimeout(()=>{const e=document.querySelector('.clres');if(e)e.scrollIntoView({behavior:'smooth'})},100);return}
+  if(CLB)return toast('이전 검색이 끝나면 다시 눌러 주세요');
+  if(!CFG.url){R[key]={err:'AI 단계별 방법은 서버 연결 후 사용할 수 있어요 (더보기 → 설정). 지금은 아래 유튜브·사진 설명 글로 찾아보세요.'};LS.set('cleanRes',R);render();return}
+  CLB=key;render();const r={at:new Date().toLocaleString('ko-KR',{hour12:false}).slice(0,-3)};
+  try{r.ai=await ai(`너는 생활 ${q.cat} 도우미야(수리·청소·정리·수선·세탁). 분류: ${q.cat}. 대상: "${q.obj||'(지정 안 함)'}". 목적: "${q.goal||'기본 관리'}".
+일반 가정에서 혼자 할 수 있는 안전한 방법을 중학생도 따라 할 수 있게 단계별로 알려줘.
+규칙: 1) 확실하지 않은 내용은 지어내지 말고 널리 알려진 일반적인 방법만 써. 제품마다 다르면 그렇다고 말해.
+2) 전기·가스·수도를 다루면 첫 단계에 차단(전원·밸브 잠그기)을 넣어.
+3) 세제를 쓰면 락스(염소계)와 산성 세제(식초·구연산 등)·암모니아를 섞지 말라는 주의, 환기, 장갑을 safety에 넣어.
+4) 감전·가스·높은 곳·구조 변경처럼 위험하거나 자격이 필요한 작업이면 pro에 분명히 쓰고, steps는 안전한 점검까지만 써.
+5) steps는 4~8개, 각 d에는 분량·시간·횟수 등 구체적인 값을 넣고, icon은 다음 중 하나만: ${CL_ICON_NAMES.join(', ')}.
+6) yt에는 유튜브에서 이 작업 영상을 찾을 짧은 한국어 검색어.
+반드시 다음 JSON으로만 답해: {"title":"제목","summary":"한 줄 요약","difficulty":"쉬움|보통|어려움","minutes":30,"cost":"대략 비용(재료비)","tools":["준비물"],"safety":["안전 주의"],"steps":[{"t":"단계 제목","d":"구체적 설명","icon":"장갑"}],"tips":["팁"],"pro":["전문가가 필요한 경우"],"yt":"검색어"}`);
+    if(!r.ai||r.ai.raw||!(r.ai.steps||[]).length){r.err='AI 응답을 해석하지 못했어요. 「다시 만들기」를 눌러 주세요.';delete r.ai}
+    else{try{const y=await api('yt',{q:r.ai.yt||(q.obj+' '+q.goal),n:3},30000);if(y&&y.off)r.ytOff=1;else r.vids=(y&&y.items||[]).filter(v=>v.id)}catch(e){r.ytOff=/알 수 없는 요청/.test(e.message)?1:0}}
+  }catch(e){r.err=e.message}
+  const R2=LS.get('cleanRes',{});R2[key]=r;const ks=Object.keys(R2);while(ks.length>40)delete R2[ks.shift()];LS.set('cleanRes',R2);CLB='';toast('🧹 방법을 정리했어요');
+  if(tab==='clean'){render();setTimeout(()=>{const e=document.querySelector('.clres');if(e)e.scrollIntoView({behavior:'smooth'})},100)}};
+ACT.clPlay=d=>{const box=document.querySelector(`.clvid[data-vid="${d.id}"]`);if(!box)return;const old=box.querySelector('iframe');if(old){old.remove();return}
+  const f=document.createElement('iframe');f.src=`https://www.youtube-nocookie.com/embed/${d.id}?autoplay=1&playsinline=1&rel=0`;f.title='유튜브 영상';f.allow='autoplay; encrypted-media; picture-in-picture; fullscreen';f.allowFullscreen=true;box.insertBefore(f,box.firstChild)};
+ACT.clSave=()=>{const q=clSt(),key=clKey(q),r=(LS.get('cleanRes',{})[key]||{}).ai||{};let S=LS.get('cleanSaved',[]);
+  if(S.some(x=>x.key===key)){S=S.filter(x=>x.key!==key);toast('저장을 해제했어요')}else{S.unshift({key,cat:q.cat,obj:q.obj,goal:q.goal,title:r.title||'',at:today()});toast('💾 저장했어요')}
+  LS.set('cleanSaved',S.slice(0,60));clSaveCloud();const y=scrollY;render();scrollTo(0,y)};
+ACT.clMemo=()=>{const q=clSt(),a=(LS.get('cleanRes',{})[clKey(q)]||{}).ai;if(!a)return;
+  put('메모',{제목:'🧹 '+(a.title||q.obj+' '+q.goal),내용:[`대상: ${q.obj} / 목적: ${q.goal}`,(a.tools||[]).length?'준비물: '+a.tools.join(', '):'',(a.safety||[]).length?'⚠️ '+a.safety.join(' / '):'',(a.steps||[]).map((s,i)=>`${i+1}. ${s.t} — ${s.d}`).join('\n'),(a.pro||[]).length?'🚨 전문가: '+a.pro.join(' / '):''].filter(Boolean).join('\n\n'),태그:'클리닝,'+q.cat,고정:false});toast('📝 메모에 저장했어요')};
+ACT.clCal=()=>{const q=clSt();form('일정',{제목:`🧹 ${(q.obj+' '+q.goal).trim()}`,날짜:today(),종류:'일정',메모:'클리닝 메뉴에서 등록'},{kind:'사적'})};
+AFTER.clean=()=>{const oi=$('#clObj'),gi=$('#clGoal');[oi,gi].forEach(i=>{if(!i)return;i.oninput=()=>clSetQ({[i.id==='clObj'?'obj':'goal']:i.value});i.onkeydown=e=>{if(e.key==='Enter')ACT.clGo()}});
+  ['obj','goal'].forEach(f=>{const a=$('#cladd-'+f);if(a)a.onkeydown=e=>{if(e.key==='Enter')ACT.clAdd({f})}});
+  document.querySelectorAll('img[data-wk]').forEach(async im=>{const k=im.dataset.wk;if(!k)return;const u=await wikiImg(k);if(u&&im.isConnected){im.src=u;im.hidden=false}});
+  document.querySelectorAll('.clvid a.th').forEach(a=>a.onclick=e=>{e.preventDefault();ACT.clPlay({id:a.dataset.id})});
+  document.querySelectorAll('.clvid .sc img').forEach(im=>im.onerror=()=>{im.style.visibility='hidden'})};
 
 /* ---- 유용한 사이트 (무료 음악·이미지·TV·영화·책·강의·도구·주식·혜택) ---- */
 const siteKey=x=>x.u;
