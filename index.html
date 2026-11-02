@@ -2431,9 +2431,9 @@ async function ovpRun(q){let last;for(let round=0;round<2;round++){for(const u o
     if(round===0)await new Promise(r=>setTimeout(r,5000))}throw last}
 /* 섬·광역 도시는 Nominatim 좌표가 행정구역 한가운데(숲·산)일 수 있음 → 범위 안의 가장 큰 시가지로 중심 옮기기 */
 function bboxKm(b){if(!b||b.length<4)return 0;const s=+b[0],n=+b[1],w=+b[2],e=+b[3];const dy=(n-s)*111,dx=(e-w)*111*Math.cos((s+n)/2*Math.PI/180);return Math.sqrt(dx*dx+dy*dy)/2}
-async function recenter(b){const el=await overpass(`[out:json][timeout:20];node["place"~"^(city|town)$"]["name"](${b[0]},${b[2]},${b[1]},${b[3]});out tags 60;`);
+async function recenter(b){const el=await overpass(`[out:json][timeout:20];node["place"~"^(city|town)$"]["name"](${b[0]},${b[2]},${b[1]},${b[3]});out body 60;`);
   const pop=t=>parseInt(String(t.population||"0").replace(/[^0-9]/g,""))||0;const sc=e=>pop(e.tags)+(e.tags.place==="city"?1e6:0)+(e.tags.capital?5e5:0);
-  el.sort((a,b)=>sc(b)-sc(a));return el[0]?{lat:el[0].lat,lng:el[0].lon,name:el[0].tags["name:en"]||el[0].tags.name}:null}
+  const ok=el.filter(e=>e.tags&&Number.isFinite(+e.lat)&&Number.isFinite(+e.lon));ok.sort((a,b)=>sc(b)-sc(a));return ok[0]?{lat:+ok[0].lat,lng:+ok[0].lon,name:ok[0].tags["name:en"]||ok[0].tags.name}:null}
 const clampN=(v,a,b)=>Math.max(a,Math.min(b,v));
 function osmKind(t){if(t.amenity==="restaurant")return"맛집";if(t.tourism==="viewpoint"||t.man_made==="tower"||t.natural==="peak")return"전망대";if(/theme_park|zoo|aquarium/.test(t.tourism||"")||t.natural==="beach"||t.natural==="cave_entrance")return"체험";if(t.amenity==="marketplace"||t.shop)return"쇼핑";return"명소"}
 function descKind(d){d=String(d||"").toLowerCase();if(/observation|tower|lookout|전망/.test(d))return"전망대";if(/zoo|aquarium|theme park|amusement|beach|동물원|수족관|해변|테마파크/.test(d))return"체험";if(/market|mall|shopping|시장|쇼핑/.test(d))return"쇼핑";return"명소"}
@@ -2498,7 +2498,8 @@ async function buildCityPack(trip,prog){prog=prog||(()=>{});const en=(trip.cityE
   if(!nm.length){prog("loc","fail","결과 없음");throw new Error(`"${en}" 위치를 찾지 못했어요(도시 영문 확인)`)}
   let lat=+nm[0].lat,lng=+nm[0].lon;const cc=String((nm[0].address||{}).country_code||cc0).toUpperCase(),ci=COUNTRY[cc]||[];
   const hk=bboxKm(nm[0].boundingbox),wide=hk>5&&hk<60;let moved="";
-  if(wide){prog("loc","run","넓은 지역 → 중심가 찾는 중");try{const c=await recenter(nm[0].boundingbox);if(c){lat=c.lat;lng=c.lng;moved=` (중심가: ${c.name})`}}catch(_){}}
+  if(!Number.isFinite(lat)||!Number.isFinite(lng)){prog("loc","fail","좌표 없음");throw new Error(`"${en}" 좌표를 받지 못했어요. 잠시 뒤 다시 시도하세요.`)}
+  if(wide){prog("loc","run","넓은 지역 → 중심가 찾는 중");try{const c=await recenter(nm[0].boundingbox);if(c&&Number.isFinite(c.lat)&&Number.isFinite(c.lng)){lat=c.lat;lng=c.lng;moved=` (중심가: ${c.name||"시가지"})`}}catch(_){}}
   const RS=wide?clampN(hk*1000,10000,25000):10000,RF=wide?clampN(hk*500,2500,12000):2500,RH=wide?clampN(hk*600,4000,15000):4000;
   prog("loc","ok",`${lat.toFixed(3)}, ${lng.toFixed(3)}${moved}`);
   const warn=[];let places=[],hotels=[],guide=[],rateHint=null,foodL=[];
