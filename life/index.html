@@ -187,6 +187,11 @@ textarea.auto{overflow:hidden;resize:none;min-height:120px}
 details.rday{background:var(--card);border:1px solid var(--line);border-radius:var(--r);margin:8px 0;overflow:hidden}details.rday summary{list-style:none;cursor:pointer;padding:12px 14px;display:flex;gap:8px;align-items:center}details.rday summary::-webkit-details-marker{display:none}
 details.rday summary .ar{margin-left:auto;color:var(--sub);transition:transform .2s}details.rday[open] summary .ar{transform:rotate(180deg)}details.rday .in{padding:0 14px 10px}
 .backbar{display:flex;align-items:center;gap:6px;margin:-4px 0 6px}.backbar button{padding:6px 10px;font-size:14px}
+.stc{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;margin:8px 0}
+.stc .hd{display:flex;align-items:center;gap:8px}.stc .hd b{font-size:16px;flex:1;min-width:0}.stc .fv{border:0;background:none;font-size:20px;padding:4px 6px;color:var(--sub)}.stc .fv.on{color:#f59e0b}
+.stc .ok{font-size:14px;margin:6px 0 0;line-height:1.5}.stc .wn{font-size:12.5px;color:var(--warn);background:var(--warnbg);border-radius:8px;padding:6px 8px;margin-top:6px;line-height:1.45}
+.stc .ft{display:flex;align-items:center;gap:6px;margin-top:8px}.stc .ft .dom{flex:1;min-width:0;font-size:11px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.scat{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:8px 0}.scat button{flex-direction:column;gap:2px;padding:8px 2px;font-size:11px;border-radius:12px;min-height:60px;line-height:1.2}.scat button span{font-size:20px}.scat button.on{border:2px solid var(--brand);background:var(--brand2);font-weight:700}
 .gbtn{width:100%;background:#fff;color:#1f1f1f;border:1px solid #dadce0;font-weight:600;gap:10px}.gbtn svg{width:18px;height:18px}
 /* ===== 골든아워 마을 테마 (samsy.ninja 풍 · 따뜻한 실사 사진) ===== */
 header{background:rgba(255,243,230,.92);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
@@ -273,6 +278,7 @@ dialog{border-radius:24px}
 <script src="routines.js"></script>
 <script src="recipes.js"></script>
 <script src="recipes2.js"></script>
+<script src="sites.js"></script>
 <script>
 /* ===================== 기본 ===================== */
 const TABS=[['home','M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z','홈'],['plan','M4 6h16v14H4zM4 10h16M8 3v4M16 3v4','일정'],['cook','M3 11h18a9 7 0 0 1-18 0zM8 7c0-2 2-2 2-4M13 7c0-2 2-2 2-4','요리'],['fit','M6 7v10M3 9v6M18 7v10M21 9v6M6 12h12','운동'],['more','M4 6h16M4 12h16M4 18h16','더보기']];
@@ -328,13 +334,14 @@ const CLOUD={auth:null,db:null,user:null,ready:false,failed:false,t:null,busy:fa
   },
   async logout(){if(this.auth&&confirm('로그아웃할까요? (이 기기 데이터는 그대로 남아요)')){await this.auth.signOut();render()}},
   ref(){return this.db.collection('users').doc(this.user.uid).collection('life').doc('state')},
-  cfgOut(){return {url:CFG.url||'',kcal:CFG.kcal||'',hasAI:!!CFG.hasAI,sheetUrl:CFG.sheetUrl||'',plan:LS.get('plan',null),at:CFG.at||0,themes:THM,themesAt:THM_AT,plans:LS.get('plans',[]),woOv:LS.get('woOv',{}),plansAt:LS.get('plansAt',0)}},
+  cfgOut(){return {url:CFG.url||'',kcal:CFG.kcal||'',hasAI:!!CFG.hasAI,sheetUrl:CFG.sheetUrl||'',plan:LS.get('plan',null),at:CFG.at||0,themes:THM,themesAt:THM_AT,plans:LS.get('plans',[]),woOv:LS.get('woOv',{}),plansAt:LS.get('plansAt',0),sites:LS.get('mySites',[]),siteFav:LS.get('siteFav',[]),sitesAt:LS.get('sitesAt',0)}},
   async pull(){
     if(!this.user)return;this.busy=true;setSync('☁︎ 불러오는 중…');
     try{
       const snap=await this.ref().get();const r=snap.exists?snap.data():{};
       const rc=r.cfg||{};
       if((rc.plansAt||0)>LS.get('plansAt',0)){LS.set('plans',rc.plans||[]);LS.set('woOv',rc.woOv||{});if(rc.plan!==undefined)LS.set('plan',rc.plan);LS.set('plansAt',rc.plansAt)}else if(LS.get('plansAt',0)>(rc.plansAt||0))await this.saveCfg(true);
+      if((rc.sitesAt||0)>LS.get('sitesAt',0)){LS.set('mySites',rc.sites||[]);LS.set('siteFav',rc.siteFav||[]);LS.set('sitesAt',rc.sitesAt)}else if(LS.get('sitesAt',0)>(rc.sitesAt||0))await this.saveCfg(true);
       if((rc.themesAt||0)>THM_AT){THM=rc.themes||[];THM_AT=rc.themesAt;LS.set('themes',THM);LS.set('themesAt',THM_AT)}else if(THM_AT>(rc.themesAt||0))await this.saveCfg(true);
       if(rc.url&&(!CFG.url||(rc.at||0)>(CFG.at||0))){
         const changed=rc.url!==CFG.url;
@@ -493,7 +500,8 @@ const PH={
   transit:{q:'Seoul Metropolitan Subway train',fb:'img/rest-hero.svg'},
   plan:{q:'Gyeongbokgung autumn',fb:'img/rest-hero.svg'},
   meet:{q:'cafe interior coffee Seoul',fb:'img/rest-hero.svg'},
-  store:{q:'Korean restaurant exterior',fb:'img/rest-store.svg'}
+  store:{q:'Korean restaurant exterior',fb:'img/rest-store.svg'},
+  sites:{q:'library reading room books',fb:'img/memo-hero.svg'}
 };
 const PHC=LS.get('phc',{});
 const PHP={};
@@ -673,6 +681,46 @@ function calPopup(x){const dl=$('#dlg');
   dl.showModal();const close=()=>{dl.returnValue='';dl.close()};$('#cpClose').onclick=close;
   $('#cpDel').onclick=async()=>{if(!confirm('구글 캘린더에서 이 일정을 삭제할까요?'))return;close();try{await api('calDelete',{eventId:x.eventId});CAL=CAL.filter(c=>c.eventId!==x.eventId);LS.set('cal',CAL);toast('🗑 삭제했어요');render()}catch(e){toast('삭제 실패: '+e.message,4000)}};
   $('#cpImp').onclick=()=>{close();setTimeout(()=>form('일정',{구분:kindOf(x)==='미분류'?'':kindOf(x),종류:'일정',제목:x.제목,날짜:x.날짜,종료일:x.종료일||'',시작:x.시작||'',장소:x.장소||'',캘린더ID:x.eventId}),0)}}
+
+/* ---- 유용한 사이트 (무료 음악·이미지·TV·영화·책·강의·도구·주식·혜택) ---- */
+const siteKey=x=>x.u;
+function allSites(){return [...SITES,...LS.get('mySites',[]).map(x=>Object.assign({c:'내 사이트',mine:1},x))]}
+function siteSave(){LS.set('sitesAt',Date.now());CLOUD.saveCfg()}
+function siteCard(x){const fav=LS.get('siteFav',[]).includes(siteKey(x)),cat=SITE_CATS.find(c=>c[0]===x.c);let dom='';try{dom=new URL(x.u).hostname.replace(/^www\./,'')}catch(e){}
+  return `<div class="stc"><div class="hd"><span style="font-size:20px">${cat?cat[1]:'📌'}</span><b>${esc(x.n)}</b><button class="fv ${fav?'on':''}" data-act="siteFav" data-u="${esc(x.u)}" aria-label="${fav?'즐겨찾기 해제':'즐겨찾기'}">${fav?'★':'☆'}</button></div>
+   <div class="ok">✅ ${esc(x.f||'')}</div>${x.w?`<div class="wn">⚠️ ${esc(x.w)}</div>`:''}
+   <div class="ft"><span class="dom">${esc(dom)}${x.mine?' · 내가 추가':''}</span>${x.mine?`<button class="s" data-act="siteEdit" data-u="${esc(x.u)}">수정</button>`:''}<a class="btn p s" target="_blank" rel="noopener noreferrer" href="${esc(x.u)}">바로 가기 ↗</a></div></div>`}
+function sitesView(){const sc=sub.sc||'전체',q=(sub.sq||'').trim().toLowerCase(),A=allSites(),F=LS.get('siteFav',[]);
+  let L=sc==='⭐'?A.filter(x=>F.includes(siteKey(x))):sc==='전체'?A:A.filter(x=>x.c===sc);
+  if(q)L=L.filter(x=>[x.n,x.f,x.w,x.k,x.c,x.u].join(' ').toLowerCase().includes(q));
+  const favs=sc==='전체'&&!q?A.filter(x=>F.includes(siteKey(x))):[];
+  const cnt=c=>A.filter(x=>x.c===c).length;
+  const groups=sc==='전체'&&!q?[...SITE_CATS.map(c=>c[0]),'내 사이트'].map(c=>[c,L.filter(x=>x.c===c)]).filter(g=>g[1].length):null;
+  return `${dhero('sites','FREE · LINKS','무료로 즐기는<br>유용한 사이트')}
+  <input id="sq" placeholder="🔍 사이트 검색 (예: 배경음악, 사진, 실시간, 공시)" value="${esc(sub.sq||'')}">
+  <div class="scat">${[['전체','🗂','전체'],['⭐','⭐','즐겨찾기'],...SITE_CATS,['내 사이트','📌','내 사이트']].map(([k,ic,lab])=>`<button class="${sc===k?'on':''}" data-act="chip" data-k="sc" data-v="${k}"><span>${ic}</span>${lab.replace('무료 ','')}<small class="muted">${k==='전체'?A.length:k==='⭐'?F.length:cnt(k)}</small></button>`).join('')}</div>
+  ${favs.length?`<h3 style="margin:12px 0 4px">⭐ 즐겨찾기</h3>${favs.map(siteCard).join('')}`:''}
+  ${groups?groups.map(([c,G])=>{const cat=SITE_CATS.find(x=>x[0]===c);return `<h3 style="margin:16px 0 4px">${cat?cat[1]+' '+cat[2]:'📌 내 사이트'} <span class="muted" style="font-weight:400">${G.length}</span></h3>${G.map(siteCard).join('')}`}).join('')
+    :(L.length?L.map(siteCard).join(''):`<div class="card empty">${sc==='⭐'?'☆를 눌러 자주 쓰는 사이트를 모아 보세요':sc==='내 사이트'?'아래 버튼으로 나만의 사이트를 추가해 보세요':'검색 결과가 없어요'}</div>`)}
+  <button style="width:100%;margin-top:10px" data-act="siteAdd">＋ 내 사이트 직접 추가</button>
+  <p class="muted" style="margin-top:10px">${SITES_CHECKED} 기준으로 공식 안내·2곳 이상의 자료로 확인한 합법 무료 사이트예요. 조건은 바뀔 수 있으니 이용 전 각 사이트 안내를 확인하세요. 음악·사진을 영상이나 글에 쓸 땐 ⚠️ 라이선스 조건을 꼭 지켜 주세요.</p>`}
+ACT.siteFav=d=>{let F=LS.get('siteFav',[]);F=F.includes(d.u)?F.filter(x=>x!==d.u):[d.u,...F];LS.set('siteFav',F);siteSave();const y=scrollY;render();scrollTo(0,y)};
+ACT.siteAdd=(d,edit)=>{const M=LS.get('mySites',[]),x=edit||{n:'',u:'https://',f:'',w:''},dl=$('#dlg');
+  dl.innerHTML=`<form method="dialog" style="padding:18px"><h3>${edit?'✏️ 내 사이트 수정':'📌 내 사이트 추가'}</h3>
+   <label>이름</label><input name="n" value="${esc(x.n)}" placeholder="예: 우리 동네 도서관">
+   <label>주소</label><input name="u" value="${esc(x.u)}" inputmode="url" placeholder="https://...">
+   <label>무엇이 좋은지 (선택)</label><input name="f" value="${esc(x.f||'')}" placeholder="예: 전자책 무료 대출">
+   <label>주의할 점 (선택)</label><input name="w" value="${esc(x.w||'')}" placeholder="예: 회원가입 필요">
+   <div class="row" style="margin-top:14px">${edit?'<button value="del" class="x" style="color:var(--bad)">🗑 삭제</button>':''}<span style="flex:1"></span><button value="cancel">취소</button><button value="ok" class="p">저장</button></div></form>`;
+  dl.showModal();dl.onclose=()=>{const fm=dl.querySelector('form');if(!fm)return;
+    if(dl.returnValue==='del'){if(!confirm('이 사이트를 삭제할까요?'))return;LS.set('mySites',M.filter(y=>y.u!==edit.u));LS.set('siteFav',LS.get('siteFav',[]).filter(u=>u!==edit.u));siteSave();toast('삭제했어요');render();return}
+    if(dl.returnValue!=='ok')return;const o={n:fm.elements.n.value.trim(),u:fm.elements.u.value.trim(),f:fm.elements.f.value.trim(),w:fm.elements.w.value.trim()};
+    if(!/^https?:\/\/[^\s.]+\.[^\s]+/.test(o.u)){if(/^[^\s]+\.[^\s]+$/.test(o.u))o.u='https://'+o.u;else return toast('주소를 확인해 주세요 (예: https://example.com)',3500)}
+    if(!o.n){try{o.n=new URL(o.u).hostname.replace(/^www\./,'')}catch(e){o.n=o.u}}
+    const L=edit?M.map(y=>y.u===edit.u?o:y):(M.some(y=>y.u===o.u)?M:[o,...M]);LS.set('mySites',L);
+    if(edit&&edit.u!==o.u)LS.set('siteFav',LS.get('siteFav',[]).map(u=>u===edit.u?o.u:u));
+    siteSave();sub.sc='내 사이트';toast('📌 저장했어요');render()}};
+ACT.siteEdit=d=>{const x=LS.get('mySites',[]).find(y=>y.u===d.u);if(x)ACT.siteAdd({},x)};
 
 /* ---- WHAT: 사진으로 물건·장소 알아보기 + 위치 ---- */
 let WH={busy:0,img:'',cur:null,mode:''};
@@ -1249,7 +1297,7 @@ ACT.aiMeal=async()=>{const out=$('#mealPlan');out.innerHTML='<p class="muted">�
 
 /* ---- 더보기 (메모·맛집·교통·설정) ---- */
 V.more=()=>{
-  const m=sub.more||'메모';let h=chips('more',['메모','맛집','교통','WHAT','설정']);
+  const m=sub.more||'메모';let h=chips('more',['메모','맛집','교통','WHAT','유용한 사이트','설정']);
   if(m==='메모'){
     const q=(sub.mq||'').toLowerCase();const ms=sub.ms||'최근 수정순';
     const L=DB.메모.filter(x=>!q||(x.제목+x.내용+x.태그).toLowerCase().includes(q)).sort(ms==='제목순'?((a,b)=>String(a.제목).localeCompare(String(b.제목),'ko')):((a,b)=>String(b.수정||'').localeCompare(String(a.수정||''))));
@@ -1285,6 +1333,7 @@ V.more=()=>{
     <div class="chips">${['전체','가보고싶음','가봄'].map(x=>`<span class="chip ${f===x?'on':''}" data-act="chip" data-k="mf" data-v="${x}">${x}</span>`).join('')}</div>
     ${used.length?`<div class="chips"><span class="muted" style="align-self:center">테마</span>${['',...used].map(x=>`<span class="chip ${tf===x?'on':''}" data-act="chip" data-k="ft" data-v="${esc(x)}">${x?'★ '+esc(x):'전체'}</span>`).join('')}</div>`:''}
     <div class="pgrid">${L.length?L.map(x=>{const im=REST[[...String(x.이름)].reduce((a,c)=>a+c.charCodeAt(0),0)%3],ph=FPH[x.id];return `<div class="pcard" data-act="detail" data-id="${x.id}"><img src="${ph||im}" ${!ph&&x.메뉴?`data-dish="${esc(String(x.메뉴).split(/[,\s]/)[0])}"`:''} alt=""><div class="pb"><div class="t">${esc(x.이름)}</div><div class="d">📍 ${esc(x.지역||'-')}${x.메뉴?'\n'+esc(x.메뉴):''}</div>${x.테마?String(x.테마).split(',').filter(t=>t.trim()).map(t=>`<span class="tag">★ ${esc(t.trim())}</span>`).join(''):''}<div class="st">${stars(x.평점)} <span>${esc(x.가격대||'')}</span></div></div></div>`}).join(''):'<div class="card empty" style="grid-column:1/-1">맛집을 추가해 보세요</div>'}</div><button class="fab" data-act="add" data-s="맛집">＋</button>`;
+  }else if(m==='유용한 사이트'){h+=sitesView();
   }else if(m==='WHAT'){h+=whatView();
   }else if(m==='교통'){
     const P=DB.장소;const opts=P.map(x=>`<option value="${esc(x.주소||x.이름)}">${esc(x.이름)}</option>`).join('');
@@ -1329,6 +1378,7 @@ V.more=()=>{
   return h;
 };
 AFTER.more=()=>{
+  const sq=$('#sq');if(sq)sq.oninput=()=>{sub.sq=sq.value;const p=sq.selectionStart;render();const n=$('#sq');n.focus();n.setSelectionRange(p,p)};
   const wc=$('#whCam'),wg=$('#whGal');if(wc)wc.onchange=e=>whatRun(e.target.files[0]);if(wg)wg.onchange=e=>whatRun(e.target.files[0]);
   ['#whFood','#whFoodG'].forEach(k=>{const f=$(k);if(f)f.onchange=e=>whatRun(e.target.files[0],'food')});
   const wa=$('#whAsk');if(wa)wa.oninput=()=>{LS.set('whAsk',wa.value);document.querySelectorAll('[data-act=whQ]').forEach(x=>x.classList.toggle('on',x.dataset.v===wa.value))};
