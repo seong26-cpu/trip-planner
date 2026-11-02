@@ -248,4 +248,15 @@ function listMyModels() {
 function authorizeTest() {
   Logger.log(JSON.stringify(listAll_()).slice(0, 200));
   Logger.log(cal_().getName());
+  ytCheck();
+}
+
+/* 유튜브 연결 점검 — 편집기에서 ▶ 실행 */
+function ytCheck() {
+  if (typeof YouTube === 'undefined') {
+    Logger.log('❌ YouTube 서비스가 추가되지 않았습니다 → 왼쪽 「서비스 +」 → YouTube Data API v3 → 추가');
+    return;
+  }
+  var r = yt_('욕실 곰팡이 제거', 1);
+  Logger.log(r.items && r.items.length ? '✅ 유튜브 연결 성공: ' + r.items[0].t : '⚠️ 연결은 됐지만 결과 0개');
 }
