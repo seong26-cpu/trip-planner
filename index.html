@@ -1637,6 +1637,16 @@ function loadSave(no){const s=saves().find(x=>x.no===no);if(!s)return;const d=JS
 function sig(d){const t=Object.assign({},d.trip||{});delete t.saveNo;delete t.saveSid;delete t.recStatus;const o={t};COLS.forEach(c=>o[c]=d[c]||[]);return JSON.stringify(o)}
 function sameSave(d){const g=sig(d);const x=saves().find(v=>v.data&&sig(v.data)===g);return x?x.no:0}
 function hasContentOf(d){return !!(d&&((d.items||[]).length||(d.bookings||[]).length||(d.expenses||[]).length||(d.checklist||[]).length||(d.bucket||[]).length||(d.notes||[]).length||(d.memories||[]).length||(d.places||[]).some(p=>!p.rec)))}
+/* 여행지(도시)가 바뀌면 이전 도시의 흔적을 남기지 않음: 지금 여행은 저장 목록에 보관 → 일정·예약·추천 장소·숙소·경비·준비물·버킷리스트·메모·일별 설정 전부 비우고,
+   여행 정보에서는 사람이 정한 값(출발 공항·일행·날짜·총 예산·통화·언어)만 남기고 도시별 값(항목별 예산·숙소 선택·추천 상태·환율 출처·저장 번호)은 지움 */
+const cNorm=v=>String(v||"").replace(/\s+/g,"").toLowerCase();
+function cityChanged(oldT,newT){if(!oldT||!newT)return false;const d=(a,b)=>!!(cNorm(a)&&cNorm(b)&&cNorm(a)!==cNorm(b));return d(oldT.city,newT.city)||d(oldT.cityEn,newT.cityEn)}
+function freshCity(trip,oldT){const k=archiveCurrent();COLS.forEach(c=>S[c]=[]);day=null;
+  const keep=["title","city","cityEn","from","to","start","end","travelers","budget","cur","rate","rateAuto","lang"];const out={};keep.forEach(x=>{if(trip[x]!==undefined)out[x]=trip[x]});
+  out.budget=Number(trip.budget)||(trip.bud?BCATS.reduce((a,c)=>a+(Number(trip.bud[c])||0),0):0);out.bud=Object.fromEntries(BCATS.map(c=>[c,0]));
+  if(out.rateAuto!==false&&oldT&&oldT.cur!==out.cur)out.rate=0;
+  if(!out.title||out.title==="새 여행"||(oldT&&out.title===oldT.title)||/여행$/.test(out.title))out.title=(out.city||out.cityEn)+" 여행";
+  if(k)setTimeout(()=>toast(`이전 여행 '${(oldT&&(oldT.title||oldT.city))||""}'은 저장 목록 #${k}에 보관했어요`),1800);return out}
 function archiveCurrent(){if(!S.trip||!hasContentOf(S))return 0;{const same=sameSave(S);if(same)return same}const cur=saves().find(x=>(T().saveSid&&sidOf(x)===T().saveSid)||x.no===T().saveNo);return saveTo(cur?cur.no:nextNo(),true)}
 function addAutoSave(d,label){if(!hasContentOf(d)||sameSave(d))return 0;const a=saves();const no=a.reduce((m,x)=>Math.max(m,x.no),0)+1;const t=d.trip||{};
   a.push({sid:"s"+uid(),no,name:`${t.title||t.city||"여행"} · 자동 보관(${label})`,city:t.city||"",start:t.start||"",end:t.end||"",savedAt:Date.now(),counts:countsOf(d),data:JSON.parse(JSON.stringify(d)),auto:true});writeSaves(a,true);return no}
@@ -2755,7 +2765,8 @@ async function applyRecs(trip){
   return pk.places.length;
 }
 
-async function applyPackToTrip(pk){if(!pk)return;const trip=Object.assign({},T(),{city:pk.city,cityEn:pk.cityEn,to:pk.to||T().to});if(!S.trip||!T().title||T().title==="새 여행"||/여행$/.test(T().title))trip.title=pk.city+" 여행";const n=await applyRecs(trip);S.trip=trip;commit();toast(`${pk.city} 팩 적용: 추천 ${n}곳·숙소 ${S.hotels.length}곳`)}
+async function applyPackToTrip(pk){if(!pk)return;let trip=Object.assign({},T(),{city:pk.city,cityEn:pk.cityEn,to:pk.to||T().to});
+  if(S.trip&&cityChanged(S.trip,trip)){if(!confirm(`여행지를 '${T().city||T().cityEn}' → '${pk.city}'(으)로 바꿀까요?\n이전 여행은 저장 목록에 보관하고 새 여행지는 깨끗하게 시작해요.`))return;trip=freshCity(Object.assign(trip,{cur:pk.cur||trip.cur,lang:pk.lang||trip.lang}),T())}if(!S.trip||!T().title||T().title==="새 여행"||/여행$/.test(T().title))trip.title=pk.city+" 여행";const n=await applyRecs(trip);S.trip=trip;commit();toast(`${pk.city} 팩 적용: 추천 ${n}곳·숙소 ${S.hotels.length}곳`)}
 
 /* ===== 위치 찾기: OpenStreetMap Nominatim (무료, 초당 1회 이하·버튼을 누를 때만) ===== */
 function llField(p){return `<div class="llrow"><label class="f">위치 "위도, 경도" 또는 구글 지도 링크 (비워두면 이름으로 자동 찾기)<input id="${p}-ll" name="ll" placeholder="34.6873, 135.5262"></label><button type="button" class="btn sm" data-act="geoFind" data-form="${p}">📍 찾기</button></div><div class="geo-res" id="${p}-geo"></div>`}
@@ -2829,6 +2840,7 @@ async function importTemplate(file){const msg=document.getElementById("tplMsg");
   if(info.travelers)trip.travelers=String(info.travelers).split(/[,，、]/).map(x=>x.trim()).filter(Boolean);
   if(info.cur)trip.cur=String(info.cur).trim().toUpperCase();if(info.rate)trip.rate=xNum(info.rate);if(info.budget)trip.budget=xNum(info.budget);
   if(BCATS.some(k=>info["b_"+k]!=null)){trip.bud=Object.assign({},trip.bud||{});BCATS.forEach(k=>{if(info["b_"+k]!=null)trip.bud[k]=xNum(info["b_"+k])})}
+  if(S.trip&&cityChanged(prev,trip)){const nt=freshCity(trip,prev);Object.keys(trip).forEach(x=>delete trip[x]);Object.assign(trip,nt);if(info.rate)trip.rate=xNum(info.rate);if(BCATS.some(k=>info["b_"+k]!=null))BCATS.forEach(k=>{if(info["b_"+k]!=null)trip.bud[k]=xNum(info["b_"+k])})}
   /* 2) 일정 */
   const rows=aoa(findSheet(wb,"일정"));let hi=rows.findIndex(r=>r.some(c=>/장소|할\s*일/.test(String(c))));
   const bkRows=aoa(findSheet(wb,"버킷리스트")).slice(1).filter(r=>String(r[1]||"").trim());
@@ -3066,12 +3078,11 @@ async function cityLookup(name){name=(name||"").trim();if(!name||cityLookBusy===
 document.addEventListener("input",e=>{if(e.target.id==="tf-rate"){const a=document.getElementById("tf-rateAuto"),n=document.getElementById("fxNote");if(a)a.value="0";if(n)n.textContent="직접 입력 중 · 저장하면 자동 갱신이 꺼져요 (🔄 최신을 누르면 다시 자동)"}if(e.target.id==="if-title"){const p=S.places.find(x=>x.name===e.target.value.trim());if(p){const set=(i,v)=>{const el=document.getElementById(i);if(el&&!el.value&&v!=null&&v!=="")el.value=v};if(hasLL(p))set("if-ll",`${p.lat}, ${p.lng}`);const k=document.getElementById("if-kind");if(k)k.value=p.kind==="맛집"?"맛집":p.kind==="쇼핑"?"쇼핑":p.kind==="체험"?"체험":"명소";if(p.kind!=="맛집")set("if-cost",p.cost||"");const box=document.getElementById("if-geo");if(box)box.innerHTML=`<span class="small" style="color:var(--good)">✓ 저장된 장소 위치를 넣었어요</span>`}}if(e.target.id==="noteQ"){noteQ=e.target.value;filterNotes()}if(e.target.id==="whAsk")lss("tp-whAsk",e.target.value.trim());if(e.target.id==="tf-city"){CITYF.concat("tf-rate").forEach(id=>{const el=document.getElementById(id);if(el&&el.dataset.auto==="0")el.dataset.auto=""});clearTimeout(window.__ct);window.__ct=setTimeout(()=>autoCity(true),250)}if(["tf-cityEn","tf-to","tf-rate"].includes(e.target.id))e.target.dataset.auto="0";if(e.target.id==="tr-text"){const v=e.target.value;window.__draft=v;const l=L(),tl=T().lang||"ja";$("#tr-g").href=l.gt(v,tl);$("#tr-p").href=l.pp(v,tl)}});
 document.addEventListener("submit",async e=>{
   e.preventDefault();const f=e.target,d=formData(f);delete d.attfile;{const ai=f.querySelector("input[data-att]");PENDING_ATT=ai&&ai.files.length?await saveAtts(ai):null}
-  if(f.id==="tripForm"){const apply=e.submitter&&e.submitter.value==="apply";{const dd=dictFor(d.city);if(dd){if(!d.cityEn)d.cityEn=dd[1];if(!d.to)d.to=dd[2]}}const trip=Object.assign({},T(),{title:d.title,city:d.city,cityEn:d.cityEn,from:(d.from||"").toUpperCase(),to:(d.to||"").toUpperCase(),start:d.start,end:d.end,budget:Number(d.budget)||0,bud:Object.fromEntries(BCATS.map(k=>[k,Number(d["b_"+k])||0])),cur:d.cur,rate:Number(d.rate)||0,rateAuto:d.rateAuto!=="0",lang:d.lang,travelers:d.travelers.split(",").map(s=>s.trim()).filter(Boolean)});
-    {const old=S.trip;const oldCity=old&&(old.cityEn||old.city),newCity=trip.cityEn||trip.city;
-     if(old&&oldCity&&newCity&&oldCity.trim().toLowerCase()!==newCity.trim().toLowerCase()&&hasContentOf(S)){
-       if(confirm(`도시가 '${old.city||old.cityEn}'에서 '${trip.city||trip.cityEn}'(으)로 바뀌었어요. 새 여행으로 시작할까요?\n\n[확인] '${old.title||old.city}'는 저장 목록에 보관하고, 일정·예약·경비·준비물·버킷리스트·메모를 비운 새 여행으로 시작\n[취소] 지금 내용을 그대로 두고 도시만 바꾸기`)){
-         const k=archiveCurrent();COLS.forEach(c=>S[c]=[]);day=null;delete trip.saveNo;delete trip.saveSid;delete trip.hotelPick;delete trip.recStatus;delete trip.rateFrom;
-         if(!d.title||d.title===old.title||/여행$/.test(d.title))trip.title=(trip.city||trip.cityEn)+" 여행";if(k)setTimeout(()=>toast(`'${old.title||old.city}'를 저장 목록 #${k}에 보관했어요`),1800)}}}
+  if(f.id==="tripForm"){const apply=e.submitter&&e.submitter.value==="apply";{const dd=dictFor(d.city),o=S.trip;if(o&&dd&&cNorm(d.city)!==cNorm(o.city)){if(cNorm(d.cityEn)===cNorm(o.cityEn))d.cityEn=dd[1];if(!d.to||d.to.toUpperCase()===String(o.to||"").toUpperCase())d.to=dd[2];if(d.cur===o.cur&&dd[3]&&d.rateAuto!=="0")d.cur=dd[3];if(d.lang===o.lang&&dd[4])d.lang=dd[4]}if(dd){if(!d.cityEn)d.cityEn=dd[1];if(!d.to)d.to=dd[2]}}const trip=Object.assign({},T(),{title:d.title,city:d.city,cityEn:d.cityEn,from:(d.from||"").toUpperCase(),to:(d.to||"").toUpperCase(),start:d.start,end:d.end,budget:Number(d.budget)||0,bud:Object.fromEntries(BCATS.map(k=>[k,Number(d["b_"+k])||0])),cur:d.cur,rate:Number(d.rate)||0,rateAuto:d.rateAuto!=="0",lang:d.lang,travelers:d.travelers.split(",").map(s=>s.trim()).filter(Boolean)});
+    {const old=S.trip;
+     if(old&&cityChanged(old,trip)){
+       if(!confirm(`여행지가 '${old.city||old.cityEn}' → '${trip.city||trip.cityEn}'(으)로 바뀌어요.\n\n이전 여행은 저장 목록에 그대로 보관하고, 새 여행지는 깨끗하게 시작해요.\n(일정·예약·추천 장소·숙소·경비·준비물·버킷리스트·메모·항목별 예산을 비움)\n\n[확인] 새 여행지로 시작   [취소] 바꾸지 않기`))return;
+       Object.keys(trip).forEach(x=>delete trip[x]);Object.assign(trip,freshCity(Object.assign({},T(),{title:d.title,city:d.city,cityEn:d.cityEn,from:(d.from||"").toUpperCase(),to:(d.to||"").toUpperCase(),start:d.start,end:d.end,budget:Number(d.budget)||0,cur:d.cur,rate:Number(d.rate)||0,rateAuto:d.rateAuto!=="0",lang:d.lang,travelers:d.travelers.split(",").map(s=>s.trim()).filter(Boolean)}),old))}}
     if(apply&&(!trip.title||trip.title==="새 여행")&&trip.city)trip.title=trip.city+" 여행";{const o=T();if(trip.rateAuto&&o&&(o.cur!==trip.cur||Number(o.rate)!==trip.rate)){trip.rateAt=Date.now();const n=document.getElementById("fxNote");trip.rateNote=(n&&/기준/.test(n.textContent)?n.textContent.replace(/^자동 · /,"").replace(/ · 저장하면 적용$/,""):o.rateNote)||""}if(!trip.rateAuto){delete trip.rateAt;delete trip.rateNote}}
     if(apply){const ab=e.submitter;if(ab){ab.disabled=true;ab.textContent="추천 찾는 중…"}const n=await applyRecs(trip);S.trip=trip;commit();toast(n?`추천 ${n}곳·숙소 ${S.hotels.length}곳을 반영했어요`:"추천 칸을 비워뒀어요");}else{saveTrip(trip);toast("저장했어요")}if(trip.rateAuto&&(!trip.rate||!trip.rateAt))autoFx(true);return}
   if(f.id==="itemForm"){let ll=parseLL(d.ll),how="";const btn=f.querySelector("button.primary");
