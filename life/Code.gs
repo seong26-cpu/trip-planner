@@ -192,19 +192,26 @@ function ai_(prompt, imageB64, mime) {
     .map(function (s) { return s.trim(); }).filter(String);
   var parts = [{ text: prompt }];
   if (imageB64) parts.push({ inline_data: { mime_type: mime || 'image/jpeg', data: imageB64 } });
-  var payload = JSON.stringify({
-    contents: [{ parts: parts }],
-    generationConfig: { responseMimeType: 'application/json', temperature: 0.4 }
-  });
+  // 빠른 응답: 「생각(thinking)」을 줄임. 모델이 이 옵션을 모르면(400) 옵션 없이 자동 재시도
+  function payloadFor(m, fast) {
+    var gc = { responseMimeType: 'application/json', temperature: 0.4 };
+    if (fast && /flash/i.test(m)) {
+      if (/gemini-2\.5/i.test(m)) gc.thinkingConfig = { thinkingBudget: 0 };
+      else if (/gemini-[3-9]/i.test(m)) gc.thinkingConfig = { thinkingLevel: 'low' };
+    }
+    return JSON.stringify({ contents: [{ parts: parts }], generationConfig: gc });
+  }
+  var noFast = {};
   var tried = {}, last = '', discovered = false;
   for (var i = 0; i < models.length && i < 6; i++) {
     var m = models[i]; if (tried[m]) continue; tried[m] = 1;
     var res = UrlFetchApp.fetch(
       'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(m) + ':generateContent',
       { method: 'post', contentType: 'application/json', muteHttpExceptions: true,
-        headers: { 'x-goog-api-key': key }, payload: payload });
+        headers: { 'x-goog-api-key': key }, payload: payloadFor(m, !noFast[m]) });
     var code = res.getResponseCode(), body = {};
     try { body = JSON.parse(res.getContentText() || '{}'); } catch (x) {}
+    if (code === 400 && !noFast[m] && /think/i.test(JSON.stringify(body.error || ''))) { noFast[m] = 1; i--; delete tried[m]; continue; }
     if (code === 200) {
       var txt = (((body.candidates || [])[0] || {}).content || {}).parts;
       txt = txt ? txt.filter(function (p) { return !p.thought; }).map(function (p) { return p.text || ''; }).join('') : '';

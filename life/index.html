@@ -407,7 +407,11 @@ async function api(action,body={},timeout=60000){
   if(!CFG.url)throw new Error('서버 미연결');
   const ctl=new AbortController();const tm=setTimeout(()=>ctl.abort(),timeout);
   try{
-    const r=await fetch(CFG.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action,...body}),signal:ctl.signal});
+    let r;try{r=await fetch(CFG.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action,...body}),signal:ctl.signal})}
+    catch(e){const m=String(e&&e.message||e);
+      if(e&&e.name==='AbortError'||/abort/i.test(m)){const er=new Error(`서버 응답이 ${Math.round(timeout/1000)}초 안에 오지 않아 중단했어요. 화면이 꺼졌거나 다른 앱으로 이동했으면 연결이 끊길 수 있어요. 「🔄 다시 시도」를 눌러 주세요.`);er.timeout=1;throw er}
+      if(/failed to fetch|network|load failed/i.test(m))throw new Error('인터넷 연결이 불안정해요. 와이파이/데이터를 확인하고 「🔄 다시 시도」를 눌러 주세요.');
+      throw e}
     const j=await r.json();if(!j.ok)throw new Error(j.error||'서버 오류');return j.data===undefined?j:j.data;
   }finally{clearTimeout(tm)}
 }
@@ -444,7 +448,7 @@ async function ai(prompt,image,mime){
   if(!CFG.url)throw new Error('AI 기능은 서버 연결 후 사용할 수 있어요 (더보기 → 설정).');
   const waits=[4000,10000,20000];
   for(let i=0;;i++){
-    try{return await api('ai',{prompt,image,mime},120000)}
+    try{return await api('ai',{prompt,image,mime},180000)}
     catch(e){
       const busy=/\((500|503)|high demand|overloaded|UNAVAILABLE/i.test(e.message);
       if(!busy||i>=waits.length)throw new Error(busy?'지금 구글 AI 서버가 붐벼요(일시적). 1~2분 뒤 다시 눌러 주세요.':e.message);
@@ -718,12 +722,12 @@ V.clean=()=>{const q=clSt(),c=clCat(q.cat),ed=!!sub.cledit,R=LS.get('cleanRes',{
    <div class="muted" style="margin-top:10px;font-size:12px">🎯 대상 — 누르면 바로 입력</div>${clChipRow(q.cat,'obj',q.obj,ed)}
    <div class="muted" style="margin-top:8px;font-size:12px">✅ 목적 — 누르면 바로 입력</div>${clChipRow(q.cat,'goal',q.goal,ed)}
    ${ed?`<button class="x" data-act="clReset" style="margin-top:6px">↩ ${c.k} 기본 단어로 되돌리기</button>`:''}
-   <div class="row" style="margin-top:12px;flex-wrap:nowrap"><button class="x" data-act="clClear">지우기</button><button class="p" style="flex:1;min-height:48px;background:var(--cc);border-color:var(--cc)" data-act="clGo" ${busy?'disabled':''}>${busy?'🔍 방법을 찾는 중… (10~30초)':'🔍 방법 찾기'}</button></div></div>
-  ${busy?`<div class="card"><p class="muted">🤖 「${esc(q.obj)} · ${esc(q.goal)}」 방법을 정리하고 관련 영상을 찾고 있어요. 다른 메뉴에 다녀와도 결과는 여기 남아요.</p></div>`:res?clResult(q,res):''}
+   <div class="row" style="margin-top:12px;flex-wrap:nowrap"><button class="x" data-act="clClear">지우기</button><button class="p" style="flex:1;min-height:48px;background:var(--cc);border-color:var(--cc)" data-act="clGo" ${busy?'disabled':''}>${busy?'🔍 방법을 찾는 중… (최대 1~2분)':'🔍 방법 찾기'}</button></div></div>
+  ${busy?`<div class="card"><p class="muted">🤖 「${esc(q.obj)} · ${esc(q.goal)}」 방법을 정리하고 관련 영상을 찾고 있어요. 다른 메뉴에 다녀와도 결과는 여기 남아요. <b>화면을 끄거나 다른 앱으로 나가면 끊길 수 있어요.</b></p></div>`:res?clResult(q,res):''}
   ${saved.length?`<h3 style="margin:16px 0 6px">💾 저장한 가이드 <span class="muted" style="font-weight:400">${saved.length}</span></h3><div class="card">${saved.map(x=>`<div class="item" style="cursor:pointer" data-act="clOpen" data-k="${esc(x.key)}"><span style="font-size:20px">${clCat(x.cat).ic}</span><div class="b"><div class="t">${esc(x.obj)} · ${esc(x.goal)}</div><div class="d">${esc(x.title||'')}</div></div><span class="muted">›</span></div>`).join('')}</div>`:''}
   </div>`};
 function clResult(q,r){const c=clCat(q.cat),a=r.ai||{},vids=r.vids||[],yq=a.yt||(q.obj+' '+q.goal),sv=LS.get('cleanSaved',[]).some(x=>x.key===clKey(q));
-  if(r.err)return `<div class="card"><div class="notice">${esc(r.err)}</div>${clLinks(yq,q)}</div>`;
+  if(r.err)return `<div class="card"><div class="notice">⚠️ ${esc(r.err)}</div><button class="p" style="width:100%;margin-top:8px;background:var(--cc);border-color:var(--cc)" data-act="clRedo">🔄 다시 시도</button><p class="muted" style="margin:8px 0 0;font-size:12px">💡 AI가 방법을 정리하는 데 보통 10~60초 걸려요. 그동안 화면을 켜 두세요.</p>${clLinks(yq,q)}</div>`;
   return `<div class="card clres"><h2 style="font-size:18px">${esc(a.title||q.obj+' '+q.goal)}</h2>
    <div class="gl"><span>🎯 ${esc(q.obj||'-')}</span><span>✅ ${esc(q.goal||'-')}</span></div>
    <img class="clphoto" data-wk="${esc(q.obj)}" alt="" hidden>
@@ -757,7 +761,7 @@ ACT.clOpen=d=>{const [cat,obj,goal]=d.k.split('|');clSetQ({cat,obj,goal});render
 ACT.clRedo=()=>{const q=clSt(),R=LS.get('cleanRes',{});delete R[clKey(q)];LS.set('cleanRes',R);ACT.clGo()};
 ACT.clGo=async()=>{const oi=$('#clObj'),gi=$('#clGoal');const q=clSetQ({obj:oi?oi.value.trim():clSt().obj,goal:gi?gi.value.trim():clSt().goal});
   if(!q.obj&&!q.goal)return toast('대상이나 목적을 입력하거나 아래 단어를 눌러 주세요');const key=clKey(q),R=LS.get('cleanRes',{});
-  if(R[key]){render();setTimeout(()=>{const e=document.querySelector('.clres');if(e)e.scrollIntoView({behavior:'smooth'})},100);return}
+  if(R[key]&&!R[key].err){render();setTimeout(()=>{const e=document.querySelector('.clres');if(e)e.scrollIntoView({behavior:'smooth'})},100);return}
   if(CLB)return toast('이전 검색이 끝나면 다시 눌러 주세요');
   if(!CFG.url){R[key]={err:'AI 단계별 방법은 서버 연결 후 사용할 수 있어요 (더보기 → 설정). 지금은 아래 유튜브·사진 설명 글로 찾아보세요.'};LS.set('cleanRes',R);render();return}
   CLB=key;render();const r={at:new Date().toLocaleString('ko-KR',{hour12:false}).slice(0,-3)};
@@ -773,7 +777,7 @@ ACT.clGo=async()=>{const oi=$('#clObj'),gi=$('#clGoal');const q=clSetQ({obj:oi?o
     if(!r.ai||r.ai.raw||!(r.ai.steps||[]).length){r.err='AI 응답을 해석하지 못했어요. 「다시 만들기」를 눌러 주세요.';delete r.ai}
     else await clFetchVids(r,q)
   }catch(e){r.err=e.message}
-  const R2=LS.get('cleanRes',{});R2[key]=r;const ks=Object.keys(R2);while(ks.length>40)delete R2[ks.shift()];LS.set('cleanRes',R2);CLB='';toast('🧹 방법을 정리했어요');
+  const R2=LS.get('cleanRes',{});R2[key]=r;const ks=Object.keys(R2);while(ks.length>40)delete R2[ks.shift()];LS.set('cleanRes',R2);CLB='';toast(r.err?'⚠️ 방법을 가져오지 못했어요 — 「다시 시도」를 눌러 주세요':'🧹 방법을 정리했어요',3500);
   if(tab==='clean'){render();setTimeout(()=>{const e=document.querySelector('.clres');if(e)e.scrollIntoView({behavior:'smooth'})},100)}};
 /* 유튜브 영상 찾기 — 실패하면 원인(r.ytErr)을 저장해 화면에 해결법을 보여줌 */
 async function clFetchVids(r,q){delete r.ytOff;delete r.ytErr;
