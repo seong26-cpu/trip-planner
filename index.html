@@ -1591,7 +1591,8 @@ const PK=()=>packFor();
 const BUILTIN=new Set(Object.keys(PACKS));
 function installPack(pk){if(!pk||!pk.id||!Array.isArray(pk.places))return false;PACKS[pk.id]=pk;Object.assign(SRCS,pk.sources||{});return true}
 function cachedPacks(){try{return JSON.parse(localStorage.getItem("trip-planner-packs-v1")||"{}")}catch(e){return{}}}
-function cachePack(pk){const c=cachedPacks();c[pk.id]=pk;try{localStorage.setItem("trip-planner-packs-v1",JSON.stringify(c))}catch(e){}}
+function cachePack(pk,fromCloud){if(!fromCloud)pk.syncAt=Date.now();const c=cachedPacks();c[pk.id]=pk;try{localStorage.setItem("trip-planner-packs-v1",JSON.stringify(c))}catch(e){}
+  if(!fromCloud)try{Sync.pushPack(pk)}catch(_){}}
 Object.values(cachedPacks()).forEach(installPack);
 let packIndex=null,packIndexErr="";
 async function loadPackIndex(force){if(packIndex&&!force)return packIndex;try{const r=await fetch("packs/index.json",{cache:"no-cache"});if(!r.ok)throw new Error(r.status);packIndex=await r.json();packIndexErr=""}catch(e){packIndexErr=location.protocol==="file:"?"파일로 열면 팩을 내려받을 수 없어요. https://seong26-cpu.github.io/trip-planner/ 에서 열어주세요.":"팩 목록을 불러오지 못했어요. 인터넷 연결을 확인하세요."}return packIndex}
@@ -1751,10 +1752,23 @@ const Sync={user:null,ready:false,state:"off",last:0,timer:null,db:null,auth:nul
         if(localUpdatedAt!==rAt||changedSaves||Object.keys(m.del).length!==Object.keys(r.savesDel||{}).length)await this.push();else{try{localStorage.setItem("tp-last-sync",String(rAt))}catch(_){}}
         if(msg)toast(msg)}
       else if(S.trip||S.items.length||saves().length){await this.push();toast("이 기기 데이터를 계정에 올렸어요")}
+      try{await this.syncPacks()}catch(e){console.warn("pack sync",e)}
       await this.pullPhotos();this.state="ok";this.last=Date.now();
       try{if(!lsj("tp-ai-url","")&&!((lsj("life.cfg",{})||{}).url)){const ls=await this.ref().collection("life").doc("state").get();const u=ls.exists&&ls.data().cfg&&ls.data().cfg.url;if(u){lss("tp-ai-url",u);toast("✅ '나의 하루' AI 서버를 연결했어요 (WHAT 사용 가능)")}}}catch(_){}}
     catch(e){this.state="error";this.err=(e&&e.code)==="permission-denied"?"권한 오류(보안 규칙 확인)":"네트워크 확인"}
     this.paint()},
+  /* 도시 팩: users/{uid}/packs/{팩id} 에 하나씩 저장 → 같은 계정이면 휴대폰·웹 어디서 받든 공유 */
+  async pushPack(pk){if(!this.user||!pk||!pk.id||BUILTIN.has(pk.id))return;try{const json=JSON.stringify(pk);if(json.length>900000){toast("도시 팩이 너무 커서 계정에는 못 올렸어요(이 기기에만 저장)");return}
+      await this.ref().collection("packs").doc(pk.id).set({json,city:pk.city||"",at:pk.syncAt||Date.now(),deleted:false})}catch(e){console.warn("pack push",e)}},
+  async delPackCloud(id){if(!this.user)return;try{await this.ref().collection("packs").doc(id).set({deleted:true,at:Date.now(),json:""})}catch(e){console.warn("pack del",e)}},
+  async syncPacks(){let got=0,sent=0;const qs=await this.ref().collection("packs").get();const remote={};qs.forEach(d=>remote[d.id]=d.data());
+    const local=cachedPacks();
+    for(const [id,r] of Object.entries(remote)){const l=local[id],lAt=(l&&l.syncAt)||0;
+      if(r.deleted){if(l&&lAt<=r.at){delPack(id,true)}continue}
+      if(!l||(r.at||0)>lAt){try{const pk=JSON.parse(r.json);pk.syncAt=r.at||Date.now();if(installPack(pk)){cachePack(pk,true);got++}}catch(_){}}}
+    for(const [id,l] of Object.entries(local)){if(BUILTIN.has(id))continue;const r=remote[id];
+      if(!r||(r.deleted?(l.syncAt||0)>r.at:(l.syncAt||0)>(r.at||0))){if(!l.syncAt){l.syncAt=Date.now();cachePack(l,true)}await this.pushPack(l);sent++}}
+    if(got)toast(`계정에 있던 도시 팩 ${got}개를 이 기기에 받았어요`);return{got,sent}},
   async pullPhotos(){const need=[];allPhotoIds().forEach(id=>{if(!PH[id])need.push(id)});
     for(const id of need){try{const d=await this.ref().collection("photos").doc(id).get();if(d.exists){PH[id]=d.data().data;await putPhoto(id,PH[id])}}catch(_){}}
     if(need.length)render()},
@@ -1763,7 +1777,7 @@ const Sync={user:null,ready:false,state:"off",last:0,timer:null,db:null,auth:nul
 function acctCard(){if(!Sync.enabled())return `<div class="card"><h3>계정·동기화</h3><p class="small muted">로그인 기능은 아직 설정 전이에요(관리자가 Firebase 설정을 넣으면 켜져요). 지금은 이 기기에만 저장돼요.</p></div>`;
   const u=Sync.user;return `<div class="card"><div class="row between"><h3>계정·동기화</h3>${u?`<button class="btn ghost sm" data-act="logout">로그아웃</button>`:""}</div>
   ${u?`<div class="row"><b>${esc(u.displayName||"")}</b><span class="small muted">${esc(u.email||"")}</span></div><p class="small" id="acctLine">${esc(Sync.label())}</p><div class="row"><button class="btn sm" data-act="syncNow">지금 동기화</button></div>
-  <p class="small muted">같은 구글 계정으로 로그인하면 휴대폰 앱·PC 웹·다른 기기에서 일정·경비·저장 목록·사진 기록을 똑같이 불러와요. 마지막으로 고친 기기의 내용이 기준이 돼요.</p>`
+  <p class="small muted">같은 구글 계정으로 로그인하면 휴대폰 앱·PC 웹·다른 기기에서 일정·경비·저장 목록·사진 기록·도시 팩을 똑같이 불러와요. 마지막으로 고친 기기의 내용이 기준이 돼요.</p>`
   :`<p class="small muted">구글 계정으로 로그인하면 웹에서 등록한 내용을 휴대폰 앱에서도 그대로 불러올 수 있어요.</p><div class="row"><button class="btn primary" data-act="login" ${Sync.ready?"":"disabled"}>${Sync.ready?"구글 계정으로 로그인":"준비 중…"}</button></div>`}</div>`}
 
 function installCard(){const standalone=matchMedia("(display-mode: standalone)").matches||navigator.standalone;if(standalone)return"";
@@ -2505,7 +2519,8 @@ async function autoPackFor(trip,force){const ex=packFor(trip);if(ex&&!force)retu
   try{const pk=await buildCityPack(trip,ppSet);if(!pk.places.length&&!pk.hotels.length)throw new Error("장소가 없어요");installPack(pk);cachePack(pk);ppSet("apply","run");return pk}
   catch(e){ppFinish(false,e.message);throw e}}
 async function applyPackOrBuild(t){try{const pk=await autoPackFor(t,true);await applyPackToTrip(pk)}catch(_){render()}}
-function delPack(id){if(BUILTIN.has(id))return;delete PACKS[id];const c=cachedPacks();delete c[id];try{localStorage.setItem("trip-planner-packs-v1",JSON.stringify(c))}catch(_){}}
+function delPack(id,fromCloud){if(BUILTIN.has(id))return;delete PACKS[id];const c=cachedPacks();delete c[id];try{localStorage.setItem("trip-planner-packs-v1",JSON.stringify(c))}catch(_){}
+  if(!fromCloud)try{Sync.delPackCloud(id)}catch(_){}}
 function exportPack(id){const pk=PACKS[id];if(!pk)return;const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(pk)],{type:"application/json"}));a.download=`도시팩_${pk.city}_${(pk.version||"").replace(/\s/g,"")}.json`;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000);toast("팩 파일을 내려받았어요 · 다른 기기에서 '팩 파일 가져오기'로 넣을 수 있어요")}
 async function importPack(file){try{const pk=JSON.parse(await file.text());if(!pk||!pk.id||!Array.isArray(pk.places)||!pk.cityEn)throw 0;installPack(pk);cachePack(pk);toast(`${pk.city} 팩을 설치했어요`);render()}catch(_){toast("도시 팩 파일(.json)이 아니에요")}}
 function packStatus(){const t=T(),pk=PK();if(!t.city&&!t.cityEn)return"";
@@ -2984,7 +2999,7 @@ document.addEventListener("click",async e=>{
     case "cityLookup":{const c=$("#tf-city");if(c)cityLookup(c.value);break}
     case "buildPack":{const t=Object.assign({},T());b.disabled=true;b.textContent="만드는 중…";const old=packFor(t);if(old&&old.auto)delPack(old.id);await applyPackOrBuild(t);break}
     case "exportPack":exportPack(id);break;
-    case "delPack":{if(!confirm("이 도시 팩을 이 기기에서 지울까요? (일정·장소 기록은 그대로)"))break;delPack(id);render();toast("팩을 지웠어요");break}
+    case "delPack":{if(!confirm(Sync.user?"이 도시 팩을 지울까요? 같은 계정의 다른 기기에서도 지워져요. (일정·장소 기록은 그대로)":"이 도시 팩을 이 기기에서 지울까요? (일정·장소 기록은 그대로)"))break;delPack(id);render();toast("팩을 지웠어요");break}
     case "loadBasic":basicList().forEach(([cat,text])=>S.checklist.push({id:uid(),cat,text,done:false,createdAt:Date.now()}));commit();break;
   }
 });
