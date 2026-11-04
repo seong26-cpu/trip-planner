@@ -35,6 +35,9 @@ def build_html(mode):
     s = re.sub(r'<link rel="(icon|apple-touch-icon)"[^>]*>\n?', '', s)
     s = must(s, "if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});", '')
     s = s.replace('<head>', '<head>\n' + HEAD_JS, 1)
+    # 배포자(원 개발자) 쪽 주소·서비스와의 연결 고리 제거
+    s = re.sub(r"const APK_URL='[^']*';", "const APK_URL='';", s)
+    s = s.replace("await loadScript('../firebase-config.js');", "throw new Error('standalone');")
     # 작은 그림은 파일 안에 넣기
     for m in sorted(set(re.findall(r"img/[a-z0-9\-]+\.(?:svg|jpg)", s))):
         p = os.path.join(LIFE, m)
