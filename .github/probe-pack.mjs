@@ -10,7 +10,7 @@ for (const [city, en] of CITIES) {
   const r = await page.evaluate(async ([city, en]) => {
     const t0 = Date.now(), log = [];
     try {
-      const pk = await buildCityPack({ city, cityEn: en }, (k, s, m) => { if (s !== "run") log.push(k + ":" + s + (m ? "(" + m + ")" : "")); });
+      const pk = await window.__bcp({ city, cityEn: en }, (k, s, m) => { if (s !== "run") log.push(k + ":" + s + (m ? "(" + m + ")" : "")); });
       const nf = pk.places.filter(p => p.kind === "맛집").length;
       return `OK ${Math.round((Date.now()-t0)/1000)}s 명소${pk.places.length-nf} 맛집${nf} 숙소${pk.hotels.length} 안내${pk.guide.length} center=${pk.center.lat.toFixed(3)},${pk.center.lng.toFixed(3)} warn=[${pk.warn.join(" / ")}] | ${log.join(" ")}`;
     } catch (e) { return `FAIL ${Math.round((Date.now()-t0)/1000)}s ${e.message} | ${log.join(" ")}`; }
