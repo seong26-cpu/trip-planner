@@ -1,4 +1,4 @@
-const C='life-v'+'11051230';
+const C='life-v'+'11051340';
 const SHELL=['./','index.html','manifest.json','icon.svg','icon-192.png','icon-512.png','maskable-512.png','apple-touch-icon.png','ex.js','ex2.js','routines.js','recipes.js','recipes2.js','sites.js','clean.js','gapi.js','img/haru.jpg'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k.startsWith('life-')&&k!==C).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
