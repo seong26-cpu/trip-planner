@@ -18,3 +18,12 @@
 - 번들에 직접 넣은 수정(다시 빌드하면 소스에 반영 필요):
   1. 내보내기 메뉴: "전체 CONFIG — 장비 적용용 (TXT)" 추가, CONFIG 창: "적용용 복사"·"적용용 저장"
   2. 구성도 선 이름표: 아래로 내려가는 선은 포트 이름을 장비 글자 밑으로(오프셋 +62), 짧은 선은 가운데 이름표를 한 줄 위로
+
+## 운용 도구 5종 (addons.js)
+원복 CONFIG · 장비↔설계 비교 · IP 계획표(CSV) · 점검 명령 · 변경 이력(이 기기 IndexedDB `netops-hist`).
+번들에 넣은 연결 4곳(다시 빌드하면 소스에 반영 필요):
+1. 맨 끝: `window.__nxFn={deviceConfig, configText, validate, alloc(allocateIps), parse(parseConfig), save(saveFile)}`
+2. DraftProvider 본문: `window.__nxCtx={topo: view, raw: activeTopo, updateTopo}`
+3. DraftProvider save(): `window.__nxOnSave && window.__nxOnSave(before, after, report)`
+4. 구성도 도구 막대: `<button id="btn-tools" onClick={() => window.__nxTools?.open()}>운용 도구</button>`
+왼쪽 메뉴 '운용 작업 → 운용 도구 5종'은 addons.js가 `#nav-tasks` 뒤에 붙입니다.
