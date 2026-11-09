@@ -12,3 +12,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black" />
 <script src="./pwa-install.js" defer></script>
 ```
+
+## addons.js (적용용 CONFIG)
+- `<script src="./addons.js"></script>` 를 앱 모듈 스크립트 **앞**에 둡니다. `window.__nxApply(vendor, text)` 제공.
+- 번들에 직접 넣은 수정(다시 빌드하면 소스에 반영 필요):
+  1. 내보내기 메뉴: "전체 CONFIG — 장비 적용용 (TXT)" 추가, CONFIG 창: "적용용 복사"·"적용용 저장"
+  2. 구성도 선 이름표: 아래로 내려가는 선은 포트 이름을 장비 글자 밑으로(오프셋 +62), 짧은 선은 가운데 이름표를 한 줄 위로
