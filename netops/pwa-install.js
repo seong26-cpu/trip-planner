@@ -16,14 +16,14 @@
     '.nx-ov{position:fixed;inset:0;z-index:1000;background:rgba(10,14,20,.45);display:flex;align-items:flex-end;justify-content:center;padding:16px;padding-bottom:max(16px,env(safe-area-inset-bottom))}' +
     '@media(min-width:640px){.nx-ov{align-items:center}}' +
     '.nx-card{--bg:#fff;--fg:#14191f;--mu:#5b6573;--ln:#e3e7ec;--ac:#111418;--acfg:#fff;--soft:#f3f5f7;background:var(--bg);color:var(--fg);width:min(460px,100%);border-radius:16px;padding:20px 20px 16px;box-shadow:0 18px 50px rgba(0,0,0,.3);font:14px/1.55 "Noto Sans KR",Inter,system-ui,sans-serif;max-height:calc(100vh - 32px);overflow:auto}' +
-    '@media(prefers-color-scheme:dark){.nx-card{--bg:#1a1f26;--fg:#e9edf2;--mu:#9aa5b3;--ln:#2c343e;--ac:#e9edf2;--acfg:#111418;--soft:#222831}}' +
+    ':root[data-theme=dark] .nx-card{--bg:#1a1f26;--fg:#e9edf2;--mu:#9aa5b3;--ln:#2c343e;--ac:#e9edf2;--acfg:#111418;--soft:#222831}' +
     '.nx-card h3{margin:0 0 6px;font-size:17px;font-weight:700;display:flex;align-items:center;gap:8px}' +
     '.nx-card p{margin:6px 0;color:var(--mu)}.nx-card b{color:var(--fg)}' +
     '.nx-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;font:inherit;font-weight:600;border-radius:10px;padding:11px 18px;border:0;cursor:pointer;background:var(--ac);color:var(--acfg)}' +
     '.nx-btn.q{background:var(--soft);color:var(--fg)}.nx-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0}' +
     '.nx-steps{margin:8px 0;padding-left:20px;color:var(--fg)}.nx-steps li{margin:4px 0}' +
     '.nx-url{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:12.5px;background:var(--soft);border:1px solid var(--ln);border-radius:8px;padding:8px 10px;overflow-wrap:anywhere;user-select:all;color:var(--fg)}' +
-    '.nx-ok{background:#e7f5ec;color:#1f7a4e;border-radius:8px;padding:8px 10px;margin:8px 0}@media(prefers-color-scheme:dark){.nx-ok{background:#16301f;color:#7fd3a0}}' +
+    '.nx-ok{background:#e7f5ec;color:#1f7a4e;border-radius:8px;padding:8px 10px;margin:8px 0}:root[data-theme=dark] .nx-ok{background:#16301f;color:#7fd3a0}' +
     '.nx-x{float:right;background:none;border:0;font-size:20px;line-height:1;color:var(--mu);cursor:pointer;padding:2px 6px}' +
     '.nx-toast{position:fixed;left:50%;transform:translateX(-50%);bottom:max(20px,env(safe-area-inset-bottom));z-index:1001;background:#111418;color:#fff;padding:9px 14px;border-radius:8px;font:13px "Noto Sans KR",system-ui,sans-serif}';
   var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
